@@ -33,7 +33,7 @@ const Navbar: React.FC = () => {
             <Sun className="w-4 h-4" />
           )}
         </motion.button>
-        <Link href="/sign-in">
+        <Link href="/login">
           <Button variant="default">Sign In</Button>
         </Link>
       </div>
