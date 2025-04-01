@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-
-import Footer from "@/components/footer"; // Import the Footer component
-import Navbar from "@/components/navbar"; // Import the Navbar component
 import { ThemeProvider } from "@/components/theme-provider";
 
 const geistSans = Geist({
@@ -37,9 +34,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Navbar />
-          <div className="container mx-auto max-w-4xl pt-14">{children}</div>
-          <Footer />
+          {children}
         </ThemeProvider>
       </body>
     </html>
