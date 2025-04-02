@@ -6,7 +6,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { logout } from "@/actions/logout";
+import { logout } from "@/actions/auth";
 import {
   FileText,
   Settings,
