@@ -62,9 +62,6 @@ const Navbar: React.FC = () => {
               )}
             </motion.button>
             <Link href="/login">
-              <Button variant="ghost">Sign In</Button>
-            </Link>
-            <Link href="/signup">
               <Button className="bg-blue-600 hover:bg-blue-700 text-white">
                 Get Started
               </Button>
@@ -122,11 +119,6 @@ const Navbar: React.FC = () => {
               ))}
               <div className="pt-2 space-y-2">
                 <Link href="/login" className="block">
-                  <Button variant="ghost" className="w-full">
-                    Sign In
-                  </Button>
-                </Link>
-                <Link href="/signup" className="block">
                   <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
                     Get Started
                   </Button>
