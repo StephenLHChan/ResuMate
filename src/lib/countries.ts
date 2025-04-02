@@ -1,5 +1,6 @@
 // List of countries for the dropdown selection
 export const countries = [
+  "Canada",
   "United States",
   "Afghanistan",
   "Albania",
@@ -32,7 +33,6 @@ export const countries = [
   "Cabo Verde",
   "Cambodia",
   "Cameroon",
-  "Canada",
   "Central African Republic",
   "Chad",
   "Chile",

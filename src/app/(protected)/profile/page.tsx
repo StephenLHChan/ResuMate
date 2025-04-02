@@ -270,7 +270,7 @@ export default function ProfilePage() {
                         name="legalFirstName"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>First Name*</FormLabel>
+                            <FormLabel>First Name</FormLabel>
                             <FormControl>
                               <Input placeholder="First name" {...field} />
                             </FormControl>
@@ -284,7 +284,7 @@ export default function ProfilePage() {
                         name="legalLastName"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Last Name*</FormLabel>
+                            <FormLabel>Last Name</FormLabel>
                             <FormControl>
                               <Input placeholder="Last name" {...field} />
                             </FormControl>
@@ -306,14 +306,7 @@ export default function ProfilePage() {
                             />
                           </FormControl>
                           <div className="space-y-1 leading-none">
-                            <FormLabel>
-                              I have a preferred name that&apos;s different from
-                              my legal name
-                            </FormLabel>
-                            <FormDescription>
-                              Your preferred name will be used on your resume
-                              and other materials
-                            </FormDescription>
+                            <FormLabel>I have a preferred name</FormLabel>
                           </div>
                         </FormItem>
                       )}
@@ -429,59 +422,7 @@ export default function ProfilePage() {
                       )}
                     />
 
-                    <FormField
-                      control={form.control}
-                      name="country"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Country</FormLabel>
-                          <Select
-                            onValueChange={(value: string) => {
-                              field.onChange(value);
-                            }}
-                            value={field.value || undefined}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select a country" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {countries.map(country => (
-                                <SelectItem key={country} value={country}>
-                                  {country}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="zipCode"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>ZIP/Postal Code</FormLabel>
-                            <FormControl>
-                              <Input
-                                placeholder="ZIP or postal code"
-                                {...field}
-                                value={field.value || ""}
-                              />
-                            </FormControl>
-                            <FormDescription>
-                              Enter ZIP/postal code to auto-fill city and
-                              state/province (US and Canada only)
-                            </FormDescription>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
                       <FormField
                         control={form.control}
                         name="city"
@@ -499,69 +440,119 @@ export default function ProfilePage() {
                           </FormItem>
                         )}
                       />
-                    </div>
-
-                    <FormField
-                      control={form.control}
-                      name="state"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>State/Province</FormLabel>
-                          {watchCountry === "United States" ? (
-                            <Select
-                              onValueChange={field.onChange}
-                              value={field.value || undefined}
-                            >
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select a state" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {usStates.map((state: StateType) => (
-                                  <SelectItem
-                                    key={state.name}
-                                    value={state.name}
-                                  >
-                                    {state.name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          ) : watchCountry === "Canada" ? (
-                            <Select
-                              onValueChange={field.onChange}
-                              value={field.value || undefined}
-                            >
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select a province" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {canadaProvinces.map((province: StateType) => (
-                                  <SelectItem
-                                    key={province.name}
-                                    value={province.name}
-                                  >
-                                    {province.name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          ) : (
+                      <FormField
+                        control={form.control}
+                        name="zipCode"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>ZIP/Postal Code</FormLabel>
                             <FormControl>
                               <Input
-                                placeholder="State or province"
+                                placeholder="ZIP or postal code"
                                 {...field}
                                 value={field.value || ""}
                               />
                             </FormControl>
-                          )}
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="state"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>State/Province</FormLabel>
+                            {watchCountry === "United States" ? (
+                              <Select
+                                onValueChange={field.onChange}
+                                value={field.value || undefined}
+                              >
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select a state" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {usStates.map((state: StateType) => (
+                                    <SelectItem
+                                      key={state.name}
+                                      value={state.name}
+                                    >
+                                      {state.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            ) : watchCountry === "Canada" ? (
+                              <Select
+                                onValueChange={field.onChange}
+                                value={field.value || undefined}
+                              >
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select a province" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {canadaProvinces.map(
+                                    (province: StateType) => (
+                                      <SelectItem
+                                        key={province.name}
+                                        value={province.name}
+                                      >
+                                        {province.name}
+                                      </SelectItem>
+                                    )
+                                  )}
+                                </SelectContent>
+                              </Select>
+                            ) : (
+                              <FormControl>
+                                <Input
+                                  placeholder="State or province"
+                                  {...field}
+                                  value={field.value || ""}
+                                />
+                              </FormControl>
+                            )}
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="country"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Country</FormLabel>
+                            <Select
+                              onValueChange={(value: string) => {
+                                field.onChange(value);
+                              }}
+                              value={field.value || undefined}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select a country" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {countries.map(country => (
+                                  <SelectItem key={country} value={country}>
+                                    {country}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
 
                     <FormField
                       control={form.control}
