@@ -15,6 +15,8 @@ import {
   User,
   Briefcase,
   GraduationCap,
+  Award,
+  Code2,
 } from "lucide-react";
 
 interface NavigationItem {
@@ -33,7 +35,9 @@ const navigation: NavigationItem[] = [
     icon: User,
     children: [
       { name: "Experience", href: "/profile/experience", icon: Briefcase },
-      { name: "Education", href: "/education", icon: GraduationCap },
+      { name: "Education", href: "/profile/education", icon: GraduationCap },
+      { name: "Certifications", href: "/profile/certifications", icon: Award },
+      { name: "Projects", href: "/profile/projects", icon: Code2 },
     ],
   },
   { name: "Settings", href: "/settings", icon: Settings },
