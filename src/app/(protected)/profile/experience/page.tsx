@@ -1,10 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import {
   Calendar as CalendarIcon,
@@ -12,12 +8,16 @@ import {
   Trash2,
   Building,
   Briefcase,
-  CalendarRange,
   Loader2,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
@@ -28,19 +28,18 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
 import {
   experienceSchema,
-  ExperienceFormValues,
+  type ExperienceFormValues,
 } from "@/lib/schemas/experience";
-import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
 interface Experience {
   id: string;
@@ -51,7 +50,7 @@ interface Experience {
   description: string | null;
 }
 
-export default function ExperiencePage() {
+const ExperiencePage = (): React.ReactElement => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
@@ -78,7 +77,7 @@ export default function ExperiencePage() {
     fetchExperience();
   }, []);
 
-  const fetchExperience = async () => {
+  const fetchExperience = async (): Promise<void> => {
     setFetchLoading(true);
     try {
       const response = await fetch("/api/profile/experience");
@@ -111,7 +110,7 @@ export default function ExperiencePage() {
   });
 
   // Handle form submission
-  const onSubmit = async (values: ExperienceFormValues) => {
+  const onSubmit = async (values: ExperienceFormValues): Promise<void> => {
     setLoading(true);
     try {
       // If currently working, set endDate to null
@@ -160,20 +159,20 @@ export default function ExperiencePage() {
     }
   };
 
-  const handleEdit = (experience: Experience) => {
+  const handleEdit = (exp: Experience): void => {
     setIsEditing(true);
-    setCurrentId(experience.id);
+    setCurrentId(exp.id);
     form.reset({
-      company: experience.company,
-      position: experience.position,
-      startDate: new Date(experience.startDate),
-      endDate: experience.endDate ? new Date(experience.endDate) : undefined,
-      currentlyWorking: !experience.endDate,
-      description: experience.description || "",
+      company: exp.company,
+      position: exp.position,
+      startDate: new Date(exp.startDate),
+      endDate: exp.endDate ? new Date(exp.endDate) : undefined,
+      currentlyWorking: !exp.endDate,
+      description: exp.description || "",
     });
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: string): Promise<void> => {
     if (confirm("Are you sure you want to delete this experience?")) {
       try {
         const response = await fetch(`/api/profile/experience/${id}`, {
@@ -194,7 +193,7 @@ export default function ExperiencePage() {
     }
   };
 
-  const formatDate = (dateString: string | null) => {
+  const formatDate = (dateString: string | null): string => {
     if (!dateString) return "Present";
     return format(new Date(dateString), "MMM yyyy");
   };
@@ -233,80 +232,69 @@ export default function ExperiencePage() {
             ))}
           </CardContent>
         </Card>
-      ) : (
-        <>
-          {experiences.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Your Experience</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  {sortedExperiences.map(exp => (
-                    <div
-                      key={exp.id}
-                      className="border rounded-lg p-5 hover:shadow-md transition-shadow bg-card"
-                    >
-                      <div className="flex justify-between items-start">
-                        <div className="space-y-3">
-                          <div className="flex items-center gap-2 text-primary">
-                            <Briefcase className="h-5 w-5" />
-                            <h3 className="text-lg font-semibold">
-                              {exp.position}
-                            </h3>
-                          </div>
+      ) : experiences.length > 0 ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>Your Experience</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              {sortedExperiences.map(exp => (
+                <div
+                  key={exp.id}
+                  className="border rounded-lg p-5 hover:shadow-md transition-shadow bg-card"
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 text-primary">
+                        <Building className="h-5 w-5" />
+                        <h3 className="text-lg font-semibold">
+                          {exp.position}
+                        </h3>
+                      </div>
 
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <Building className="h-4 w-4" />
-                            <h4 className="text-md">{exp.company}</h4>
-                          </div>
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <h4 className="text-md">{exp.company}</h4>
+                      </div>
 
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <CalendarRange className="h-4 w-4" />
-                            <p className="text-sm">
-                              {formatDate(exp.startDate)} -{" "}
-                              {formatDate(exp.endDate)}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="flex gap-1">
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => handleEdit(exp)}
-                            className="h-8 w-8 rounded-full"
-                          >
-                            <Pencil className="h-4 w-4" />
-                            <span className="sr-only">Edit</span>
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => handleDelete(exp.id)}
-                            className="h-8 w-8 rounded-full hover:bg-destructive/10 hover:text-destructive hover:border-destructive"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                            <span className="sr-only">Delete</span>
-                          </Button>
-                        </div>
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <CalendarIcon className="h-4 w-4" />
+                        <p className="text-sm">
+                          {formatDate(exp.startDate)} -{" "}
+                          {formatDate(exp.endDate)}
+                        </p>
                       </div>
 
                       {exp.description && (
-                        <div className="mt-4 border-t pt-3">
-                          <p className="text-sm whitespace-pre-line">
-                            {exp.description}
-                          </p>
-                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {exp.description}
+                        </p>
                       )}
                     </div>
-                  ))}
+
+                    <div className="flex gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEdit(exp)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete(exp.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
-          )}
-        </>
-      )}
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
 
       <Card>
         <CardHeader>
@@ -513,4 +501,6 @@ export default function ExperiencePage() {
       </Card>
     </div>
   );
-}
+};
+
+export default ExperiencePage;

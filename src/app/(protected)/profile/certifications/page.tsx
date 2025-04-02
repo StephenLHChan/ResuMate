@@ -1,10 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import {
   Calendar as CalendarIcon,
@@ -14,9 +10,14 @@ import {
   Loader2,
   ExternalLink,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -26,19 +27,18 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
 import {
   certificationSchema,
-  CertificationFormValues,
+  type CertificationFormValues,
 } from "@/lib/schemas/certification";
-import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
 interface Certification {
   id: string;
@@ -51,7 +51,7 @@ interface Certification {
   description: string | null;
 }
 
-export default function CertificationsPage() {
+const CertificationsPage = (): React.ReactElement => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
@@ -76,7 +76,7 @@ export default function CertificationsPage() {
     fetchCertifications();
   }, []);
 
-  const fetchCertifications = async () => {
+  const fetchCertifications = async (): Promise<void> => {
     setFetchLoading(true);
     try {
       const response = await fetch("/api/profile/certification");
@@ -93,12 +93,12 @@ export default function CertificationsPage() {
   };
 
   // Sort certifications by issue date (most recent first)
-  const sortedCertifications = [...certifications].sort((a, b) => {
-    return new Date(b.issueDate).getTime() - new Date(a.issueDate).getTime();
-  });
+  const sortedCertifications = [...certifications].sort(
+    (a, b) => new Date(b.issueDate).getTime() - new Date(a.issueDate).getTime()
+  );
 
   // Handle form submission
-  const onSubmit = async (values: CertificationFormValues) => {
+  const onSubmit = async (values: CertificationFormValues): Promise<void> => {
     setLoading(true);
     try {
       const endpoint =
@@ -144,7 +144,7 @@ export default function CertificationsPage() {
     }
   };
 
-  const handleEdit = (cert: Certification) => {
+  const handleEdit = (cert: Certification): void => {
     setIsEditing(true);
     setCurrentId(cert.id);
     form.reset({
@@ -158,7 +158,7 @@ export default function CertificationsPage() {
     });
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: string): Promise<void> => {
     if (confirm("Are you sure you want to delete this certification?")) {
       try {
         const response = await fetch(`/api/profile/certification/${id}`, {
@@ -179,7 +179,7 @@ export default function CertificationsPage() {
     }
   };
 
-  const formatDate = (dateString: string | null) => {
+  const formatDate = (dateString: string | null): string => {
     if (!dateString) return "Present";
     return format(new Date(dateString), "MMM yyyy");
   };
@@ -218,100 +218,87 @@ export default function CertificationsPage() {
             ))}
           </CardContent>
         </Card>
-      ) : (
-        <>
-          {certifications.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Your Certifications</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  {sortedCertifications.map(cert => (
-                    <div
-                      key={cert.id}
-                      className="border rounded-lg p-5 hover:shadow-md transition-shadow bg-card"
-                    >
-                      <div className="flex justify-between items-start">
-                        <div className="space-y-3">
-                          <div className="flex items-center gap-2 text-primary">
-                            <Award className="h-5 w-5" />
-                            <h3 className="text-lg font-semibold">
-                              {cert.name}
-                            </h3>
-                          </div>
-
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <h4 className="text-md">{cert.issuer}</h4>
-                          </div>
-
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <CalendarIcon className="h-4 w-4" />
-                            <p className="text-sm">
-                              Issued: {formatDate(cert.issueDate)}
-                              {cert.expiryDate &&
-                                ` • Expires: ${formatDate(cert.expiryDate)}`}
-                            </p>
-                          </div>
-
-                          {cert.credentialId && (
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                              <p className="text-sm">ID: {cert.credentialId}</p>
-                            </div>
-                          )}
-
-                          {cert.credentialUrl && (
-                            <div className="flex items-center gap-2">
-                              <a
-                                href={cert.credentialUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-sm text-primary hover:underline flex items-center gap-1"
-                              >
-                                View Credential
-                                <ExternalLink className="h-3 w-3" />
-                              </a>
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="flex gap-1">
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => handleEdit(cert)}
-                            className="h-8 w-8 rounded-full"
-                          >
-                            <Pencil className="h-4 w-4" />
-                            <span className="sr-only">Edit</span>
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => handleDelete(cert.id)}
-                            className="h-8 w-8 rounded-full hover:bg-destructive/10 hover:text-destructive hover:border-destructive"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                            <span className="sr-only">Delete</span>
-                          </Button>
-                        </div>
+      ) : certifications.length > 0 ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>Your Certifications</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              {sortedCertifications.map(cert => (
+                <div
+                  key={cert.id}
+                  className="border rounded-lg p-5 hover:shadow-md transition-shadow bg-card"
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 text-primary">
+                        <Award className="h-5 w-5" />
+                        <h3 className="text-lg font-semibold">{cert.name}</h3>
                       </div>
 
-                      {cert.description && (
-                        <div className="mt-4 border-t pt-3">
-                          <p className="text-sm whitespace-pre-line">
-                            {cert.description}
-                          </p>
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <h4 className="text-md">{cert.issuer}</h4>
+                      </div>
+
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <CalendarIcon className="h-4 w-4" />
+                        <p className="text-sm">
+                          {formatDate(cert.issueDate)} -{" "}
+                          {formatDate(cert.expiryDate)}
+                        </p>
+                      </div>
+
+                      {cert.credentialId && (
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <p className="text-sm">ID: {cert.credentialId}</p>
                         </div>
                       )}
+
+                      {cert.credentialUrl && (
+                        <div className="flex items-center gap-2">
+                          <ExternalLink className="h-4 w-4 text-primary" />
+                          <a
+                            href={cert.credentialUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm text-primary hover:underline"
+                          >
+                            View Credential
+                          </a>
+                        </div>
+                      )}
+
+                      {cert.description && (
+                        <p className="text-sm text-muted-foreground">
+                          {cert.description}
+                        </p>
+                      )}
                     </div>
-                  ))}
+
+                    <div className="flex gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEdit(cert)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete(cert.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
-          )}
-        </>
-      )}
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
 
       <Card>
         <CardHeader>
@@ -424,7 +411,7 @@ export default function CertificationsPage() {
                         <PopoverContent className="w-auto p-0" align="start">
                           <Calendar
                             mode="single"
-                            selected={field.value}
+                            selected={field.value || undefined}
                             onSelect={field.onChange}
                             initialFocus
                           />
@@ -529,4 +516,6 @@ export default function CertificationsPage() {
       </Card>
     </div>
   );
-}
+};
+
+export default CertificationsPage;

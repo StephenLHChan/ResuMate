@@ -1,10 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import {
   Calendar as CalendarIcon,
@@ -15,9 +11,14 @@ import {
   ExternalLink,
   Github,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
@@ -28,16 +29,15 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { projectSchema, ProjectFormValues } from "@/lib/schemas/project";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
+import { projectSchema, type ProjectFormValues } from "@/lib/schemas/project";
+import { cn } from "@/lib/utils";
 
 interface Project {
   id: string;
@@ -50,7 +50,7 @@ interface Project {
   githubUrl: string | null;
 }
 
-export default function ProjectsPage() {
+const ProjectsPage = (): React.ReactElement => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
@@ -79,7 +79,7 @@ export default function ProjectsPage() {
     fetchProjects();
   }, []);
 
-  const fetchProjects = async () => {
+  const fetchProjects = async (): Promise<void> => {
     setFetchLoading(true);
     try {
       const response = await fetch("/api/profile/project");
@@ -112,7 +112,7 @@ export default function ProjectsPage() {
   });
 
   // Handle form submission
-  const onSubmit = async (values: ProjectFormValues) => {
+  const onSubmit = async (values: ProjectFormValues): Promise<void> => {
     setLoading(true);
     try {
       // If currently working, set endDate to null
@@ -163,7 +163,7 @@ export default function ProjectsPage() {
     }
   };
 
-  const handleEdit = (project: Project) => {
+  const handleEdit = (project: Project): void => {
     setIsEditing(true);
     setCurrentId(project.id);
     form.reset({
@@ -178,7 +178,7 @@ export default function ProjectsPage() {
     });
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: string): Promise<void> => {
     if (confirm("Are you sure you want to delete this project?")) {
       try {
         const response = await fetch(`/api/profile/project/${id}`, {
@@ -199,7 +199,7 @@ export default function ProjectsPage() {
     }
   };
 
-  const formatDate = (dateString: string | null) => {
+  const formatDate = (dateString: string | null): string => {
     if (!dateString) return "Present";
     return format(new Date(dateString), "MMM yyyy");
   };
@@ -238,112 +238,103 @@ export default function ProjectsPage() {
             ))}
           </CardContent>
         </Card>
-      ) : (
-        <>
-          {projects.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Your Projects</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  {sortedProjects.map(project => (
-                    <div
-                      key={project.id}
-                      className="border rounded-lg p-5 hover:shadow-md transition-shadow bg-card"
-                    >
-                      <div className="flex justify-between items-start">
-                        <div className="space-y-3">
-                          <div className="flex items-center gap-2 text-primary">
-                            <Code2 className="h-5 w-5" />
-                            <h3 className="text-lg font-semibold">
-                              {project.name}
-                            </h3>
-                          </div>
-
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <CalendarIcon className="h-4 w-4" />
-                            <p className="text-sm">
-                              {formatDate(project.startDate)} -{" "}
-                              {formatDate(project.endDate)}
-                            </p>
-                          </div>
-
-                          {project.technologies &&
-                            project.technologies.length > 0 && (
-                              <div className="flex flex-wrap gap-2">
-                                {project.technologies.map(tech => (
-                                  <span
-                                    key={tech}
-                                    className="px-2 py-1 text-xs rounded-full bg-primary/10 text-primary"
-                                  >
-                                    {tech}
-                                  </span>
-                                ))}
-                              </div>
-                            )}
-
-                          <div className="flex gap-4">
-                            {project.projectUrl && (
-                              <a
-                                href={project.projectUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-sm text-primary hover:underline flex items-center gap-1"
-                              >
-                                View Project
-                                <ExternalLink className="h-3 w-3" />
-                              </a>
-                            )}
-                            {project.githubUrl && (
-                              <a
-                                href={project.githubUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-sm text-primary hover:underline flex items-center gap-1"
-                              >
-                                View on GitHub
-                                <Github className="h-3 w-3" />
-                              </a>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="flex gap-1">
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => handleEdit(project)}
-                            className="h-8 w-8 rounded-full"
-                          >
-                            <Pencil className="h-4 w-4" />
-                            <span className="sr-only">Edit</span>
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => handleDelete(project.id)}
-                            className="h-8 w-8 rounded-full hover:bg-destructive/10 hover:text-destructive hover:border-destructive"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                            <span className="sr-only">Delete</span>
-                          </Button>
-                        </div>
+      ) : projects.length > 0 ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>Your Projects</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              {sortedProjects.map(project => (
+                <div
+                  key={project.id}
+                  className="border rounded-lg p-5 hover:shadow-md transition-shadow bg-card"
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 text-primary">
+                        <Code2 className="h-5 w-5" />
+                        <h3 className="text-lg font-semibold">
+                          {project.name}
+                        </h3>
                       </div>
 
-                      <div className="mt-4 border-t pt-3">
-                        <p className="text-sm whitespace-pre-line">
-                          {project.description}
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <CalendarIcon className="h-4 w-4" />
+                        <p className="text-sm">
+                          {formatDate(project.startDate)} -{" "}
+                          {formatDate(project.endDate)}
                         </p>
                       </div>
+
+                      {project.technologies.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {project.technologies.map(tech => (
+                            <span
+                              key={tech}
+                              className="px-2 py-1 bg-primary/10 text-primary rounded-full text-sm"
+                            >
+                              {tech}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+
+                      {project.description && (
+                        <p className="text-sm text-muted-foreground">
+                          {project.description}
+                        </p>
+                      )}
+
+                      <div className="flex gap-4">
+                        {project.projectUrl && (
+                          <a
+                            href={project.projectUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 text-sm text-primary hover:underline"
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                            View Project
+                          </a>
+                        )}
+                        {project.githubUrl && (
+                          <a
+                            href={project.githubUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 text-sm text-primary hover:underline"
+                          >
+                            <Github className="h-4 w-4" />
+                            View Code
+                          </a>
+                        )}
+                      </div>
                     </div>
-                  ))}
+
+                    <div className="flex gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEdit(project)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete(project.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
-          )}
-        </>
-      )}
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
 
       <Card>
         <CardHeader>
@@ -594,4 +585,6 @@ export default function ProjectsPage() {
       </Card>
     </div>
   );
-}
+};
+
+export default ProjectsPage;

@@ -1,11 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Briefcase,
+  GraduationCap,
+  ChevronRight,
+  Link as LinkIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -37,30 +42,21 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
-
 import { canadaProvinces } from "@/lib/canada-provinces";
 import { countries } from "@/lib/countries";
+import { profileSchema, type ProfileFormValues } from "@/lib/schemas/profile";
 import { usStates } from "@/lib/us-states";
-import { profileSchema, ProfileFormValues } from "@/lib/schemas/profile";
-
-import {
-  Briefcase,
-  GraduationCap,
-  ChevronRight,
-  Link as LinkIcon,
-} from "lucide-react";
 
 interface StateType {
   code: string;
   name: string;
 }
 
-export default function ProfilePage() {
+const ProfilePage = (): React.ReactElement => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [showPreferredNameFields, setShowPreferredNameFields] = useState(false);
 
-  // Initialize the form
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
@@ -111,8 +107,9 @@ export default function ProfilePage() {
   }, [watchHasPreferredName, watchLegalFirstName, watchLegalLastName, form]);
 
   // Load profile data on component mount
+
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchProfile = async (): Promise<void> => {
       try {
         const response = await fetch("/api/profile");
         if (response.ok) {
@@ -158,7 +155,7 @@ export default function ProfilePage() {
     if (watchZipCode && watchCountry === "United States") {
       // This would be an API call to a postal code lookup service
       // For demo purposes, we're just showing the concept
-      const lookupZipCode = async () => {
+      const lookupZipCode = async (): Promise<void> => {
         try {
           // In a real implementation, this would call an actual API
           // For now, we'll just simulate it for US zip code 94043
@@ -207,7 +204,7 @@ export default function ProfilePage() {
   }, [watchCity, watchState, watchCountry, form]);
 
   // Handle form submission
-  const onSubmit = async (values: ProfileFormValues) => {
+  const onSubmit = async (values: ProfileFormValues): Promise<void> => {
     setLoading(true);
     try {
       // Process form data for submission
@@ -241,6 +238,11 @@ export default function ProfilePage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCountryChange = (value: string): void => {
+    form.setValue("country", value);
+    form.setValue("state", "");
   };
 
   return (
@@ -530,9 +532,7 @@ export default function ProfilePage() {
                           <FormItem>
                             <FormLabel>Country</FormLabel>
                             <Select
-                              onValueChange={(value: string) => {
-                                field.onChange(value);
-                              }}
+                              onValueChange={handleCountryChange}
                               value={field.value || undefined}
                             >
                               <FormControl>
@@ -773,4 +773,6 @@ export default function ProfilePage() {
       </div>
     </div>
   );
-}
+};
+
+export default ProfilePage;

@@ -1,10 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import {
   Calendar as CalendarIcon,
@@ -13,9 +9,14 @@ import {
   GraduationCap,
   Loader2,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
@@ -26,16 +27,18 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { educationSchema, EducationFormValues } from "@/lib/schemas/education";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  educationSchema,
+  type EducationFormValues,
+} from "@/lib/schemas/education";
+import { cn } from "@/lib/utils";
 
 interface Education {
   id: string;
@@ -47,7 +50,7 @@ interface Education {
   description: string | null;
 }
 
-export default function EducationPage() {
+const EducationPage = (): React.ReactElement => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
@@ -75,7 +78,7 @@ export default function EducationPage() {
     fetchEducation();
   }, []);
 
-  const fetchEducation = async () => {
+  const fetchEducation = async (): Promise<void> => {
     setFetchLoading(true);
     try {
       const response = await fetch("/api/profile/education");
@@ -108,7 +111,7 @@ export default function EducationPage() {
   });
 
   // Handle form submission
-  const onSubmit = async (values: EducationFormValues) => {
+  const onSubmit = async (values: EducationFormValues): Promise<void> => {
     setLoading(true);
     try {
       // If currently studying, set endDate to null
@@ -158,7 +161,7 @@ export default function EducationPage() {
     }
   };
 
-  const handleEdit = (edu: Education) => {
+  const handleEdit = (edu: Education): void => {
     setIsEditing(true);
     setCurrentId(edu.id);
     form.reset({
@@ -172,7 +175,7 @@ export default function EducationPage() {
     });
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: string): Promise<void> => {
     if (confirm("Are you sure you want to delete this education?")) {
       try {
         const response = await fetch(`/api/profile/education/${id}`, {
@@ -193,7 +196,7 @@ export default function EducationPage() {
     }
   };
 
-  const formatDate = (dateString: string | null) => {
+  const formatDate = (dateString: string | null): string => {
     if (!dateString) return "Present";
     return format(new Date(dateString), "MMM yyyy");
   };
@@ -232,79 +235,71 @@ export default function EducationPage() {
             ))}
           </CardContent>
         </Card>
-      ) : (
-        <>
-          {education.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Your Education</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  {sortedEducation.map(edu => (
-                    <div
-                      key={edu.id}
-                      className="border rounded-lg p-5 hover:shadow-md transition-shadow bg-card"
-                    >
-                      <div className="flex justify-between items-start">
-                        <div className="space-y-3">
-                          <div className="flex items-center gap-2 text-primary">
-                            <GraduationCap className="h-5 w-5" />
-                            <h3 className="text-lg font-semibold">
-                              {edu.degree} in {edu.field}
-                            </h3>
-                          </div>
+      ) : education.length > 0 ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>Your Education</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              {sortedEducation.map(edu => (
+                <div
+                  key={edu.id}
+                  className="border rounded-lg p-5 hover:shadow-md transition-shadow bg-card"
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 text-primary">
+                        <GraduationCap className="h-5 w-5" />
+                        <h3 className="text-lg font-semibold">{edu.degree}</h3>
+                      </div>
 
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <h4 className="text-md">{edu.institution}</h4>
-                          </div>
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <h4 className="text-md">{edu.institution}</h4>
+                      </div>
 
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <CalendarIcon className="h-4 w-4" />
-                            <p className="text-sm">
-                              {formatDate(edu.startDate)} -{" "}
-                              {formatDate(edu.endDate)}
-                            </p>
-                          </div>
-                        </div>
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <p className="text-sm">{edu.field}</p>
+                      </div>
 
-                        <div className="flex gap-1">
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => handleEdit(edu)}
-                            className="h-8 w-8 rounded-full"
-                          >
-                            <Pencil className="h-4 w-4" />
-                            <span className="sr-only">Edit</span>
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => handleDelete(edu.id)}
-                            className="h-8 w-8 rounded-full hover:bg-destructive/10 hover:text-destructive hover:border-destructive"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                            <span className="sr-only">Delete</span>
-                          </Button>
-                        </div>
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <CalendarIcon className="h-4 w-4" />
+                        <p className="text-sm">
+                          {formatDate(edu.startDate)} -{" "}
+                          {formatDate(edu.endDate)}
+                        </p>
                       </div>
 
                       {edu.description && (
-                        <div className="mt-4 border-t pt-3">
-                          <p className="text-sm whitespace-pre-line">
-                            {edu.description}
-                          </p>
-                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {edu.description}
+                        </p>
                       )}
                     </div>
-                  ))}
+
+                    <div className="flex gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEdit(edu)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete(edu.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
-          )}
-        </>
-      )}
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
 
       <Card>
         <CardHeader>
@@ -453,7 +448,7 @@ export default function EducationPage() {
                         <PopoverContent className="w-auto p-0" align="start">
                           <Calendar
                             mode="single"
-                            selected={field.value}
+                            selected={field.value || undefined}
                             onSelect={field.onChange}
                             initialFocus
                           />
@@ -528,4 +523,6 @@ export default function EducationPage() {
       </Card>
     </div>
   );
-}
+};
+
+export default EducationPage;
