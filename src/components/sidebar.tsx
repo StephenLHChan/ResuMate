@@ -1,12 +1,5 @@
 "use client";
 
-import React from "react";
-import Link from "next/link";
-import Image from "next/image";
-import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { logout } from "@/actions/auth";
 import {
   FileText,
   Settings,
@@ -18,6 +11,14 @@ import {
   Award,
   Code2,
 } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import React from "react";
+
+import { logout } from "@/actions/auth";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface NavigationItem {
   name: string;
@@ -43,10 +44,10 @@ const navigation: NavigationItem[] = [
   { name: "Settings", href: "/settings", icon: Settings },
 ];
 
-const Sidebar = () => {
+const Sidebar = (): React.ReactElement => {
   const pathname = usePathname();
 
-  const handleLogout = async () => {
+  const handleLogout = async (): Promise<void> => {
     await logout();
   };
 

@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
+
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { experienceSchema } from "@/lib/schemas/experience";
 
 // GET: Fetch all experiences for the current user
-export async function GET() {
+export const GET = async (): Promise<NextResponse> => {
   try {
     // Get the current session
     const session = await auth();
@@ -40,10 +41,10 @@ export async function GET() {
       { status: 500 }
     );
   }
-}
+};
 
 // POST: Create a new experience for the current user
-export async function POST(req: Request) {
+export const POST = async (req: Request): Promise<NextResponse> => {
   try {
     // Get the current session
     const session = await auth();
@@ -113,4 +114,4 @@ export async function POST(req: Request) {
       { status: 500 }
     );
   }
-}
+};

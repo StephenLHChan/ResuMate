@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server";
+
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { educationSchema } from "@/lib/schemas/education";
 
 // GET: Fetch a specific education entry
-export async function GET(
+export const GET = async (
   req: Request,
   context: { params: Promise<{ id: string }> }
-) {
+): Promise<NextResponse> => {
   try {
     const id = await (await context.params).id;
     const session = await auth();
@@ -52,13 +53,13 @@ export async function GET(
       { status: 500 }
     );
   }
-}
+};
 
 // PUT: Update a specific education entry
-export async function PUT(
+export const PUT = async (
   req: Request,
   context: { params: Promise<{ id: string }> }
-) {
+): Promise<NextResponse> => {
   try {
     const id = await (await context.params).id;
     const session = await auth();
@@ -145,13 +146,13 @@ export async function PUT(
       { status: 500 }
     );
   }
-}
+};
 
 // DELETE: Delete a specific education entry
-export async function DELETE(
+export const DELETE = async (
   req: Request,
   context: { params: Promise<{ id: string }> }
-) {
+): Promise<NextResponse> => {
   try {
     const id = await (await context.params).id;
     const session = await auth();
@@ -201,4 +202,4 @@ export async function DELETE(
       { status: 500 }
     );
   }
-}
+};

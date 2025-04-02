@@ -1,11 +1,12 @@
 "use client";
 
-import React from "react";
+import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import React from "react";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
 
+import { login } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -15,12 +16,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { login } from "@/actions/auth";
 
 const SignIn: React.FC = () => {
   const [isLoading, setIsLoading] = React.useState(false);
 
-  const handleGoogleSignIn = async () => {
+  const handleGoogleSignIn = async (): Promise<void> => {
     try {
       setIsLoading(true);
       await login("google");

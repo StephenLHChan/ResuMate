@@ -72,8 +72,10 @@
     "@types/react-dom": "^19",
     "@types/ws": "^8.18.1",
     "bufferutil": "^4.0.9",
-    "eslint": "^9",
+    "eslint": "^9.23.0",
     "eslint-config-next": "15.2.4",
+    "eslint-plugin-prefer-arrow": "^1.2.3",
+    "eslint-plugin-security": "^3.0.1",
     "prisma": "^6.5.0",
     "tailwindcss": "^4",
     "typescript": "^5"

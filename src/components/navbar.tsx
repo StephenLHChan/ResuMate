@@ -1,12 +1,14 @@
 "use client";
 
-import Link from "next/link";
-import Image from "next/image";
-import React, { useState } from "react";
-import { useTheme } from "next-themes";
-import { Button } from "@/components/ui/button";
-import { Sun, Moon, Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Sun, Moon, Menu, X } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useTheme } from "next-themes";
+import React, { useState } from "react";
+
+import { Button } from "@/components/ui/button";
+
 
 const Navbar: React.FC = () => {
   const { theme, setTheme } = useTheme();
