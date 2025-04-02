@@ -70,19 +70,31 @@ model User {
 }
 
 model Profile {
-  id          String    @id @default(cuid())
-  userId      String    @unique
-  user        User      @relation(fields: [userId], references: [id])
-  title       String?
-  bio         String?
-  location    String?
-  phone       String?
-  website     String?
-  skills      String[]
-  experience  Experience[]
-  education   Education[]
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id                String       @id @default(cuid())
+  userId            String       @unique
+  user              User         @relation(fields: [userId], references: [id])
+  legalFirstName    String?
+  legalLastName     String?
+  preferredFirstName String?
+  preferredLastName  String?
+  hasPreferredName   Boolean     @default(false)
+  title             String?
+  bio               String?
+  address           String?
+  city              String?
+  state             String?
+  zipCode           String?
+  country           String?
+  location          String?
+  phone             String?
+  website           String?
+  linkedin          String?
+  github            String?
+  skills            String[]
+  experience        Experience[]
+  education         Education[]
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
 }
 
 model Experience {
