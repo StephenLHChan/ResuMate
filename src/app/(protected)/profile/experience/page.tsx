@@ -106,7 +106,10 @@ const ExperiencePage = (): React.ReactElement => {
     }
 
     // Both have end dates, sort by end date (most recent first)
-    return new Date(b.endDate!).getTime() - new Date(a.endDate!).getTime();
+    return (
+      new Date(b.endDate as string).getTime() -
+      new Date(a.endDate as string).getTime()
+    );
   });
 
   // Handle form submission

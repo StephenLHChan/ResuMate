@@ -68,7 +68,6 @@ export const POST = async (req: Request): Promise<NextResponse> => {
 
     // Parse the request body
     const body = await req.json();
-    console.log(body);
     // Validate with zod schema
     const validationResult = experienceSchema.safeParse(body);
 
