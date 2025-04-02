@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import React, { useState } from "react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
@@ -25,11 +26,17 @@ const Navbar: React.FC = () => {
           {/* Logo */}
           <Link href="/" passHref>
             <motion.div
-              className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent cursor-pointer"
+              className="flex items-center cursor-pointer"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              ResuMate
+              <Image
+                src="/logo_long.png"
+                alt="ResuMate Logo"
+                width={225}
+                height={150}
+                className="dark:invert"
+              />
             </motion.div>
           </Link>
 

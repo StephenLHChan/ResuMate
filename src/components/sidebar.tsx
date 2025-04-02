@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -49,10 +50,15 @@ const Sidebar = () => {
     <div className="flex h-full w-64 flex-col border-r bg-card">
       {/* Logo */}
       <div className="flex h-16 items-center border-b px-4">
-        <div className="flex items-center space-x-2">
-          <FileText className="h-6 w-6 text-primary" />
-          <span className="text-xl font-bold">ResuMate</span>
-        </div>
+        <Link href="/home" className="flex items-center space-x-2">
+          <Image
+            src="/logo_long.png"
+            alt="ResuMate Logo"
+            width={180}
+            height={120}
+            className="dark:invert"
+          />
+        </Link>
       </div>
 
       {/* Navigation */}
