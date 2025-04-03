@@ -41,12 +41,19 @@ interface Application {
   position: string;
   jobDescription: string;
   requirements: string[];
-  resumeUrl: string | null;
   coverLetterUrl: string | null;
   status: string;
   notes: string | null;
   jobUrl: string | null;
   createdAt: string;
+  resumes: {
+    id: string;
+    resume: {
+      id: string;
+      title: string;
+      content: string;
+    };
+  }[];
 }
 
 interface PaginationInfo {
@@ -179,10 +186,13 @@ const ApplicationPage = (): React.ReactElement => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          companyName: application.company,
-          position: application.position,
-          description: application.jobDescription,
-          requirements: application.requirements,
+          applicationId,
+          jobInfo: {
+            companyName: application.company,
+            position: application.position,
+            description: application.jobDescription,
+            requirements: application.requirements,
+          },
         }),
       });
 
@@ -193,27 +203,14 @@ const ApplicationPage = (): React.ReactElement => {
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
 
-      // Update the application with the new URL
-      const updateResponse = await fetch(`/api/applications/${applicationId}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          [`${type}Url`]: url,
-        }),
-      });
-
-      if (!updateResponse.ok) {
-        throw new Error(`Failed to update ${type} URL`);
+      // If it's a resume, update the application with the new resume
+      if (type === "resume") {
+        const resumeId = response.headers.get("X-Resume-Id");
+        if (resumeId) {
+          // Refresh the applications to get the updated resume list
+          await fetchApplications(pagination.page);
+        }
       }
-
-      const updatedApplication = await updateResponse.json();
-
-      // Update the applications list
-      setApplications(prev =>
-        prev.map(app => (app.id === applicationId ? updatedApplication : app))
-      );
 
       // Download the file
       const a = document.createElement("a");
@@ -264,6 +261,67 @@ const ApplicationPage = (): React.ReactElement => {
       toast({
         title: "Error",
         description: "Failed to delete application",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const reprintResume = async (
+    applicationId: string,
+    resumeId: string
+  ): Promise<void> => {
+    setIsLoading(true);
+
+    try {
+      // Find the application to get resume content
+      const application = applications.find(app => app.id === applicationId);
+      if (!application) {
+        throw new Error("Application not found");
+      }
+
+      const resume = application.resumes.find(r => r.resume.id === resumeId);
+      if (!resume) {
+        throw new Error("Resume not found");
+      }
+
+      // Generate the PDF
+      const response = await fetch("/api/reprint-resume", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          resumeContent: resume.resume.content,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to reprint resume");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      // Download the file
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `tailored-resume.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast({
+        title: "Success",
+        description: "Resume reprinted successfully",
+      });
+    } catch (error) {
+      console.error("Error reprinting resume:", error);
+      toast({
+        title: "Error",
+        description: "Failed to reprint resume",
         variant: "destructive",
       });
     } finally {
@@ -628,6 +686,31 @@ const ApplicationPage = (): React.ReactElement => {
                             </DropdownMenu>
                           </div>
                           <div className="flex gap-2">
+                            {application.resumes &&
+                              application.resumes.length > 0 && (
+                                <div className="flex gap-2">
+                                  {application.resumes.map(({ id, resume }) => (
+                                    <Button
+                                      key={id}
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() =>
+                                        reprintResume(application.id, resume.id)
+                                      }
+                                      disabled={isLoading}
+                                    >
+                                      {isLoading ? (
+                                        <>
+                                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                          Reprinting...
+                                        </>
+                                      ) : (
+                                        `Reprint ${resume.title}`
+                                      )}
+                                    </Button>
+                                  ))}
+                                </div>
+                              )}
                             <Button
                               variant="outline"
                               size="sm"

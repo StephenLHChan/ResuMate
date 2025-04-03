@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 
 import { Toaster } from "@/components/ui/toaster";
+
+import type { Metadata } from "next";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -15,15 +16,13 @@ const RootLayout = ({
   children,
 }: {
   children: React.ReactNode;
-}): JSX.Element => {
-  return (
-    <html lang="en">
-      <body className={inter.className}>
-        {children}
-        <Toaster />
-      </body>
-    </html>
-  );
-};
+}): React.ReactElement => (
+  <html lang="en">
+    <body className={inter.className}>
+      {children}
+      <Toaster />
+    </body>
+  </html>
+);
 
 export default RootLayout;

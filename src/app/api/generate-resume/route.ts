@@ -4,6 +4,7 @@ import puppeteer from "puppeteer";
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { resumeTemplate } from "@/lib/templates/resume-template";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -11,12 +12,12 @@ const openai = new OpenAI({
 
 export const POST = async (request: Request): Promise<NextResponse> => {
   try {
-    const jobInfo = await request.json();
     const session = await auth();
-
     if (!session?.user?.email) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
+
+    const { applicationId, jobInfo } = await request.json();
 
     // Get user's profile data
     const user = await prisma.user.findUnique({
@@ -46,21 +47,43 @@ export const POST = async (request: Request): Promise<NextResponse> => {
       messages: [
         {
           role: "system",
-          content:
-            "You are a professional resume writer. Create a tailored resume based on the job information and user profile provided.",
+          content: `You are a professional resume writer. Create a tailored resume for the job application. Return a JSON object with the following structure:
+            {
+              "summary": "Professional summary tailored to the job",
+              "experience": [
+                {
+                  "company": "Company name",
+                  "position": "Position title",
+                  "startDate": "Start date",
+                  "endDate": "End date or 'Present'",
+                  "description": "Tailored description of responsibilities and achievements"
+                }
+              ],
+              "education": [
+                {
+                  "institution": "Institution name",
+                  "degree": "Degree name",
+                  "field": "Field of study",
+                  "startDate": "Start date",
+                  "endDate": "End date or 'Present'"
+                }
+              ],
+              "certifications": [
+                {
+                  "name": "Certification name",
+                  "issuer": "Issuing organization",
+                  "issueDate": "Issue date"
+                }
+              ]
+            }`,
         },
         {
           role: "user",
-          content: `Please create a professional resume tailored for this position:
-            Company: ${jobInfo.companyName}
-            Position: ${jobInfo.position}
-            Description: ${jobInfo.description}
-            Requirements: ${jobInfo.requirements.join(", ")}
-            
-            User Profile Information:
-            Name: ${user.profile.preferredFirstName} ${
-            user.profile.preferredLastName
-          }
+          content: `Create a resume for a ${jobInfo.position} position at ${
+            jobInfo.companyName
+          }. Here's my profile information:
+
+            Name: ${user.profile.legalFirstName} ${user.profile.legalLastName}
             Title: ${user.profile.title}
             Bio: ${user.profile.bio}
             Skills: ${user.profile.skills.join(", ")}
@@ -69,11 +92,11 @@ export const POST = async (request: Request): Promise<NextResponse> => {
             ${user.profile.experience
               .map(
                 exp => `
-              - ${exp.position} at ${exp.company}
-                Period: ${exp.startDate.toLocaleDateString()} - ${
-                  exp.endDate ? exp.endDate.toLocaleDateString() : "Present"
-                }
-                Description: ${exp.description || ""}
+              Company: ${exp.company}
+              Position: ${exp.position}
+              Start Date: ${exp.startDate}
+              End Date: ${exp.endDate || "Present"}
+              Description: ${exp.description}
             `
               )
               .join("\n")}
@@ -82,11 +105,11 @@ export const POST = async (request: Request): Promise<NextResponse> => {
             ${user.profile.education
               .map(
                 edu => `
-              - ${edu.degree} in ${edu.field} from ${edu.institution}
-                Period: ${edu.startDate.toLocaleDateString()} - ${
-                  edu.endDate ? edu.endDate.toLocaleDateString() : "Present"
-                }
-                Description: ${edu.description || ""}
+              Institution: ${edu.institution}
+              Degree: ${edu.degree}
+              Field: ${edu.field}
+              Start Date: ${edu.startDate}
+              End Date: ${edu.endDate || "Present"}
             `
               )
               .join("\n")}
@@ -95,48 +118,57 @@ export const POST = async (request: Request): Promise<NextResponse> => {
             ${user.profile.certifications
               .map(
                 cert => `
-              - ${cert.name} from ${cert.issuer}
-                Issue Date: ${cert.issueDate.toLocaleDateString()}
-                ${
-                  cert.expiryDate
-                    ? `Expiry Date: ${cert.expiryDate.toLocaleDateString()}`
-                    : ""
-                }
-                Description: ${cert.description || ""}
+              Name: ${cert.name}
+              Issuer: ${cert.issuer}
+              Issue Date: ${cert.issueDate}
             `
               )
               .join("\n")}
             
-            Projects:
-            ${user.profile.projects
-              .map(
-                proj => `
-              - ${proj.name}
-                Period: ${proj.startDate.toLocaleDateString()} - ${
-                  proj.endDate ? proj.endDate.toLocaleDateString() : "Present"
-                }
-                Technologies: ${proj.technologies.join(", ")}
-                Description: ${proj.description}
-            `
-              )
-              .join("\n")}
+            Job Description:
+            ${jobInfo.description}
             
-            Format the resume in a clean, professional style with the following sections:
-            - Professional Summary
-            - Work Experience
-            - Skills
-            - Education
-            - Certifications (if relevant)
-            - Projects (if relevant)
-            
-            Return the resume in HTML format with appropriate styling.`,
+            Requirements:
+            ${jobInfo.requirements.join("\n")}`,
         },
       ],
+      response_format: { type: "json_object" },
     });
 
-    const resumeContent = completion.choices[0].message.content;
+    const resumeContent = completion.choices[0]?.message?.content;
     if (!resumeContent) {
       throw new Error("Failed to generate resume content");
+    }
+
+    // Create a new resume record
+    const resume = await prisma.resume.create({
+      data: {
+        user: {
+          connect: {
+            email: session.user.email,
+          },
+        },
+        title: `Resume for ${jobInfo.position} at ${jobInfo.companyName}`,
+        content: resumeContent,
+      },
+    });
+
+    // Connect the resume to the application
+    if (applicationId) {
+      await prisma.applicationResume.create({
+        data: {
+          application: {
+            connect: {
+              id: applicationId,
+            },
+          },
+          resume: {
+            connect: {
+              id: resume.id,
+            },
+          },
+        },
+      });
     }
 
     // Convert HTML to PDF using Puppeteer
@@ -146,40 +178,7 @@ export const POST = async (request: Request): Promise<NextResponse> => {
     const page = await browser.newPage();
 
     // Set content with proper styling
-    await page.setContent(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <style>
-            body {
-              font-family: Arial, sans-serif;
-              line-height: 1.6;
-              margin: 1cm;
-              color: #333;
-            }
-            h1, h2, h3 {
-              color: #2c3e50;
-            }
-            .section {
-              margin-bottom: 1.5em;
-            }
-            .section-title {
-              border-bottom: 2px solid #2c3e50;
-              margin-bottom: 0.5em;
-            }
-            pre {
-              white-space: pre-wrap;
-              word-wrap: break-word;
-            }
-          </style>
-        </head>
-        <body>
-          <pre>${resumeContent
-            .replace(/```html/g, "")
-            .replace(/```/g, "")}</pre>
-        </body>
-      </html>
-    `);
+    await page.setContent(resumeTemplate(user, JSON.parse(resumeContent)));
 
     // Generate PDF
     const pdf = await page.pdf({
@@ -195,11 +194,12 @@ export const POST = async (request: Request): Promise<NextResponse> => {
 
     await browser.close();
 
-    // Return the PDF
+    // Return both the PDF and the resume ID
     return new NextResponse(pdf, {
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": 'attachment; filename="tailored-resume.pdf"',
+        "X-Resume-Id": resume.id,
       },
     });
   } catch (error: unknown) {

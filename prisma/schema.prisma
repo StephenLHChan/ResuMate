@@ -134,6 +134,7 @@ model Resume {
   content     String
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  applications ApplicationResume[]
 }
 
 model Application {
@@ -144,15 +145,27 @@ model Application {
   position        String
   jobDescription  String    @db.Text
   requirements    String[]
-  resumeUrl       String?
   coverLetterUrl  String?
   status          String    @default("pending") // pending, applied, rejected, accepted
   notes           String?   @db.Text
   jobUrl          String?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
+  resumes         ApplicationResume[]
 
   @@index([userId])
+}
+
+model ApplicationResume {
+  id            String      @id @default(cuid())
+  applicationId String
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  resumeId      String
+  resume        Resume      @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@unique([applicationId, resumeId])
 }
 
 model Certification {

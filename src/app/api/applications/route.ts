@@ -22,6 +22,13 @@ export const GET = async (request: Request): Promise<NextResponse> => {
         orderBy: { createdAt: "desc" },
         skip,
         take: ITEMS_PER_PAGE,
+        include: {
+          resumes: {
+            include: {
+              resume: true,
+            },
+          },
+        },
       }),
       prisma.application.count({
         where: { user: { email: session.user.email } },
@@ -54,7 +61,7 @@ export const POST = async (request: Request): Promise<NextResponse> => {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { jobInfo, resumeUrl, coverLetterUrl } = await request.json();
+    const { jobInfo, coverLetterUrl } = await request.json();
 
     const application = await prisma.application.create({
       data: {
@@ -67,7 +74,6 @@ export const POST = async (request: Request): Promise<NextResponse> => {
         position: jobInfo.position,
         jobDescription: jobInfo.description,
         requirements: jobInfo.requirements,
-        resumeUrl,
         coverLetterUrl,
         status: "pending",
       },
