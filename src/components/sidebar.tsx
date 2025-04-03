@@ -10,6 +10,7 @@ import {
   GraduationCap,
   Award,
   Code2,
+  Send,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -30,6 +31,7 @@ interface NavigationItem {
 const navigation: NavigationItem[] = [
   { name: "Dashboard", href: "/home", icon: Home },
   { name: "My Resume", href: "/resume", icon: FileText },
+  { name: "Applications", href: "/application", icon: Send },
   {
     name: "Profile",
     href: "/profile",

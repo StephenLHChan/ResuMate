@@ -1,44 +1,29 @@
-import { Geist, Geist_Mono } from "next/font/google";
-import React from "react";
-
-import { ThemeProvider } from "@/components/theme-provider";
-
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 
+import { Toaster } from "@/components/ui/toaster";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "ResuMate",
-  description: "Your AI-powered resume builder",
+  title: "ResuMate - AI-Powered Resume Generator",
+  description: "Generate tailored resumes and cover letters using AI",
 };
 
 const RootLayout = ({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>): React.ReactElement => (
-  <html lang="en" suppressHydrationWarning>
-    <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="dark"
-        enableSystem
-        disableTransitionOnChange
-      >
+}): JSX.Element => {
+  return (
+    <html lang="en">
+      <body className={inter.className}>
         {children}
-      </ThemeProvider>
-    </body>
-  </html>
-);
+        <Toaster />
+      </body>
+    </html>
+  );
+};
 
 export default RootLayout;
