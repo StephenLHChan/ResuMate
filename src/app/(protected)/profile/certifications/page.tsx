@@ -66,7 +66,7 @@ const CertificationsPage = (): React.ReactElement => {
       name: "",
       issuer: "",
       credentialId: "",
-      credentialUrl: "",
+      credentialUrl: undefined,
       description: "",
     },
   });
@@ -126,7 +126,7 @@ const CertificationsPage = (): React.ReactElement => {
           issueDate: undefined,
           expiryDate: undefined,
           credentialId: "",
-          credentialUrl: "",
+          credentialUrl: undefined,
           description: "",
         });
         setIsEditing(false);
@@ -153,7 +153,7 @@ const CertificationsPage = (): React.ReactElement => {
       issueDate: new Date(cert.issueDate),
       expiryDate: cert.expiryDate ? new Date(cert.expiryDate) : undefined,
       credentialId: cert.credentialId || "",
-      credentialUrl: cert.credentialUrl || "",
+      credentialUrl: cert.credentialUrl || undefined,
       description: cert.description || "",
     });
   };
