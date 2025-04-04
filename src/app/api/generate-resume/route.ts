@@ -50,7 +50,11 @@ export const POST = async (request: Request): Promise<NextResponse> => {
     );
 
     // Generate PDF
-    const pdf = await ResumeService.generatePDF(user, resumeContent);
+    const pdf = await ResumeService.generatePDF(
+      user,
+      user.profile,
+      resumeContent
+    );
 
     // Return both the PDF and the resume ID
     return new NextResponse(pdf, {

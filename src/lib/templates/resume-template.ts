@@ -1,4 +1,11 @@
-export interface Experience {
+import type {
+  APIExperience,
+  APIEducation,
+  APICertification,
+  APIProject,
+} from "@/lib/types";
+
+interface Experience {
   position: string;
   company: string;
   description: string;
@@ -6,7 +13,7 @@ export interface Experience {
   endDate: string;
 }
 
-export interface Education {
+interface Education {
   degree: string;
   field: string;
   institution: string;
@@ -14,21 +21,41 @@ export interface Education {
   endDate: string;
 }
 
-export interface Certification {
+interface Certification {
   name: string;
   issuer: string;
   issueDate: string;
   expiryDate: string | null;
 }
 
-export interface ResumeData {
+interface ResumeData {
   summary: string;
   experience: Experience[];
   education: Education[];
   certifications: Certification[];
 }
 
-export const resumeTemplate = (user: any, resumeData: ResumeData): string => `
+interface TemplateProfile {
+  preferredFirstName: string | null;
+  preferredLastName: string | null;
+  title: string | null;
+  phone: string | null;
+  location: string | null;
+  website: string | null;
+  linkedin: string | null;
+  github: string | null;
+  skills: string[];
+  experience: APIExperience[];
+  education: APIEducation[];
+  certifications: APICertification[];
+  projects: APIProject[];
+  email: string;
+}
+
+export const resumeTemplate = (
+  profile: TemplateProfile,
+  resumeData: ResumeData
+): string => `
 <!DOCTYPE html>
 <html>
   <head>
@@ -38,9 +65,9 @@ export const resumeTemplate = (user: any, resumeData: ResumeData): string => `
       body {
         font-family: 'Roboto', Arial, sans-serif;
         line-height: 1.6;
-        margin: 1.5cm;
+        margin: 0.5cm;
         color: #2c3e50;
-        font-size: 11pt;
+        font-size: 10pt;
       }
       
       .header {
@@ -65,15 +92,15 @@ export const resumeTemplate = (user: any, resumeData: ResumeData): string => `
       }
       
       .contact-info {
-        font-size: 10pt;
+        font-size: 8pt;
         color: #7f8c8d;
       }
       
       .summary {
         text-align: justify;
         margin-bottom: 1.5em;
-        font-size: 11pt;
-        line-height: 1.6;
+        font-size: 10pt;
+        line-height: 1.5;
       }
       
       .section {
@@ -122,17 +149,15 @@ export const resumeTemplate = (user: any, resumeData: ResumeData): string => `
   </head>
   <body>
     <div class="header">
-      <div class="name">${user.profile.preferredFirstName} ${
-  user.profile.preferredLastName
+      <div class="name">${profile.preferredFirstName} ${
+  profile.preferredLastName
 }</div>
-      <div class="title">${user.profile.title}</div>
+      <div class="title">${profile.title}</div>
       <div class="contact-info">
-        ${user.email} | ${user.profile.phone || ""} | ${
-  user.profile.location || ""
-}
-        ${user.profile.website ? `| ${user.profile.website}` : ""}
-        ${user.profile.linkedin ? `| ${user.profile.linkedin}` : ""}
-        ${user.profile.github ? `| ${user.profile.github}` : ""}
+        ${profile.email} | ${profile.phone || ""} | ${profile.location || ""}
+        ${profile.website ? `| ${profile.website}` : ""}
+        ${profile.linkedin ? `| ${profile.linkedin}` : ""}
+        ${profile.github ? `| ${profile.github}` : ""}
       </div>
     </div>
     

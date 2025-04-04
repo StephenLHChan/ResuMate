@@ -5,6 +5,9 @@ import { prisma } from "@/lib/prisma";
 import { resumeGenerationPrompt } from "@/lib/prompts/resume-generation";
 import { resumeTemplate } from "@/lib/templates/resume-template";
 
+import type { UserProfile, ResumeContent } from "@/lib/types";
+import type { User } from "@prisma/client";
+
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
@@ -16,69 +19,9 @@ interface JobInfo {
   requirements: string[];
 }
 
-interface ResumeContent {
-  summary: string;
-  experience: Array<{
-    position: string;
-    company: string;
-    description: string;
-    startDate: string;
-    endDate: string;
-  }>;
-  education: Array<{
-    degree: string;
-    field: string;
-    institution: string;
-    startDate: string;
-    endDate: string;
-  }>;
-  certifications: Array<{
-    name: string;
-    issuer: string;
-    issueDate: string;
-    expiryDate: string | null;
-  }>;
-}
-
-interface User {
-  id: string;
-  email: string;
-  profile: {
-    preferredFirstName: string | null;
-    preferredLastName: string | null;
-    title: string | null;
-    phone: string | null;
-    location: string | null;
-    website: string | null;
-    linkedin: string | null;
-    github: string | null;
-    skills: string[];
-    experience: Array<{
-      company: string;
-      position: string;
-      startDate: Date;
-      endDate: Date | null;
-      description: string | null;
-    }>;
-    education: Array<{
-      institution: string;
-      degree: string;
-      field: string;
-      startDate: Date;
-      endDate: Date | null;
-    }>;
-    certifications: Array<{
-      name: string;
-      issuer: string;
-      issueDate: Date;
-      expiryDate: Date | null;
-    }>;
-  } | null;
-}
-
 export class ResumeService {
   static async generateResumeContent(
-    userProfile: NonNullable<User["profile"]>,
+    userProfile: UserProfile,
     jobInfo: JobInfo
   ): Promise<ResumeContent> {
     const completion = await openai.chat.completions.create({
@@ -144,18 +87,17 @@ export class ResumeService {
 
   static async generatePDF(
     user: User,
+    userProfile: UserProfile,
     resumeContent: ResumeContent
   ): Promise<Uint8Array> {
-    if (!user.profile) {
-      throw new Error("User profile not found");
-    }
-
     const browser = await puppeteer.launch({
       headless: true,
     });
     const page = await browser.newPage();
 
-    await page.setContent(resumeTemplate(user, resumeContent));
+    await page.setContent(
+      resumeTemplate({ ...userProfile, email: user.email }, resumeContent)
+    );
 
     const pdf = await page.pdf({
       format: "A4",

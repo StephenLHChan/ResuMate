@@ -1,25 +1,8 @@
-interface Experience {
-  company: string;
-  position: string;
-  startDate: string;
-  endDate: string | null;
-  description: string;
-}
-
-interface Education {
-  institution: string;
-  degree: string;
-  field: string;
-  startDate: string;
-  endDate: string | null;
-}
-
-interface Certification {
-  name: string;
-  issuer: string;
-  issueDate: string;
-  expiryDate: string | null;
-}
+import type {
+  BaseExperience,
+  BaseEducation,
+  BaseCertification,
+} from "@/lib/types";
 
 interface UserProfile {
   preferredFirstName: string | null;
@@ -31,9 +14,9 @@ interface UserProfile {
   linkedin: string | null;
   github: string | null;
   skills: string[];
-  experience: Experience[];
-  education: Education[];
-  certifications: Certification[];
+  experience: BaseExperience[];
+  education: BaseEducation[];
+  certifications: BaseCertification[];
 }
 
 interface JobInfo {
@@ -102,7 +85,7 @@ Skills: ${userProfile.skills.join(", ")}
 Experience:
 ${userProfile.experience
   .map(
-    (exp: Experience) => `
+    exp => `
 Company: ${exp.company}
 Position: ${exp.position}
 Start Date: ${exp.startDate}
@@ -115,7 +98,7 @@ Description: ${exp.description}
 Education:
 ${userProfile.education
   .map(
-    (edu: Education) => `
+    edu => `
 Institution: ${edu.institution}
 Degree: ${edu.degree}
 Field: ${edu.field}
@@ -128,7 +111,7 @@ End Date: ${edu.endDate || "Present"}
 Certifications:
 ${userProfile.certifications
   .map(
-    (cert: Certification) => `
+    cert => `
 Name: ${cert.name}
 Issuer: ${cert.issuer}
 Issue Date: ${cert.issueDate}
