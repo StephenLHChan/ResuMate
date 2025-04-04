@@ -35,26 +35,16 @@ import {
 } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  experienceSchema,
-  type ExperienceFormValues,
-} from "@/lib/schemas/experience";
+import { experienceSchema } from "@/lib/schemas/experience";
 import { cn } from "@/lib/utils";
 
-interface Experience {
-  id: string;
-  company: string;
-  position: string;
-  startDate: string;
-  endDate: string | null;
-  description: string | null;
-}
+import type { APIExperience, ExperienceFormValues } from "@/lib/types";
 
 const ExperiencePage = (): React.ReactElement => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
-  const [experiences, setExperiences] = useState<Experience[]>([]);
+  const [experiences, setExperiences] = useState<APIExperience[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [currentId, setCurrentId] = useState<string | null>(null);
 
@@ -162,7 +152,7 @@ const ExperiencePage = (): React.ReactElement => {
     }
   };
 
-  const handleEdit = (exp: Experience): void => {
+  const handleEdit = (exp: APIExperience): void => {
     setIsEditing(true);
     setCurrentId(exp.id);
     form.reset({
@@ -196,9 +186,9 @@ const ExperiencePage = (): React.ReactElement => {
     }
   };
 
-  const formatDate = (dateString: string | null): string => {
-    if (!dateString) return "Present";
-    return format(new Date(dateString), "MMM yyyy");
+  const formatDate = (date: string | Date | null): string => {
+    if (!date) return "Present";
+    return format(new Date(date), "MMM yyyy");
   };
 
   return (

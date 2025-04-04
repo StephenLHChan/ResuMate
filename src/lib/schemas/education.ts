@@ -10,12 +10,10 @@ export const educationSchema = z.object({
   field: z.string().min(1, {
     message: "Field of study is required",
   }),
-  startDate: z.union([z.date(), z.string().transform(str => new Date(str))], {
+  startDate: z.date({
     required_error: "Start date is required",
   }),
-  endDate: z
-    .union([z.date(), z.string().transform(str => new Date(str)), z.null()])
-    .optional(),
+  endDate: z.date().nullable(),
   currentlyStudying: z.boolean().default(false),
   description: z.string().optional(),
 });

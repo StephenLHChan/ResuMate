@@ -34,27 +34,16 @@ import {
 } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  educationSchema,
-  type EducationFormValues,
-} from "@/lib/schemas/education";
+import { educationSchema } from "@/lib/schemas/education";
 import { cn } from "@/lib/utils";
 
-interface Education {
-  id: string;
-  institution: string;
-  degree: string;
-  field: string;
-  startDate: string;
-  endDate: string | null;
-  description: string | null;
-}
+import type { APIEducation, EducationFormValues } from "@/lib/types";
 
 const EducationPage = (): React.ReactElement => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
-  const [education, setEducation] = useState<Education[]>([]);
+  const [education, setEducation] = useState<APIEducation[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [currentId, setCurrentId] = useState<string | null>(null);
 
@@ -164,7 +153,7 @@ const EducationPage = (): React.ReactElement => {
     }
   };
 
-  const handleEdit = (edu: Education): void => {
+  const handleEdit = (edu: APIEducation): void => {
     setIsEditing(true);
     setCurrentId(edu.id);
     form.reset({
@@ -199,7 +188,7 @@ const EducationPage = (): React.ReactElement => {
     }
   };
 
-  const formatDate = (dateString: string | null): string => {
+  const formatDate = (dateString: string | Date | null): string => {
     if (!dateString) return "Present";
     return format(new Date(dateString), "MMM yyyy");
   };

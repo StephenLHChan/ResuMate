@@ -7,12 +7,10 @@ export const experienceSchema = z.object({
   position: z.string().min(1, {
     message: "Position is required",
   }),
-  startDate: z.union([z.date(), z.string().transform(str => new Date(str))], {
+  startDate: z.date({
     required_error: "Start date is required",
   }),
-  endDate: z
-    .union([z.date(), z.string().transform(str => new Date(str)), z.null()])
-    .optional(),
+  endDate: z.date().nullable(),
   currentlyWorking: z.boolean().default(false),
   description: z.string().optional(),
 });
