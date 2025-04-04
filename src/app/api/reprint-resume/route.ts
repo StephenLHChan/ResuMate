@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
-import puppeteer from "puppeteer";
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { resumeTemplate } from "@/lib/templates/resume-template";
+import { ResumeService } from "@/lib/services/resume-service";
 
 export const POST = async (request: Request): Promise<NextResponse> => {
   try {
@@ -40,27 +39,8 @@ export const POST = async (request: Request): Promise<NextResponse> => {
     const parsedData = JSON.parse(resumeContent);
 
     // Convert HTML to PDF using Puppeteer
-    const browser = await puppeteer.launch({
-      headless: true,
-    });
-    const page = await browser.newPage();
 
-    // Set content with proper styling
-    await page.setContent(resumeTemplate(user, parsedData));
-
-    // Generate PDF
-    const pdf = await page.pdf({
-      format: "A4",
-      printBackground: true,
-      margin: {
-        top: "1cm",
-        right: "1cm",
-        bottom: "1cm",
-        left: "1cm",
-      },
-    });
-
-    await browser.close();
+    const pdf = await ResumeService.generatePDF(user, parsedData);
 
     // Return the PDF
     return new NextResponse(pdf, {
