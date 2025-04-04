@@ -34,28 +34,16 @@ import {
 } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  certificationSchema,
-  type CertificationFormValues,
-} from "@/lib/schemas/certification";
+import { certificationSchema } from "@/lib/schemas/certification";
 import { cn } from "@/lib/utils";
 
-interface Certification {
-  id: string;
-  name: string;
-  issuer: string;
-  issueDate: string;
-  expiryDate: string | null;
-  credentialId: string | null;
-  credentialUrl: string | null;
-  description: string | null;
-}
+import type { APICertification, CertificationFormValues } from "@/lib/types";
 
 const CertificationsPage = (): React.ReactElement => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
-  const [certifications, setCertifications] = useState<Certification[]>([]);
+  const [certifications, setCertifications] = useState<APICertification[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [currentId, setCurrentId] = useState<string | null>(null);
 
@@ -65,6 +53,8 @@ const CertificationsPage = (): React.ReactElement => {
     defaultValues: {
       name: "",
       issuer: "",
+      issueDate: new Date(),
+      expiryDate: null,
       credentialId: "",
       credentialUrl: undefined,
       description: "",
@@ -144,14 +134,14 @@ const CertificationsPage = (): React.ReactElement => {
     }
   };
 
-  const handleEdit = (cert: Certification): void => {
+  const handleEdit = (cert: APICertification): void => {
     setIsEditing(true);
     setCurrentId(cert.id);
     form.reset({
       name: cert.name,
       issuer: cert.issuer,
       issueDate: new Date(cert.issueDate),
-      expiryDate: cert.expiryDate ? new Date(cert.expiryDate) : undefined,
+      expiryDate: cert.expiryDate ? new Date(cert.expiryDate) : null,
       credentialId: cert.credentialId || "",
       credentialUrl: cert.credentialUrl || undefined,
       description: cert.description || "",
@@ -179,7 +169,7 @@ const CertificationsPage = (): React.ReactElement => {
     }
   };
 
-  const formatDate = (dateString: string | null): string => {
+  const formatDate = (dateString: string | Date | null): string => {
     if (!dateString) return "Present";
     return format(new Date(dateString), "MMM yyyy");
   };
@@ -501,7 +491,7 @@ const CertificationsPage = (): React.ReactElement => {
                         issueDate: undefined,
                         expiryDate: undefined,
                         credentialId: "",
-                        credentialUrl: "",
+                        credentialUrl: undefined,
                         description: "",
                       });
                     }}
