@@ -96,8 +96,15 @@ export const PUT = async (
     // Parse the request body
     const body = await req.json();
 
+    // Format dates before validation
+    const formattedBody = {
+      ...body,
+      issueDate: body.issueDate ? new Date(body.issueDate) : new Date(),
+      expiryDate: body.expiryDate ? new Date(body.expiryDate) : null,
+    };
+
     // Validate with zod schema
-    const validationResult = certificationSchema.safeParse(body);
+    const validationResult = certificationSchema.safeParse(formattedBody);
 
     if (!validationResult.success) {
       return NextResponse.json(
@@ -125,8 +132,8 @@ export const PUT = async (
       data: {
         name,
         issuer,
-        issueDate: new Date(issueDate),
-        expiryDate: expiryDate ? new Date(expiryDate) : null,
+        issueDate,
+        expiryDate,
         credentialId,
         credentialUrl,
         description,
