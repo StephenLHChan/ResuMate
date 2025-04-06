@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
+
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { profileSchema } from "@/lib/schemas/profile";
+
 import type { Prisma } from "@prisma/client";
 
 // GET: Fetch profile data for the current user
