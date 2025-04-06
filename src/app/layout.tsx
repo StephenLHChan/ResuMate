@@ -1,4 +1,5 @@
 import { Inter } from "next/font/google";
+import { SessionProvider } from "next-auth/react";
 
 import { Toaster } from "@/components/ui/toaster";
 
@@ -19,8 +20,10 @@ const RootLayout = ({
 }): React.ReactElement => (
   <html lang="en">
     <body className={inter.className}>
-      {children}
-      <Toaster />
+      <SessionProvider>
+        {children}
+        <Toaster />
+      </SessionProvider>
     </body>
   </html>
 );

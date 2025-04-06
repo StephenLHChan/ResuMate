@@ -11,14 +11,23 @@ import {
   Award,
   Code2,
   Send,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React from "react";
+import { useSession } from "next-auth/react";
+import React, { useState } from "react";
 
 import { logout } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 
 interface NavigationItem {
@@ -30,7 +39,7 @@ interface NavigationItem {
 
 const navigation: NavigationItem[] = [
   { name: "Dashboard", href: "/home", icon: Home },
-  { name: "My Resume", href: "/resume", icon: FileText },
+  { name: "Resumes", href: "/resume", icon: FileText },
   { name: "Applications", href: "/application", icon: Send },
   {
     name: "Profile",
@@ -43,29 +52,53 @@ const navigation: NavigationItem[] = [
       { name: "Projects", href: "/profile/projects", icon: Code2 },
     ],
   },
-  { name: "Settings", href: "/settings", icon: Settings },
 ];
 
 const Sidebar = (): React.ReactElement => {
   const pathname = usePathname();
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const { data: session } = useSession();
 
   const handleLogout = async (): Promise<void> => {
     await logout();
   };
 
   return (
-    <div className="flex h-full w-64 flex-col border-r bg-card">
+    <div
+      className={cn(
+        "flex h-full flex-col border-r bg-card transition-all duration-300",
+        isCollapsed ? "w-16" : "w-64"
+      )}
+    >
       {/* Logo */}
-      <div className="flex h-16 items-center border-b px-4">
-        <Link href="/home" className="flex items-center space-x-2">
+      <div className="flex h-16 items-center justify-between border-b px-4">
+        <Link
+          href="/home"
+          className={cn(
+            "flex items-center space-x-2",
+            isCollapsed && "justify-center"
+          )}
+        >
           <Image
             src="/logo_long.png"
             alt="ResuMate Logo"
-            width={180}
-            height={120}
+            width={isCollapsed ? 40 : 180}
+            height={isCollapsed ? 40 : 120}
             className="dark:invert"
           />
         </Link>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="h-8 w-8"
+        >
+          {isCollapsed ? (
+            <ChevronRight className="h-4 w-4" />
+          ) : (
+            <ChevronLeft className="h-4 w-4" />
+          )}
+        </Button>
       </div>
 
       {/* Navigation */}
@@ -84,11 +117,13 @@ const Sidebar = (): React.ReactElement => {
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
               >
-                <item.icon className="h-4 w-4" />
-                <span>{item.name}</span>
+                <item.icon
+                  className={cn("h-5 w-5", isCollapsed && "h-6 w-6")}
+                />
+                {!isCollapsed && <span>{item.name}</span>}
               </Link>
 
-              {item.children && (
+              {item.children && !isCollapsed && (
                 <div className="ml-6 mt-1 space-y-1">
                   {item.children.map(child => {
                     const isChildActive = pathname === child.href;
@@ -115,17 +150,60 @@ const Sidebar = (): React.ReactElement => {
         })}
       </nav>
 
-      {/* Logout Button */}
+      {/* User Profile */}
       <div className="border-t p-4">
-        <form action={handleLogout}>
-          <Button
-            variant="ghost"
-            className="w-full justify-start text-muted-foreground hover:text-destructive"
-          >
-            <LogOut className="mr-2 h-4 w-4" />
-            Logout
-          </Button>
-        </form>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              className={cn(
+                "w-full justify-start",
+                isCollapsed && "justify-center"
+              )}
+            >
+              <div className="flex items-center space-x-2">
+                {session?.user?.image ? (
+                  <Image
+                    src={session.user.image}
+                    alt={session.user.name || "User"}
+                    width={32}
+                    height={32}
+                    className="rounded-full"
+                  />
+                ) : (
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+                    <User className="h-5 w-5 text-primary" />
+                  </div>
+                )}
+                {!isCollapsed && (
+                  <div className="flex flex-col items-start">
+                    <span className="text-sm font-medium">
+                      {session?.user?.name || "User"}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {session?.user?.email}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" side="right" className="w-56">
+            <DropdownMenuItem asChild>
+              <Link href="/settings" className="cursor-pointer">
+                <Settings className="mr-2 h-4 w-4" />
+                <span>Settings</span>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="cursor-pointer text-destructive focus:text-destructive"
+              onClick={handleLogout}
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Logout</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );
