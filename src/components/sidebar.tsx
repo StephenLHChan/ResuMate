@@ -102,7 +102,7 @@ const Sidebar = (): React.ReactElement => {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-1 p-4">
+      <nav className="flex-1 space-y-1 p-3">
         {navigation.map(item => {
           const isActive = pathname === item.href;
 
@@ -111,15 +111,13 @@ const Sidebar = (): React.ReactElement => {
               <Link
                 href={item.href}
                 className={cn(
-                  "flex items-center space-x-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                  "flex items-center space-x-3 rounded-lg px-2 py-2 text-sm font-medium transition-colors",
                   isActive
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
               >
-                <item.icon
-                  className={cn("h-5 w-5", isCollapsed && "h-6 w-6")}
-                />
+                <item.icon className="h-5 w-5" />
                 {!isCollapsed && <span>{item.name}</span>}
               </Link>
 
