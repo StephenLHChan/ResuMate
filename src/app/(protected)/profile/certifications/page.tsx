@@ -56,7 +56,7 @@ const CertificationsPage = (): React.ReactElement => {
       issueDate: undefined,
       expiryDate: null,
       credentialId: "",
-      credentialUrl: undefined,
+      credentialUrl: "",
       description: "",
     },
   });
@@ -116,7 +116,7 @@ const CertificationsPage = (): React.ReactElement => {
           issueDate: undefined,
           expiryDate: undefined,
           credentialId: "",
-          credentialUrl: undefined,
+          credentialUrl: "",
           description: "",
         });
         setIsEditing(false);
@@ -143,7 +143,7 @@ const CertificationsPage = (): React.ReactElement => {
       issueDate: new Date(cert.issueDate),
       expiryDate: cert.expiryDate ? new Date(cert.expiryDate) : null,
       credentialId: cert.credentialId || "",
-      credentialUrl: cert.credentialUrl || undefined,
+      credentialUrl: cert.credentialUrl || "",
       description: cert.description || "",
     });
   };
@@ -491,7 +491,7 @@ const CertificationsPage = (): React.ReactElement => {
                         issueDate: undefined,
                         expiryDate: undefined,
                         credentialId: "",
-                        credentialUrl: undefined,
+                        credentialUrl: "",
                         description: "",
                       });
                     }}

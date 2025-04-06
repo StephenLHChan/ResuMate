@@ -15,7 +15,12 @@ export const certificationSchema = z.object({
     .nullable()
     .default(null),
   credentialId: z.string().optional(),
-  credentialUrl: z.string().url().optional(),
+  credentialUrl: z
+    .string()
+    .refine(val => val === "" || z.string().url().safeParse(val).success, {
+      message: "Please enter a valid URL",
+    })
+    .optional(),
   description: z.string().optional(),
 });
 
