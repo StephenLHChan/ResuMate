@@ -23,6 +23,7 @@ export const POST = async (request: Request): Promise<NextResponse> => {
             education: true,
             certifications: true,
             projects: true,
+            skills: true,
           },
         },
       },

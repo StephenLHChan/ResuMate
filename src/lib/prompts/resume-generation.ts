@@ -3,6 +3,7 @@ import type {
   BaseEducation,
   BaseCertification,
 } from "@/lib/types";
+import { Skill } from "@prisma/client";
 
 interface UserProfile {
   preferredFirstName: string | null;
@@ -13,7 +14,7 @@ interface UserProfile {
   website: string | null;
   linkedin: string | null;
   github: string | null;
-  skills: string[];
+  skills: Skill[];
   experience: BaseExperience[];
   education: BaseEducation[];
   certifications: BaseCertification[];
@@ -80,7 +81,7 @@ Location: ${userProfile.location || "N/A"}
 Website: ${userProfile.website || "N/A"}
 LinkedIn: ${userProfile.linkedin || "N/A"}
 GitHub: ${userProfile.github || "N/A"}
-Skills: ${userProfile.skills.join(", ")}
+Skills: ${userProfile.skills.map(skill => skill.name).join(", ")}
 
 Experience:
 ${userProfile.experience

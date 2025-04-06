@@ -4,6 +4,7 @@ import type {
   APICertification,
   APIProject,
 } from "@/lib/types";
+import { Skill } from "@prisma/client";
 
 interface Experience {
   position: string;
@@ -44,7 +45,7 @@ interface TemplateProfile {
   website: string | null;
   linkedin: string | null;
   github: string | null;
-  skills: string[];
+  skills: Skill[];
   experience: APIExperience[];
   education: APIEducation[];
   certifications: APICertification[];

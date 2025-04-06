@@ -1,4 +1,5 @@
-// Base types for data models
+import { Skill } from "@prisma/client";
+
 export interface BaseCertification {
   name: string;
   issuer: string;
@@ -165,7 +166,7 @@ export interface UserProfile {
   website: string | null;
   linkedin: string | null;
   github: string | null;
-  skills: string[];
+  skills: Skill[];
   experience: APIExperience[];
   education: APIEducation[];
   certifications: APICertification[];
