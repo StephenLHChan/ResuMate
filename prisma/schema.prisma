@@ -70,14 +70,13 @@ model User {
 }
 
 model Profile {
-  id                String       @id @default(cuid())
-  userId            String       @unique
-  user              User         @relation(fields: [userId], references: [id])
-  legalFirstName    String?
-  legalLastName     String?
-  preferredFirstName String?
-  preferredLastName  String?
-  hasPreferredName   Boolean     @default(false)
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  legalFirstName    String
+  legalLastName     String
+  preferredFirstName String
+  preferredLastName  String
+  hasPreferredName  Boolean  @default(false)
   title             String?
   bio               String?
   address           String?
@@ -90,13 +89,26 @@ model Profile {
   website           String?
   linkedin          String?
   github            String?
-  skills            String[]
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skills            Skill[]
   experience        Experience[]
   education         Education[]
   certifications    Certification[]
   projects          Project[]
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
+}
+
+model Skill {
+  id        String   @id @default(cuid())
+  name      String
+  rating    Int?
+  profileId String
+  profile   Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([name, profileId])
 }
 
 model Experience {

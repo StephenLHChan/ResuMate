@@ -6,6 +6,7 @@ import {
   GraduationCap,
   ChevronRight,
   Link as LinkIcon,
+  Trash2,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -42,10 +43,15 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
-import { canadaProvinces } from "@/lib/canada-provinces";
-import { countries } from "@/lib/countries";
-import { profileSchema, type ProfileFormValues } from "@/lib/schemas/profile";
-import { usStates } from "@/lib/us-states";
+import { canadaProvinces } from "@/lib/data/canada-provinces";
+import { countries } from "@/lib/data/countries";
+import {
+  profileSchema,
+  type ProfileFormValues,
+  type SkillFormValues,
+} from "@/lib/schemas/profile";
+import { usStates } from "@/lib/data/us-states";
+import { SkillRating } from "@/components/ui/skill-rating";
 
 interface StateType {
   code: string;
@@ -56,6 +62,11 @@ const ProfilePage = (): React.ReactElement => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [showPreferredNameFields, setShowPreferredNameFields] = useState(false);
+  const [skills, setSkills] = useState<SkillFormValues[]>([]);
+  const [newSkill, setNewSkill] = useState("");
+  const [newSkillRating, setNewSkillRating] = useState<number | undefined>(
+    undefined
+  );
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
@@ -77,7 +88,7 @@ const ProfilePage = (): React.ReactElement => {
       website: "",
       linkedin: "",
       github: "",
-      skills: "",
+      skills: [],
     },
   });
 
@@ -107,7 +118,6 @@ const ProfilePage = (): React.ReactElement => {
   }, [watchHasPreferredName, watchLegalFirstName, watchLegalLastName, form]);
 
   // Load profile data on component mount
-
   useEffect(() => {
     const fetchProfile = async (): Promise<void> => {
       try {
@@ -115,9 +125,15 @@ const ProfilePage = (): React.ReactElement => {
         if (response.ok) {
           const data = await response.json();
 
-          // Format skills array as comma-separated string for the form
-          const skillsString = data.skills ? data.skills.join(", ") : "";
+          // Format skills array for the form
+          const skillsArray = data.skills
+            ? data.skills.map((skill: { name: string; rating?: number }) => ({
+                name: skill.name,
+                rating: skill.rating,
+              }))
+            : [];
 
+          // Update form state
           form.reset({
             legalFirstName: data.legalFirstName || "",
             legalLastName: data.legalLastName || "",
@@ -136,11 +152,11 @@ const ProfilePage = (): React.ReactElement => {
             website: data.website || "",
             linkedin: data.linkedin || "",
             github: data.github || "",
-            skills: skillsString,
           });
 
           // Update UI state
           setShowPreferredNameFields(data.hasPreferredName || false);
+          setSkills(skillsArray);
         }
       } catch (error) {
         console.error("Error fetching profile:", error);
@@ -150,36 +166,7 @@ const ProfilePage = (): React.ReactElement => {
     fetchProfile();
   }, [form]);
 
-  // Update city and state when zip code changes
-  useEffect(() => {
-    if (watchZipCode && watchCountry === "United States") {
-      // This would be an API call to a postal code lookup service
-      // For demo purposes, we're just showing the concept
-      const lookupZipCode = async (): Promise<void> => {
-        try {
-          // In a real implementation, this would call an actual API
-          // For now, we'll just simulate it for US zip code 94043
-          if (watchZipCode === "94043") {
-            form.setValue("city", "Mountain View");
-            form.setValue("state", "California");
-          }
-        } catch (error) {
-          console.error("Error looking up zip code:", error);
-        }
-      };
-
-      lookupZipCode();
-    } else if (watchZipCode && watchCountry === "Canada") {
-      // Simulate Canadian postal code lookup
-      if (watchZipCode.toUpperCase().startsWith("M")) {
-        form.setValue("city", "Toronto");
-        form.setValue("state", "Ontario");
-      } else if (watchZipCode.toUpperCase().startsWith("V")) {
-        form.setValue("city", "Vancouver");
-        form.setValue("state", "British Columbia");
-      }
-    }
-  }, [watchZipCode, watchCountry, form]);
+  // TODO: Update city and state when zip code changes
 
   // Update public location when city, state or country changes
   useEffect(() => {
@@ -203,19 +190,17 @@ const ProfilePage = (): React.ReactElement => {
     }
   }, [watchCity, watchState, watchCountry, form]);
 
-  // Handle form submission
   const onSubmit = async (values: ProfileFormValues): Promise<void> => {
+    console.log("onSubmit");
     setLoading(true);
     try {
-      // Process form data for submission
-      const formData = { ...values };
-
-      // Convert skills string to array if needed
-      if (typeof formData.skills === "string") {
-        formData.skills = formData.skills
-          ? formData.skills.split(",").map((skill: string) => skill.trim())
-          : [];
-      }
+      const formData = {
+        ...values,
+        skills: skills.map(skill => ({
+          name: skill.name,
+          rating: skill.rating,
+        })),
+      };
 
       const response = await fetch("/api/profile", {
         method: "POST",
@@ -243,6 +228,34 @@ const ProfilePage = (): React.ReactElement => {
   const handleCountryChange = (value: string): void => {
     form.setValue("country", value);
     form.setValue("state", "");
+  };
+
+  // Update the skills section in the form
+  const handleAddSkill = () => {
+    if (newSkill.trim()) {
+      setSkills([
+        ...skills,
+        {
+          name: newSkill.trim(),
+          rating: newSkillRating,
+        },
+      ]);
+      setNewSkill("");
+      setNewSkillRating(undefined);
+    }
+  };
+
+  const handleRemoveSkill = (index: number) => {
+    setSkills(skills.filter((_, i) => i !== index));
+  };
+
+  const handleUpdateSkillRating = (
+    index: number,
+    rating: number | undefined
+  ) => {
+    setSkills(prevSkills =>
+      prevSkills.map((skill, i) => (i === index ? { ...skill, rating } : skill))
+    );
   };
 
   return (
@@ -696,23 +709,48 @@ const ProfilePage = (): React.ReactElement => {
 
                   <div className="space-y-4">
                     <h3 className="text-lg font-medium">Skills</h3>
-                    <FormField
-                      control={form.control}
-                      name="skills"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Skills</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="e.g. JavaScript, React, TypeScript (comma separated)"
-                              {...field}
-                              value={field.value || ""}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    <div className="space-y-4">
+                      {skills.map((skill, index) => (
+                        <div key={index} className="flex items-center gap-4">
+                          <div className="flex-1">
+                            <Input value={skill.name} disabled />
+                          </div>
+                          <SkillRating
+                            value={skill.rating}
+                            onChange={rating =>
+                              handleUpdateSkillRating(index, rating)
+                            }
+                          />
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleRemoveSkill(index)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                      <div className="flex items-center gap-4">
+                        <div className="flex-1">
+                          <Input
+                            placeholder="Add a new skill"
+                            value={newSkill}
+                            onChange={e => setNewSkill(e.target.value)}
+                          />
+                        </div>
+                        <SkillRating
+                          value={newSkillRating}
+                          onChange={setNewSkillRating}
+                        />
+                        <Button
+                          variant="outline"
+                          onClick={handleAddSkill}
+                          disabled={!newSkill.trim()}
+                        >
+                          Add
+                        </Button>
+                      </div>
+                    </div>
                   </div>
 
                   <div className="pt-4">

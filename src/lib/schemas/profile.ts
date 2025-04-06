@@ -1,5 +1,10 @@
 import * as z from "zod";
 
+export const skillSchema = z.object({
+  name: z.string(),
+  rating: z.number().min(1).max(5).optional(),
+});
+
 export const profileSchema = z.object({
   legalFirstName: z
     .string()
@@ -32,8 +37,9 @@ export const profileSchema = z.object({
     .url({ message: "Please enter a valid URL" })
     .optional()
     .or(z.literal("")),
-  skills: z.string().optional().or(z.array(z.string()).optional()),
+  skills: z.union([z.array(z.string()), z.array(skillSchema)]).optional(),
 });
 
 // Type for use in forms and data handling
 export type ProfileFormValues = z.infer<typeof profileSchema>;
+export type SkillFormValues = z.infer<typeof skillSchema>;
