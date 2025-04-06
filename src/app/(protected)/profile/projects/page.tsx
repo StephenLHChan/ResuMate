@@ -65,8 +65,10 @@ const ProjectsPage = (): React.ReactElement => {
       name: "",
       description: "",
       technologies: [],
-      projectUrl: "",
-      githubUrl: "",
+      startDate: undefined,
+      endDate: null,
+      projectUrl: undefined,
+      githubUrl: undefined,
       currentlyWorking: false,
     },
   });
@@ -119,10 +121,10 @@ const ProjectsPage = (): React.ReactElement => {
     setLoading(true);
     try {
       // If currently working, set endDate to null
-      const dataToSubmit = {
-        ...values,
-        endDate: values.currentlyWorking ? null : values.endDate,
-      };
+      // const dataToSubmit = {
+      //   ...values,
+      //   endDate: values.currentlyWorking ? null : values.endDate,
+      // };
 
       const endpoint =
         isEditing && currentId
@@ -136,7 +138,7 @@ const ProjectsPage = (): React.ReactElement => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(dataToSubmit),
+        body: JSON.stringify(values),
       });
 
       if (response.ok) {
@@ -145,10 +147,10 @@ const ProjectsPage = (): React.ReactElement => {
           name: "",
           description: "",
           startDate: undefined,
-          endDate: undefined,
+          endDate: null,
           technologies: [],
-          projectUrl: "",
-          githubUrl: "",
+          projectUrl: undefined,
+          githubUrl: undefined,
           currentlyWorking: false,
         });
         setIsEditing(false);
@@ -175,8 +177,8 @@ const ProjectsPage = (): React.ReactElement => {
       startDate: new Date(project.startDate),
       endDate: project.endDate ? new Date(project.endDate) : undefined,
       technologies: project.technologies,
-      projectUrl: project.projectUrl || "",
-      githubUrl: project.githubUrl || "",
+      projectUrl: project.projectUrl || undefined,
+      githubUrl: project.githubUrl || undefined,
       currentlyWorking: !project.endDate,
     });
   };
