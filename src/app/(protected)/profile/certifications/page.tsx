@@ -53,7 +53,7 @@ const CertificationsPage = (): React.ReactElement => {
     defaultValues: {
       name: "",
       issuer: "",
-      issueDate: new Date(),
+      issueDate: undefined,
       expiryDate: null,
       credentialId: "",
       credentialUrl: undefined,

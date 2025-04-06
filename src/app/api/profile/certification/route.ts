@@ -69,8 +69,14 @@ export const POST = async (req: Request): Promise<NextResponse> => {
     // Parse the request body
     const body = await req.json();
 
+    const formattedBody = {
+      ...body,
+      issueDate: body.issueDate ? new Date(body.issueDate) : null,
+      expiryDate: body.expiryDate ? new Date(body.expiryDate) : null,
+    };
+
     // Validate with zod schema
-    const validationResult = certificationSchema.safeParse(body);
+    const validationResult = certificationSchema.safeParse(formattedBody);
 
     if (!validationResult.success) {
       return NextResponse.json(

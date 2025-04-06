@@ -99,7 +99,7 @@ export const PUT = async (
     // Format dates before validation
     const formattedBody = {
       ...body,
-      issueDate: body.issueDate ? new Date(body.issueDate) : new Date(),
+      issueDate: body.issueDate ? new Date(body.issueDate) : null,
       expiryDate: body.expiryDate ? new Date(body.expiryDate) : null,
     };
 
