@@ -7,14 +7,12 @@ import { experienceSchema } from "@/lib/schemas/experience";
 // GET: Fetch all experiences for the current user
 export const GET = async (): Promise<NextResponse> => {
   try {
-    // Get the current session
     const session = await auth();
 
     if (!session?.user?.email) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    // Find user and their profile by email
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
       include: { profile: true },
@@ -27,7 +25,6 @@ export const GET = async (): Promise<NextResponse> => {
       );
     }
 
-    // Get all experiences for this profile
     const experiences = await prisma.experience.findMany({
       where: { profileId: user.profile.id },
       orderBy: { startDate: "desc" },
@@ -46,14 +43,12 @@ export const GET = async (): Promise<NextResponse> => {
 // POST: Create a new experience for the current user
 export const POST = async (req: Request): Promise<NextResponse> => {
   try {
-    // Get the current session
     const session = await auth();
 
     if (!session?.user?.email) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    // Find user and their profile by email
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
       include: { profile: true },
@@ -66,10 +61,15 @@ export const POST = async (req: Request): Promise<NextResponse> => {
       );
     }
 
-    // Parse the request body
     const body = await req.json();
-    // Validate with zod schema
-    const validationResult = experienceSchema.safeParse(body);
+
+    // Format dates before validation
+    const formattedBody = {
+      ...body,
+      startDate: body.startDate ? new Date(body.startDate) : null,
+      endDate: body.endDate ? new Date(body.endDate) : null,
+    };
+    const validationResult = experienceSchema.safeParse(formattedBody);
 
     if (!validationResult.success) {
       return NextResponse.json(
@@ -90,10 +90,8 @@ export const POST = async (req: Request): Promise<NextResponse> => {
       description,
     } = validationResult.data;
 
-    // If currently working, set endDate to null
     const finalEndDate = currentlyWorking ? null : endDate;
 
-    // Create new experience
     const experience = await prisma.experience.create({
       data: {
         profileId: user.profile.id,
