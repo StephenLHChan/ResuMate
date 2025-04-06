@@ -7,6 +7,9 @@ import {
   ChevronRight,
   Link as LinkIcon,
   Trash2,
+  Award,
+  Code2,
+  User,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -263,7 +266,10 @@ const ProfilePage = (): React.ReactElement => {
 
   return (
     <div className="container mx-auto py-10 space-y-6">
-      <h1 className="text-3xl font-bold">Your Profile</h1>
+      <div className="flex items-center gap-2">
+        <User className="h-7 w-7 text-primary" />
+        <h1 className="text-3xl font-bold">Profile</h1>
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2">
           {fetchLoading ? (
@@ -837,76 +843,71 @@ const ProfilePage = (): React.ReactElement => {
           )}
         </div>
         <div className="space-y-6">
-          {fetchLoading ? (
-            <>
-              <Card>
-                <CardHeader>
-                  <Skeleton className="h-8 w-48" />
-                  <Skeleton className="h-4 w-64" />
-                </CardHeader>
-                <CardFooter>
-                  <Skeleton className="h-10 w-full" />
-                </CardFooter>
-              </Card>
-              <Card>
-                <CardHeader>
-                  <Skeleton className="h-8 w-48" />
-                  <Skeleton className="h-4 w-64" />
-                </CardHeader>
-                <CardFooter>
-                  <Skeleton className="h-10 w-full" />
-                </CardFooter>
-              </Card>
-            </>
-          ) : (
-            <>
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Briefcase className="mr-2 h-5 w-5" />
-                    Work Experience
-                  </CardTitle>
-                  <CardDescription>
-                    Add your work history to strengthen your profile
-                  </CardDescription>
-                </CardHeader>
-                <CardFooter>
-                  <Button asChild className="w-full">
-                    <Link
-                      href="/profile/experience"
-                      className="flex justify-between w-full"
-                    >
-                      Manage Experience
-                      <ChevronRight className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                </CardFooter>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <GraduationCap className="mr-2 h-5 w-5" />
-                    Education
-                  </CardTitle>
-                  <CardDescription>
-                    Add your educational background
-                  </CardDescription>
-                </CardHeader>
-                <CardFooter>
-                  <Button asChild className="w-full">
-                    <Link
-                      href="/profile/education"
-                      className="flex justify-between w-full"
-                    >
-                      Manage Education
-                      <ChevronRight className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                </CardFooter>
-              </Card>
-            </>
-          )}
+          <div className="space-y-4">
+            {[
+              {
+                title: "Work Experience",
+                description: "Add your work history to strengthen your profile",
+                href: "/profile/experience",
+                icon: Briefcase,
+              },
+              {
+                title: "Education",
+                description: "Add your educational background",
+                href: "/profile/education",
+                icon: GraduationCap,
+              },
+              {
+                title: "Certifications",
+                description: "Add your certifications",
+                href: "/profile/certifications",
+                icon: Award,
+              },
+              {
+                title: "Projects",
+                description: "Add your projects",
+                href: "/profile/projects",
+                icon: Code2,
+              },
+            ].map((item, index) => {
+              if (fetchLoading) {
+                return (
+                  <Card key={index}>
+                    <CardHeader>
+                      <Skeleton className="h-8 w-48" />
+                      <Skeleton className="h-4 w-64" />
+                    </CardHeader>
+                    <CardFooter>
+                      <Skeleton className="h-10 w-full" />
+                    </CardFooter>
+                  </Card>
+                );
+              } else {
+                return (
+                  <Card key={index}>
+                    <CardHeader>
+                      <CardTitle className="flex items-center">
+                        <item.icon className="mr-2 h-5 w-5" />
+                        {item.title}
+                      </CardTitle>
+                      <CardDescription>{item.description}</CardDescription>
+                    </CardHeader>
+                    <CardFooter>
+                      <Button asChild className="w-full">
+                        <Link
+                          href={item.href}
+                          className="flex justify-between w-full"
+                        >
+                          Manage {item.title}
+                          <ChevronRight className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                );
+              }
+            })}
+          </div>
         </div>
       </div>
     </div>
