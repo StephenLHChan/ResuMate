@@ -28,9 +28,9 @@ const months = [
   "Dec",
 ];
 
-const years = Array.from(
-  { length: 50 },
-  (_, i) => new Date().getFullYear() - i
+const years = Array.from<number, number>(
+  { length: 61 },
+  (_, i: number) => new Date().getFullYear() - 50 + i
 );
 
 function Calendar({
