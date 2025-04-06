@@ -7,10 +7,13 @@ export const certificationSchema = z.object({
   issuer: z.string().min(1, {
     message: "Issuer is required",
   }),
-  issueDate: z.date({
+  issueDate: z.union([z.date(), z.string().transform(str => new Date(str))], {
     required_error: "Issue date is required",
   }),
-  expiryDate: z.date().nullable(),
+  expiryDate: z
+    .union([z.date(), z.string().transform(str => new Date(str))])
+    .nullable()
+    .default(null),
   credentialId: z.string().optional(),
   credentialUrl: z.string().url().optional(),
   description: z.string().optional(),

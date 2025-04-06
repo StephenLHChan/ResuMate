@@ -93,16 +93,9 @@ export const PUT = async (
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    // Parse the request body
     const body = await req.json();
 
-    const formattedBody = {
-      ...body,
-      startDate: body.startDate ? new Date(body.startDate) : null,
-      endDate: body.endDate ? new Date(body.endDate) : null,
-    };
-    // Validate with zod schema
-    const validationResult = experienceSchema.safeParse(formattedBody);
+    const validationResult = experienceSchema.safeParse(body);
 
     if (!validationResult.success) {
       return NextResponse.json(

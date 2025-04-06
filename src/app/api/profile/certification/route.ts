@@ -46,14 +46,12 @@ export const GET = async (): Promise<NextResponse> => {
 // POST: Create a new certification for the current user
 export const POST = async (req: Request): Promise<NextResponse> => {
   try {
-    // Get the current session
     const session = await auth();
 
     if (!session?.user?.email) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    // Find user and their profile by email
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
       include: { profile: true },
@@ -66,17 +64,9 @@ export const POST = async (req: Request): Promise<NextResponse> => {
       );
     }
 
-    // Parse the request body
     const body = await req.json();
 
-    const formattedBody = {
-      ...body,
-      issueDate: body.issueDate ? new Date(body.issueDate) : null,
-      expiryDate: body.expiryDate ? new Date(body.expiryDate) : null,
-    };
-
-    // Validate with zod schema
-    const validationResult = certificationSchema.safeParse(formattedBody);
+    const validationResult = certificationSchema.safeParse(body);
 
     if (!validationResult.success) {
       return NextResponse.json(

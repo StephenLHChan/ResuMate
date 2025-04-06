@@ -63,13 +63,7 @@ export const POST = async (req: Request): Promise<NextResponse> => {
 
     const body = await req.json();
 
-    // Format dates before validation
-    const formattedBody = {
-      ...body,
-      startDate: body.startDate ? new Date(body.startDate) : null,
-      endDate: body.endDate ? new Date(body.endDate) : null,
-    };
-    const validationResult = experienceSchema.safeParse(formattedBody);
+    const validationResult = experienceSchema.safeParse(body);
 
     if (!validationResult.success) {
       return NextResponse.json(

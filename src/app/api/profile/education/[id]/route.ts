@@ -99,14 +99,8 @@ export const PUT = async (
     // Parse the request body
     const body = await req.json();
 
-    const formattedBody = {
-      ...body,
-      startDate: body.startDate ? new Date(body.startDate) : null,
-      endDate: body.endDate ? new Date(body.endDate) : null,
-    };
-
     // Validate with zod schema
-    const validationResult = educationSchema.safeParse(formattedBody);
+    const validationResult = educationSchema.safeParse(body);
 
     if (!validationResult.success) {
       return NextResponse.json(

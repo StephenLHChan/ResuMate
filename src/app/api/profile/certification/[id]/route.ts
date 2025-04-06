@@ -93,18 +93,9 @@ export const PUT = async (
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    // Parse the request body
     const body = await req.json();
 
-    // Format dates before validation
-    const formattedBody = {
-      ...body,
-      issueDate: body.issueDate ? new Date(body.issueDate) : null,
-      expiryDate: body.expiryDate ? new Date(body.expiryDate) : null,
-    };
-
-    // Validate with zod schema
-    const validationResult = certificationSchema.safeParse(formattedBody);
+    const validationResult = certificationSchema.safeParse(body);
 
     if (!validationResult.success) {
       return NextResponse.json(
@@ -126,7 +117,6 @@ export const PUT = async (
       description,
     } = validationResult.data;
 
-    // Update the certification
     const updatedCertification = await prisma.certification.update({
       where: { id },
       data: {
