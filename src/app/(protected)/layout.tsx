@@ -2,6 +2,13 @@ import React from "react";
 
 import Sidebar from "@/components/sidebar";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Profile | ResuMate",
+  description: "Your profile information",
+};
+
 const ProtectedLayout = ({
   children,
 }: {
