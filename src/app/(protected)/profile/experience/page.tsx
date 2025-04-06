@@ -159,7 +159,7 @@ const ExperiencePage = (): React.ReactElement => {
       company: exp.company,
       position: exp.position,
       startDate: new Date(exp.startDate),
-      endDate: exp.endDate ? new Date(exp.endDate) : undefined,
+      endDate: exp.endDate ? new Date(exp.endDate) : null,
       currentlyWorking: !exp.endDate,
       description: exp.description || "",
     });
