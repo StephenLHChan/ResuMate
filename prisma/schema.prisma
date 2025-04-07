@@ -65,6 +65,7 @@ model User {
   profile       Profile?
   resumes       Resume[]
   applications  Application[]
+  jobs          JobUser[]
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
@@ -159,6 +160,19 @@ model Job {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   applications    Application[]
+  users           JobUser[]
+}
+
+model JobUser {
+  id            String    @id @default(cuid())
+  jobId         String
+  job           Job       @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@unique([jobId, userId])
 }
 
 model Application {

@@ -1,7 +1,10 @@
 "use client";
 
+import { Briefcase, Loader2 } from "lucide-react";
+import { useState } from "react";
+
 import { JobList } from "@/components/jobs/job-list";
-import { AddJobButton } from "@/components/jobs/add-job-button";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -10,16 +13,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Tabs } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { useState } from "react";
-import { Briefcase, Loader2 } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/use-toast";
 
-export default function JobsPage() {
+const JobsPage = (): React.ReactElement => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [inputType, setInputType] = useState<"text" | "url" | "manual">("text");
@@ -86,6 +85,15 @@ export default function JobsPage() {
       }
 
       const newJob = await jobResponse.json();
+
+      // Link the job to the current user
+      const linkResponse = await fetch(`/api/jobs/${newJob.id}/link-user`, {
+        method: "POST",
+      });
+
+      if (!linkResponse.ok) {
+        throw new Error("Failed to link job to user");
+      }
 
       // Clear the input
       setJobInput("");
@@ -209,7 +217,7 @@ export default function JobsPage() {
                     Processing...
                   </>
                 ) : (
-                  "Add Application"
+                  "Add Job"
                 )}
               </Button>
             </form>
@@ -232,4 +240,6 @@ export default function JobsPage() {
       </div>
     </div>
   );
-}
+};
+
+export default JobsPage;

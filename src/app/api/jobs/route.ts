@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
+
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { z } from "zod";
 import { jobSchema } from "@/lib/schemas/job";
 
-export async function GET() {
+export const GET = async (): Promise<NextResponse> => {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -13,11 +14,22 @@ export async function GET() {
 
     const jobs = await prisma.job.findMany({
       where: {
-        applications: {
-          some: {
-            userId: session.user.id,
+        OR: [
+          {
+            users: {
+              some: {
+                userId: session.user.id,
+              },
+            },
           },
-        },
+          {
+            applications: {
+              some: {
+                userId: session.user.id,
+              },
+            },
+          },
+        ],
       },
       orderBy: {
         createdAt: "desc",
@@ -29,9 +41,9 @@ export async function GET() {
     console.error("Error fetching jobs:", error);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
-}
+};
 
-export async function POST(req: Request) {
+export const POST = async (req: Request): Promise<NextResponse> => {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -62,4 +74,4 @@ export async function POST(req: Request) {
     }
     return new NextResponse("Internal Server Error", { status: 500 });
   }
-}
+};
