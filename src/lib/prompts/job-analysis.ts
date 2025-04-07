@@ -19,5 +19,5 @@ Follow these guidelines:
     jobContent: string
   ) => `Please analyze this job posting and extract the key information:
 
-${jobContent}`,
+${jobContent.replace(/<[^>]+>/g, "")}`,
 };

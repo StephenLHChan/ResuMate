@@ -1,4 +1,4 @@
-import { Skill } from "@prisma/client";
+import type { Skill } from "@prisma/client";
 
 export interface BaseCertification {
   name: string;

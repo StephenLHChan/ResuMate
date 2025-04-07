@@ -14,7 +14,7 @@ export const POST = async (
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const jobId = params.id;
+    const jobId = await (await params).id;
 
     // Check if job exists
     const job = await prisma.job.findUnique({

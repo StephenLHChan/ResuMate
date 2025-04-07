@@ -1,7 +1,7 @@
 import OpenAI from "openai";
 
+import { prisma } from "@/lib/prisma";
 import { jobAnalysisPrompt } from "@/lib/prompts/job-analysis";
-import { prisma } from "../prisma";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
