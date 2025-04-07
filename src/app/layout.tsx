@@ -1,5 +1,6 @@
 import { Inter } from "next/font/google";
 import { SessionProvider } from "next-auth/react";
+import { ThemeProvider } from "@/components/theme-provider";
 
 import { Toaster } from "@/components/ui/toaster";
 
@@ -18,12 +19,19 @@ const RootLayout = ({
 }: {
   children: React.ReactNode;
 }): React.ReactElement => (
-  <html lang="en">
+  <html lang="en" suppressHydrationWarning>
     <body className={inter.className}>
-      <SessionProvider>
-        {children}
-        <Toaster />
-      </SessionProvider>
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="system"
+        enableSystem
+        disableTransitionOnChange
+      >
+        <SessionProvider>
+          {children}
+          <Toaster />
+        </SessionProvider>
+      </ThemeProvider>
     </body>
   </html>
 );
