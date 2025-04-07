@@ -21,7 +21,7 @@ import { useToast } from "@/components/ui/use-toast";
 const JobsPage = (): React.ReactElement => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [inputType, setInputType] = useState<"text" | "url" | "manual">("text");
+  const [inputType, setInputType] = useState<"text" | "url" | "manual">("url");
   const [jobInput, setJobInput] = useState("");
   const [manualJob, setManualJob] = useState({
     title: "",
@@ -87,7 +87,7 @@ const JobsPage = (): React.ReactElement => {
       const newJob = await jobResponse.json();
 
       // Link the job to the current user
-      const linkResponse = await fetch(`/api/jobs/${newJob.id}/link-user`, {
+      const linkResponse = await fetch(`/api/jobs/${newJob.id}/user-link`, {
         method: "POST",
       });
 
@@ -141,30 +141,30 @@ const JobsPage = (): React.ReactElement => {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <Tabs
-                defaultValue="text"
+                defaultValue="url"
                 onValueChange={value =>
                   setInputType(value as "text" | "url" | "manual")
                 }
               >
                 <TabsList>
-                  <TabsTrigger value="text">Job Description</TabsTrigger>
                   <TabsTrigger value="url">Job URL</TabsTrigger>
+                  <TabsTrigger value="text">Job Description</TabsTrigger>
                   <TabsTrigger value="manual">Manual Input</TabsTrigger>
                 </TabsList>
-                <TabsContent value="text">
-                  <Textarea
-                    placeholder="Paste the full job description here..."
-                    value={jobInput}
-                    onChange={e => setJobInput(e.target.value)}
-                    className="min-h-[200px]"
-                  />
-                </TabsContent>
                 <TabsContent value="url">
                   <Input
                     type="url"
                     placeholder="Enter the job posting URL..."
                     value={jobInput}
                     onChange={e => setJobInput(e.target.value)}
+                  />
+                </TabsContent>
+                <TabsContent value="text">
+                  <Textarea
+                    placeholder="Paste the full job description here..."
+                    value={jobInput}
+                    onChange={e => setJobInput(e.target.value)}
+                    className="min-h-[200px]"
                   />
                 </TabsContent>
                 <TabsContent value="manual">
