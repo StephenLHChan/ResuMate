@@ -4,7 +4,8 @@ import type {
   APICertification,
   APIProject,
 } from "@/lib/types";
-import { Skill } from "@prisma/client";
+import type { Skill } from "@prisma/client";
+
 
 interface Experience {
   position: string;

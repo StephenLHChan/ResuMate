@@ -3,7 +3,7 @@ import type {
   BaseEducation,
   BaseCertification,
 } from "@/lib/types";
-import { Skill } from "@prisma/client";
+import type { Skill } from "@prisma/client";
 
 interface UserProfile {
   preferredFirstName: string | null;

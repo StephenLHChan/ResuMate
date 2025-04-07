@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+
+const updateApplicationSchema = z.object({
+  status: z.enum(["pending", "applied", "rejected", "accepted"]),
+});
 
 export const PATCH = async (
   request: Request,
@@ -9,45 +14,38 @@ export const PATCH = async (
 ): Promise<NextResponse> => {
   try {
     const session = await auth();
-    if (!session?.user?.email) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id } = await params;
-    const updates = await request.json();
+    const body = await request.json();
+    const { status } = updateApplicationSchema.parse(body);
 
-    // Verify the application belongs to the user
-    const existingApplication = await prisma.application.findFirst({
+    const application = await prisma.application.update({
       where: {
-        id,
-        user: {
-          email: session.user.email,
+        id: params.id,
+        userId: session.user.id,
+      },
+      data: {
+        status,
+      },
+      include: {
+        job: true,
+        resumes: {
+          include: {
+            resume: true,
+          },
         },
       },
     });
 
-    if (!existingApplication) {
-      return NextResponse.json(
-        { error: "Application not found" },
-        { status: 404 }
-      );
-    }
-
-    // Update the application
-    const updatedApplication = await prisma.application.update({
-      where: {
-        id,
-      },
-      data: updates,
-    });
-
-    return NextResponse.json(updatedApplication);
+    return NextResponse.json(application);
   } catch (error) {
     console.error("Error updating application:", error);
-    return NextResponse.json(
-      { error: "Failed to update application" },
-      { status: 500 }
-    );
+    if (error instanceof z.ZodError) {
+      return new NextResponse("Invalid request data", { status: 400 });
+    }
+    return new NextResponse("Internal Server Error", { status: 500 });
   }
 };
 
