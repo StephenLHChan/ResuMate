@@ -2,11 +2,17 @@ import OpenAI from "openai";
 
 import { jobAnalysisPrompt } from "@/lib/prompts/job-analysis";
 import { prisma } from "../prisma";
-import { JobContent } from "../types";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
+
+export interface JobContent {
+  companyName: string;
+  position: string;
+  description: string;
+  requirements: string[];
+}
 
 export class JobService {
   static async analyzeJob(
@@ -45,6 +51,7 @@ export class JobService {
         },
       ],
       response_format: { type: "json_object" },
+      temperature: 0.2,
       max_tokens: 2000,
     });
 
@@ -54,7 +61,15 @@ export class JobService {
     }
 
     try {
-      return JSON.parse(result);
+      const parsedResult = JSON.parse(result);
+      return {
+        companyName: parsedResult.companyName,
+        position: parsedResult.position,
+        description: parsedResult.description,
+        requirements: Array.isArray(parsedResult.requirements)
+          ? parsedResult.requirements
+          : [],
+      };
     } catch (error) {
       console.error("Error parsing job analysis result:", error);
       throw new Error("Failed to parse job analysis result");
@@ -65,12 +80,11 @@ export class JobService {
     const existingJob = await prisma.job.findUnique({
       where: { url },
     });
-
     if (existingJob) {
       return {
-        companyName: existingJob.companyName,
-        title: existingJob.title,
-        description: existingJob.description,
+        companyName: existingJob.companyName || "Unknown Company",
+        position: existingJob.title || "Unknown Position",
+        description: existingJob.description || "",
         requirements: existingJob.requirements || [],
       };
     }

@@ -40,7 +40,6 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const validatedData = jobSchema.parse(body);
-
     if (validatedData.url) {
       const existingJob = await prisma.job.findUnique({
         where: { url: validatedData.url },
