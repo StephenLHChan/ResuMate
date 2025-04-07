@@ -86,10 +86,19 @@ const ApplicationPage = (): React.ReactElement => {
         throw new Error("Failed to fetch applications");
       }
       const data = await response.json();
-      setApplications(data.applications);
-      setPagination(data.pagination);
+      setApplications(data.applications || []);
+      setPagination(
+        data.pagination || {
+          total: 0,
+          page: 1,
+          totalPages: 0,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        }
+      );
     } catch (error) {
       console.error("Error fetching applications:", error);
+      setApplications([]); // Set empty array on error
       toast({
         title: "Error",
         description: "Failed to fetch applications",
@@ -102,7 +111,7 @@ const ApplicationPage = (): React.ReactElement => {
 
   useEffect(() => {
     void fetchApplications();
-  }, [toast]);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
@@ -332,60 +341,8 @@ const ApplicationPage = (): React.ReactElement => {
   return (
     <div className="container mx-auto py-8">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Job Application Assistant</h1>
-        <ApplicationForm onSuccess={() => fetchApplications(pagination.page)}>
-          <Button>Add Application Manually</Button>
-        </ApplicationForm>
+        <h1 className="text-3xl font-bold">Applications</h1>
       </div>
-
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Input Job Information</CardTitle>
-          <CardDescription>
-            Paste the job description or provide a URL to analyze
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <Tabs
-              defaultValue="text"
-              onValueChange={value => setInputType(value as "text" | "url")}
-            >
-              <TabsList>
-                <TabsTrigger value="text">Job Description</TabsTrigger>
-                <TabsTrigger value="url">Job URL</TabsTrigger>
-              </TabsList>
-              <TabsContent value="text">
-                <Textarea
-                  placeholder="Paste the full job description here..."
-                  value={jobInput}
-                  onChange={e => setJobInput(e.target.value)}
-                  className="min-h-[200px]"
-                />
-              </TabsContent>
-              <TabsContent value="url">
-                <Input
-                  type="url"
-                  placeholder="Enter the job posting URL..."
-                  value={jobInput}
-                  onChange={e => setJobInput(e.target.value)}
-                />
-              </TabsContent>
-            </Tabs>
-
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                "Add Application"
-              )}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
 
       <Card>
         <CardHeader>

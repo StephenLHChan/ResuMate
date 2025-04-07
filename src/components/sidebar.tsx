@@ -41,7 +41,7 @@ const navigation: NavigationItem[] = [
   { name: "Dashboard", href: "/home", icon: Home },
   { name: "Resumes", href: "/resume", icon: FileText },
   { name: "Jobs", href: "/jobs", icon: Briefcase },
-  { name: "Applications", href: "/application", icon: Send },
+  { name: "Applications", href: "/applications", icon: Send },
   {
     name: "Profile",
     href: "/profile",

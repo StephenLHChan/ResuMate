@@ -3,6 +3,7 @@
 import { ChevronDown, Trash2, Plus } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -45,6 +46,7 @@ export const JobList = (): React.ReactElement => {
     pageSize: 10,
     total: 0,
   });
+  const router = useRouter();
 
   useEffect(() => {
     fetchJobs();
@@ -68,8 +70,32 @@ export const JobList = (): React.ReactElement => {
   };
 
   const handleAddToApplication = async (jobId: string): Promise<void> => {
-    // TODO: Implement the actual function to add job to application
-    console.log("Adding job to application:", jobId);
+    try {
+      const response = await fetch("/api/applications", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ jobId }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        if (error.error === "Please create a profile first") {
+          toast.error("Please create a profile first");
+          router.push("/profile");
+          return;
+        }
+        throw new Error("Failed to add job to applications");
+      }
+
+      toast.success("Job added to applications");
+      // Refresh the jobs list to update the status
+      fetchJobs();
+    } catch (error) {
+      console.error("Error adding job to application:", error);
+      toast.error("Failed to add job to applications");
+    }
   };
 
   const deleteJobFromThisUser = (id: string): void => {
