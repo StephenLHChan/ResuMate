@@ -196,3 +196,10 @@ export interface ResumeContent {
     expiryDate: string | null;
   }>;
 }
+
+export interface JobContent {
+  title: string | null;
+  companyName: string | null;
+  description: string | null;
+  requirements: string[];
+}

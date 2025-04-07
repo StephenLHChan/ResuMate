@@ -155,8 +155,12 @@ export const resumeTemplate = (
 }</div>
       <div class="title">${profile.title}</div>
       <div class="contact-info">
-        ${profile.email} | ${profile.phone || ""} | ${profile.location || ""}
-        ${profile.website ? `| ${profile.website}` : ""}
+        ${profile.email} 
+        ${profile.phone ? `| ${profile.phone}` : ""}
+        ${profile.location ? `| ${profile.location}` : ""}
+      </div>
+      <div class="contact-info">
+        ${profile.website ? `${profile.website}` : ""}
         ${profile.linkedin ? `| ${profile.linkedin}` : ""}
         ${profile.github ? `| ${profile.github}` : ""}
       </div>

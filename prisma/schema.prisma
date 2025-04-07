@@ -149,18 +149,26 @@ model Resume {
   applications ApplicationResume[]
 }
 
+model Job {
+  id              String    @id @default(cuid())
+  title           String?
+  companyName     String?
+  description     String?    @db.Text
+  requirements    String[]
+  url             String?    @unique
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  applications    Application[]
+}
+
 model Application {
   id              String    @id @default(cuid())
   userId          String
   user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  company         String
-  position        String
-  jobDescription  String    @db.Text
-  requirements    String[]
-  coverLetterUrl  String?
+  jobId           String
+  job             Job       @relation(fields: [jobId], references: [id])
   status          String    @default("pending") // pending, applied, rejected, accepted
   notes           String?   @db.Text
-  jobUrl          String?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   resumes         ApplicationResume[]

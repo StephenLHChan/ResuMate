@@ -1,17 +1,12 @@
 import OpenAI from "openai";
 
 import { jobAnalysisPrompt } from "@/lib/prompts/job-analysis";
+import { prisma } from "../prisma";
+import { JobContent } from "../types";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
-
-export interface JobContent {
-  companyName: string;
-  position: string;
-  description: string;
-  requirements: string[];
-}
 
 export class JobService {
   static async analyzeJob(
@@ -23,6 +18,12 @@ export class JobService {
     // If URL is provided, fetch the content
     if (type === "url") {
       try {
+        const existingJob = await this.checkJobExistsByUrl(content);
+
+        if (existingJob) {
+          return existingJob;
+        }
+
         const response = await fetch(content);
         jobContent = await response.text();
       } catch (error) {
@@ -44,6 +45,7 @@ export class JobService {
         },
       ],
       response_format: { type: "json_object" },
+      max_tokens: 2000,
     });
 
     const result = completion.choices[0].message.content;
@@ -51,6 +53,28 @@ export class JobService {
       throw new Error("Failed to analyze job posting");
     }
 
-    return JSON.parse(result);
+    try {
+      return JSON.parse(result);
+    } catch (error) {
+      console.error("Error parsing job analysis result:", error);
+      throw new Error("Failed to parse job analysis result");
+    }
+  }
+
+  static async checkJobExistsByUrl(url: string): Promise<JobContent | null> {
+    const existingJob = await prisma.job.findUnique({
+      where: { url },
+    });
+
+    if (existingJob) {
+      return {
+        companyName: existingJob.companyName,
+        title: existingJob.title,
+        description: existingJob.description,
+        requirements: existingJob.requirements || [],
+      };
+    }
+
+    return null;
   }
 }
