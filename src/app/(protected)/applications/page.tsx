@@ -338,6 +338,53 @@ const ApplicationPage = (): React.ReactElement => {
     }
   };
 
+  const updateApplicationStatus = async (
+    applicationId: string,
+    newStatus: string
+  ): Promise<void> => {
+    try {
+      const response = await fetch(`/api/applications/${applicationId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          status: newStatus,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update status");
+      }
+
+      const updatedApplication = await response.json();
+      setApplications(prev =>
+        prev.map(app => (app.id === applicationId ? updatedApplication : app))
+      );
+
+      toast({
+        title: "Success",
+        description: `Status updated to ${
+          newStatus.charAt(0).toUpperCase() + newStatus.slice(1)
+        }`,
+      });
+    } catch (error) {
+      console.error("Error updating status:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update status",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const statusOptions = [
+    { value: "pending", color: "text-yellow-600", label: "Pending" },
+    { value: "applied", color: "text-blue-600", label: "Applied" },
+    { value: "rejected", color: "text-red-600", label: "Rejected" },
+    { value: "accepted", color: "text-green-600", label: "Accepted" },
+  ];
+
   return (
     <div className="container mx-auto py-8">
       <div className="flex justify-between items-center mb-8">
@@ -431,277 +478,24 @@ const ApplicationPage = (): React.ReactElement => {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent>
-                                <DropdownMenuItem
-                                  onClick={async () => {
-                                    try {
-                                      const response = await fetch(
-                                        `/api/applications/${application.id}`,
-                                        {
-                                          method: "PATCH",
-                                          headers: {
-                                            "Content-Type": "application/json",
-                                          },
-                                          body: JSON.stringify({
-                                            status: "pending",
-                                          }),
-                                        }
-                                      );
-
-                                      if (!response.ok) {
-                                        throw new Error(
-                                          "Failed to update status"
-                                        );
-                                      }
-
-                                      const updatedApplication =
-                                        await response.json();
-                                      setApplications(prev =>
-                                        prev.map(app =>
-                                          app.id === application.id
-                                            ? updatedApplication
-                                            : app
+                                {statusOptions.map(
+                                  ({ value, color, label }) => (
+                                    <DropdownMenuItem
+                                      key={value}
+                                      className={color}
+                                      onClick={() =>
+                                        updateApplicationStatus(
+                                          application.id,
+                                          value
                                         )
-                                      );
-
-                                      toast({
-                                        title: "Success",
-                                        description:
-                                          "Status updated to Pending",
-                                      });
-                                    } catch (error) {
-                                      console.error(
-                                        "Error updating status:",
-                                        error
-                                      );
-                                      toast({
-                                        title: "Error",
-                                        description: "Failed to update status",
-                                        variant: "destructive",
-                                      });
-                                    }
-                                  }}
-                                >
-                                  Pending
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={async () => {
-                                    try {
-                                      const response = await fetch(
-                                        `/api/applications/${application.id}`,
-                                        {
-                                          method: "PATCH",
-                                          headers: {
-                                            "Content-Type": "application/json",
-                                          },
-                                          body: JSON.stringify({
-                                            status: "applied",
-                                          }),
-                                        }
-                                      );
-
-                                      if (!response.ok) {
-                                        throw new Error(
-                                          "Failed to update status"
-                                        );
                                       }
-
-                                      const updatedApplication =
-                                        await response.json();
-                                      setApplications(prev =>
-                                        prev.map(app =>
-                                          app.id === application.id
-                                            ? updatedApplication
-                                            : app
-                                        )
-                                      );
-
-                                      toast({
-                                        title: "Success",
-                                        description:
-                                          "Status updated to Applied",
-                                      });
-                                    } catch (error) {
-                                      console.error(
-                                        "Error updating status:",
-                                        error
-                                      );
-                                      toast({
-                                        title: "Error",
-                                        description: "Failed to update status",
-                                        variant: "destructive",
-                                      });
-                                    }
-                                  }}
-                                >
-                                  Applied
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={async () => {
-                                    try {
-                                      const response = await fetch(
-                                        `/api/applications/${application.id}`,
-                                        {
-                                          method: "PATCH",
-                                          headers: {
-                                            "Content-Type": "application/json",
-                                          },
-                                          body: JSON.stringify({
-                                            status: "rejected",
-                                          }),
-                                        }
-                                      );
-
-                                      if (!response.ok) {
-                                        throw new Error(
-                                          "Failed to update status"
-                                        );
-                                      }
-
-                                      const updatedApplication =
-                                        await response.json();
-                                      setApplications(prev =>
-                                        prev.map(app =>
-                                          app.id === application.id
-                                            ? updatedApplication
-                                            : app
-                                        )
-                                      );
-
-                                      toast({
-                                        title: "Success",
-                                        description:
-                                          "Status updated to Rejected",
-                                      });
-                                    } catch (error) {
-                                      console.error(
-                                        "Error updating status:",
-                                        error
-                                      );
-                                      toast({
-                                        title: "Error",
-                                        description: "Failed to update status",
-                                        variant: "destructive",
-                                      });
-                                    }
-                                  }}
-                                >
-                                  Rejected
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={async () => {
-                                    try {
-                                      const response = await fetch(
-                                        `/api/applications/${application.id}`,
-                                        {
-                                          method: "PATCH",
-                                          headers: {
-                                            "Content-Type": "application/json",
-                                          },
-                                          body: JSON.stringify({
-                                            status: "accepted",
-                                          }),
-                                        }
-                                      );
-
-                                      if (!response.ok) {
-                                        throw new Error(
-                                          "Failed to update status"
-                                        );
-                                      }
-
-                                      const updatedApplication =
-                                        await response.json();
-                                      setApplications(prev =>
-                                        prev.map(app =>
-                                          app.id === application.id
-                                            ? updatedApplication
-                                            : app
-                                        )
-                                      );
-
-                                      toast({
-                                        title: "Success",
-                                        description:
-                                          "Status updated to Accepted",
-                                      });
-                                    } catch (error) {
-                                      console.error(
-                                        "Error updating status:",
-                                        error
-                                      );
-                                      toast({
-                                        title: "Error",
-                                        description: "Failed to update status",
-                                        variant: "destructive",
-                                      });
-                                    }
-                                  }}
-                                >
-                                  Accepted
-                                </DropdownMenuItem>
+                                    >
+                                      {label}
+                                    </DropdownMenuItem>
+                                  )
+                                )}
                               </DropdownMenuContent>
                             </DropdownMenu>
-                          </div>
-                          <div className="flex gap-2">
-                            {application.resumes &&
-                              application.resumes.length > 0 && (
-                                <div className="flex gap-2">
-                                  {application.resumes.map(({ id, resume }) => (
-                                    <Button
-                                      key={id}
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() =>
-                                        reprintResume(application.id, resume.id)
-                                      }
-                                      disabled={isLoading}
-                                    >
-                                      {isLoading ? (
-                                        <>
-                                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                          Reprinting...
-                                        </>
-                                      ) : (
-                                        `Reprint ${resume.title}`
-                                      )}
-                                    </Button>
-                                  ))}
-                                </div>
-                              )}
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() =>
-                                generateDocument(application.id, "resume")
-                              }
-                              disabled={isLoading}
-                            >
-                              {isLoading ? (
-                                <>
-                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                  Generating...
-                                </>
-                              ) : (
-                                "Generate Resume"
-                              )}
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() =>
-                                generateDocument(application.id, "cover-letter")
-                              }
-                              disabled={isLoading}
-                            >
-                              {isLoading ? (
-                                <>
-                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                  Generating...
-                                </>
-                              ) : (
-                                "Generate Cover Letter"
-                              )}
-                            </Button>
                           </div>
                         </div>
                       </CardHeader>
@@ -736,6 +530,75 @@ const ApplicationPage = (): React.ReactElement => {
                                 application.createdAt
                               ).toLocaleDateString()}
                             </p>
+                            <div className="flex gap-2 pt-4">
+                              {application.resumes &&
+                                application.resumes.length > 0 && (
+                                  <div className="flex gap-2">
+                                    {application.resumes.map(
+                                      ({ id, resume }) => (
+                                        <Button
+                                          key={id}
+                                          variant="outline"
+                                          size="sm"
+                                          onClick={() =>
+                                            reprintResume(
+                                              application.id,
+                                              resume.id
+                                            )
+                                          }
+                                          disabled={isLoading}
+                                        >
+                                          {isLoading ? (
+                                            <>
+                                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                              Reprinting...
+                                            </>
+                                          ) : (
+                                            `Reprint ${resume.title}`
+                                          )}
+                                        </Button>
+                                      )
+                                    )}
+                                  </div>
+                                )}
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() =>
+                                  generateDocument(application.id, "resume")
+                                }
+                                disabled={isLoading}
+                              >
+                                {isLoading ? (
+                                  <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Generating...
+                                  </>
+                                ) : (
+                                  "Generate Resume"
+                                )}
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() =>
+                                  generateDocument(
+                                    application.id,
+                                    "cover-letter"
+                                  )
+                                }
+                                disabled={isLoading}
+                              >
+                                {isLoading ? (
+                                  <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Generating...
+                                  </>
+                                ) : (
+                                  "Generate Cover Letter"
+                                )}
+                              </Button>
+                            </div>
                           </div>
                         </CardContent>
                       </CollapsibleContent>
