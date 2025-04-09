@@ -13,4 +13,7 @@ export const jobSchema = z.object({
   companyName: z.string().optional(),
   description: z.string().optional(),
   requirements: z.array(z.string()).optional().default([]),
+  salaryMin: z.number().optional(),
+  salaryMax: z.number().optional(),
+  location: z.string().optional(),
 });

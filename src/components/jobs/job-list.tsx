@@ -1,9 +1,9 @@
 "use client";
 
 import { ChevronDown, Trash2, Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,9 @@ interface Job {
   description: string;
   requirements: string[];
   jobUrl: string;
+  salaryMin?: number;
+  salaryMax?: number;
+  location?: string;
   createdAt: string;
   isAddedToApplication?: boolean;
 }
@@ -201,6 +204,15 @@ export const JobList = (): React.ReactElement => {
                     ? "Added to Application"
                     : "Not Added"}
                 </Badge>
+                {job.location && (
+                  <Badge variant="outline">{job.location}</Badge>
+                )}
+                {(job.salaryMin || job.salaryMax) && (
+                  <Badge variant="outline">
+                    ${job.salaryMin?.toLocaleString() ?? "N/A"} - $
+                    {job.salaryMax?.toLocaleString() ?? "N/A"}
+                  </Badge>
+                )}
               </div>
             </CardHeader>
             <CollapsibleContent>

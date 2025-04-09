@@ -6,13 +6,18 @@ Follow these guidelines:
 2. Extract the job title/position
 3. Summarize the job description in a clear, concise way
 4. List the key requirements and qualifications
-5. Format your response as a JSON object with the following structure:
+5. Extract salary range if available (both minimum and maximum)
+6. Extract job location if available
+7. Format your response as a JSON object with the following structure:
 
 {
   "companyName": "The name of the company",
   "position": "The job title/position",
   "description": "A clear summary of the job description",
-  "requirements": ["Requirement 1", "Requirement 2", ...]
+  "requirements": ["Requirement 1", "Requirement 2", ...],
+  "salaryMin": 50000, // Optional: minimum salary if available
+  "salaryMax": 80000, // Optional: maximum salary if available
+  "location": "City, State" // Optional: job location if available
 }`,
 
   user: (

@@ -8,10 +8,13 @@ const openai = new OpenAI({
 });
 
 export interface JobContent {
-  companyName: string;
-  position: string;
-  description: string;
+  title: string | null;
+  companyName: string | null;
+  description: string | null;
   requirements: string[];
+  salaryMin?: number | null;
+  salaryMax?: number | null;
+  location?: string | null;
 }
 
 export class JobService {
@@ -64,11 +67,14 @@ export class JobService {
       const parsedResult = JSON.parse(result);
       return {
         companyName: parsedResult.companyName,
-        position: parsedResult.position,
+        title: parsedResult.position,
         description: parsedResult.description,
         requirements: Array.isArray(parsedResult.requirements)
           ? parsedResult.requirements
           : [],
+        salaryMin: parsedResult.salaryMin || null,
+        salaryMax: parsedResult.salaryMax || null,
+        location: parsedResult.location || null,
       };
     } catch (error) {
       console.error("Error parsing job analysis result:", error);
@@ -82,10 +88,13 @@ export class JobService {
     });
     if (existingJob) {
       return {
+        title: existingJob.title || "Unknown Position",
         companyName: existingJob.companyName || "Unknown Company",
-        position: existingJob.title || "Unknown Position",
         description: existingJob.description || "",
         requirements: existingJob.requirements || [],
+        salaryMin: existingJob.salaryMin || null,
+        salaryMax: existingJob.salaryMax || null,
+        location: existingJob.location || null,
       };
     }
 

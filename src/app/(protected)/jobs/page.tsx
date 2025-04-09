@@ -27,6 +27,9 @@ const JobsPage = (): React.ReactElement => {
     company: "",
     description: "",
     requirements: "",
+    salaryMin: "",
+    salaryMax: "",
+    location: "",
   });
 
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
@@ -41,6 +44,13 @@ const JobsPage = (): React.ReactElement => {
           company: manualJob.company,
           description: manualJob.description,
           requirements: manualJob.requirements.split("\n").filter(Boolean),
+          salaryMin: manualJob.salaryMin
+            ? parseInt(manualJob.salaryMin)
+            : undefined,
+          salaryMax: manualJob.salaryMax
+            ? parseInt(manualJob.salaryMax)
+            : undefined,
+          location: manualJob.location || undefined,
         };
       } else {
         const processResponse = await fetch("/api/process-job", {
@@ -60,10 +70,13 @@ const JobsPage = (): React.ReactElement => {
 
         const processedJob = await processResponse.json();
         jobInfo = {
-          title: processedJob.position,
+          title: processedJob.title,
           companyName: processedJob.companyName,
           description: processedJob.description,
           requirements: processedJob.requirements,
+          salaryMin: processedJob.salaryMin || undefined,
+          salaryMax: processedJob.salaryMax || undefined,
+          location: processedJob.location || undefined,
         };
       }
 
@@ -101,6 +114,9 @@ const JobsPage = (): React.ReactElement => {
         company: "",
         description: "",
         requirements: "",
+        salaryMin: "",
+        salaryMax: "",
+        location: "",
       });
 
       toast({
@@ -182,6 +198,40 @@ const JobsPage = (): React.ReactElement => {
                         setManualJob({
                           ...manualJob,
                           company: e.target.value,
+                        })
+                      }
+                    />
+                    <div className="grid grid-cols-2 gap-4">
+                      <Input
+                        type="number"
+                        placeholder="Minimum Salary"
+                        value={manualJob.salaryMin}
+                        onChange={e =>
+                          setManualJob({
+                            ...manualJob,
+                            salaryMin: e.target.value,
+                          })
+                        }
+                      />
+                      <Input
+                        type="number"
+                        placeholder="Maximum Salary"
+                        value={manualJob.salaryMax}
+                        onChange={e =>
+                          setManualJob({
+                            ...manualJob,
+                            salaryMax: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
+                    <Input
+                      placeholder="Location"
+                      value={manualJob.location}
+                      onChange={e =>
+                        setManualJob({
+                          ...manualJob,
+                          location: e.target.value,
                         })
                       }
                     />
