@@ -19,6 +19,7 @@ export const POST = async (request: Request): Promise<NextResponse> => {
       include: {
         profile: {
           include: {
+            skills: true,
             experience: true,
             education: true,
             certifications: true,
@@ -40,7 +41,7 @@ export const POST = async (request: Request): Promise<NextResponse> => {
 
     // Convert HTML to PDF using Puppeteer
 
-    const pdf = await ResumeService.generatePDF(user, parsedData);
+    const pdf = await ResumeService.generatePDF(user, user.profile, parsedData);
 
     // Return the PDF
     return new NextResponse(pdf, {
