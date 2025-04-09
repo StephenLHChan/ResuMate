@@ -1,7 +1,7 @@
 import { Inter } from "next/font/google";
 import { SessionProvider } from "next-auth/react";
-import { ThemeProvider } from "@/components/theme-provider";
 
+import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
 
 import type { Metadata } from "next";

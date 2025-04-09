@@ -30,9 +30,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 
 interface Application {
@@ -67,8 +64,6 @@ interface PaginationInfo {
 const ApplicationPage = (): React.ReactElement => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [inputType, setInputType] = useState<"text" | "url">("text");
-  const [jobInput, setJobInput] = useState("");
   const [applications, setApplications] = useState<Application[]>([]);
   const [isLoadingApplications, setIsLoadingApplications] = useState(true);
   const [pagination, setPagination] = useState<PaginationInfo>({
@@ -112,68 +107,6 @@ const ApplicationPage = (): React.ReactElement => {
   useEffect(() => {
     void fetchApplications();
   }, []);
-
-  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      // First process the job information
-      const processResponse = await fetch("/api/process-job", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          type: inputType,
-          content: jobInput,
-        }),
-      });
-
-      if (!processResponse.ok) {
-        throw new Error("Failed to process job information");
-      }
-
-      const jobInfo = await processResponse.json();
-
-      // Then create an application record
-      const applicationResponse = await fetch("/api/applications", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          jobInfo,
-          resumeUrl: null,
-          coverLetterUrl: null,
-        }),
-      });
-
-      if (!applicationResponse.ok) {
-        throw new Error("Failed to create application");
-      }
-
-      const newApplication = await applicationResponse.json();
-      setApplications(prev => [newApplication, ...prev]);
-
-      // Clear the input
-      setJobInput("");
-
-      toast({
-        title: "Success",
-        description: "Application created successfully",
-      });
-    } catch (error) {
-      console.error("Error processing job:", error);
-      toast({
-        title: "Error",
-        description: "Failed to process job information",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const generateDocument = async (
     applicationId: string,

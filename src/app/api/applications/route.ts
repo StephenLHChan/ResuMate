@@ -8,7 +8,7 @@ const applicationSchema = z.object({
   jobId: z.string(),
 });
 
-export const GET = async (req: Request) => {
+export const GET = async (req: Request): Promise<NextResponse> => {
   try {
     const session = await auth();
     if (!session?.user?.email) {
@@ -88,7 +88,7 @@ export const GET = async (req: Request) => {
   }
 };
 
-export async function POST(req: Request) {
+export const POST = async (req: Request): Promise<NextResponse> => {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -141,4 +141,4 @@ export async function POST(req: Request) {
     }
     return new NextResponse("Internal Server Error", { status: 500 });
   }
-}
+};
