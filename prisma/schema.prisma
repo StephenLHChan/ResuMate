@@ -79,7 +79,7 @@ model Profile {
   preferredLastName  String
   hasPreferredName  Boolean  @default(false)
   title             String?
-  bio               String?
+  bio               String?  @db.Text
   address           String?
   city              String?
   state             String?
@@ -120,7 +120,8 @@ model Experience {
   position    String
   startDate   DateTime
   endDate     DateTime?
-  description String?
+  description String? @db.Text
+  isCurrent   Boolean   @default(false)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 }
@@ -134,7 +135,7 @@ model Education {
   field       String
   startDate   DateTime
   endDate     DateTime?
-  description String?
+  description String? @db.Text
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 }
@@ -160,6 +161,10 @@ model Job {
   salaryMin       Int?
   salaryMax       Int?
   location        String?
+  postingDate     DateTime?
+  applicationDeadline DateTime?
+  applicationInstructions String? @db.Text
+  applicationWebsite String?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   applications    Application[]
@@ -186,6 +191,8 @@ model Application {
   job             Job       @relation(fields: [jobId], references: [id])
   status          String    @default("pending") // pending, applied, rejected, accepted
   notes           String?   @db.Text
+  applicationDate DateTime?
+  statusHistory   ApplicationStatusHistory[]
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   resumes         ApplicationResume[]
@@ -203,6 +210,15 @@ model ApplicationResume {
   updatedAt     DateTime    @updatedAt
 
   @@unique([applicationId, resumeId])
+}
+
+model ApplicationStatusHistory {
+  id              String    @id @default(cuid())
+  applicationId   String
+  application     Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  status          String
+  notes           String?
+  createdAt       DateTime  @default(now())
 }
 
 model Certification {
