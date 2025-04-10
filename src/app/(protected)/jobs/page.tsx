@@ -53,7 +53,7 @@ const JobsPage = (): React.ReactElement => {
           location: manualJob.location || undefined,
         };
       } else {
-        const processResponse = await fetch("/api/process-job", {
+        const processResponse = await fetch("/api/jobs/process", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
