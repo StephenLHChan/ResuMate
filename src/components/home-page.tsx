@@ -1,5 +1,6 @@
 "use client";
 
+import { type Resume } from "@prisma/client";
 import { formatDistanceToNow } from "date-fns";
 import { FileText, Plus, ArrowRight } from "lucide-react";
 import Link from "next/link";
@@ -14,12 +15,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
-interface Resume {
-  id: string;
-  title: string;
-  updatedAt: string;
-}
 
 interface HomePageProps {
   recentResumes: Resume[];

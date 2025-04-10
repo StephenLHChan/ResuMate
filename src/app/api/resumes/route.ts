@@ -32,7 +32,10 @@ export const GET = async (request: Request): Promise<NextResponse> => {
     return NextResponse.json(resumes);
   } catch (error) {
     console.error("Error fetching resumes:", error);
-    return new NextResponse("Internal Server Error", { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch resumes" },
+      { status: 500 }
+    );
   }
 };
 
