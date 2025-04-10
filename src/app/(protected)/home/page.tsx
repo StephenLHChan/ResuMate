@@ -12,7 +12,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { prisma } from "@/lib/prisma";
+
+interface Resume {
+  id: string;
+  title: string;
+  updatedAt: string;
+}
 
 const HomePage = async (): Promise<React.ReactElement> => {
   const session = await auth();
@@ -20,16 +25,22 @@ const HomePage = async (): Promise<React.ReactElement> => {
     throw new Error("Unauthorized");
   }
 
-  // Fetch user's recent resumes
-  const recentResumes = await prisma.resume.findMany({
-    where: {
-      userId: session.user.id,
-    },
-    orderBy: {
-      updatedAt: "desc",
-    },
-    take: 5,
+  const searchParams = new URLSearchParams({
+    limit: "5",
+    order: "desc",
   });
+
+  const response = await fetch(`/api/resumes?${searchParams.toString()}`, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch recent resumes");
+  }
+
+  const recentResumes = (await response.json()) as Resume[];
 
   return (
     <div className="space-y-8">
@@ -113,7 +124,7 @@ const HomePage = async (): Promise<React.ReactElement> => {
         <CardContent>
           <div className="space-y-4">
             {recentResumes.length > 0 ? (
-              recentResumes.map(resume => (
+              recentResumes.map((resume: Resume) => (
                 <div
                   key={resume.id}
                   className="flex items-center justify-between"
