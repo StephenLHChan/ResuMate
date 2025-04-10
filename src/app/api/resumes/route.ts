@@ -35,3 +35,37 @@ export const GET = async (request: Request): Promise<NextResponse> => {
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 };
+
+export const POST = async (request: Request): Promise<NextResponse> => {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    const { title, content } = await request.json();
+
+    if (!title || !content) {
+      return new NextResponse("Title and content are required", {
+        status: 400,
+      });
+    }
+
+    const resume = await prisma.resume.create({
+      data: {
+        user: {
+          connect: {
+            id: session.user.id,
+          },
+        },
+        title,
+        content,
+      },
+    });
+
+    return NextResponse.json(resume);
+  } catch (error) {
+    console.error("Error creating resume:", error);
+    return new NextResponse("Internal Server Error", { status: 500 });
+  }
+};

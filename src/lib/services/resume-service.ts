@@ -71,17 +71,12 @@ export class ResumeService {
     content: string,
     applicationId?: string
   ): Promise<{ id: string }> {
-    const resume = await prisma.resume.create({
-      data: {
-        user: {
-          connect: {
-            id: userId,
-          },
-        },
-        title,
-        content,
-      },
+    const resumeResponse = await fetch("/api/resumes", {
+      method: "POST",
+      body: JSON.stringify({ title, content }),
     });
+
+    const resume = await resumeResponse.json();
 
     if (applicationId) {
       await prisma.applicationResume.create({
