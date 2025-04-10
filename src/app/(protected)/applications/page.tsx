@@ -122,7 +122,7 @@ const ApplicationPage = (): React.ReactElement => {
       }
 
       // Generate the document
-      const response = await fetch(`/api/generate-${type}`, {
+      const response = await fetch(`/api/${type}s/generate`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -229,7 +229,7 @@ const ApplicationPage = (): React.ReactElement => {
       }
 
       // Generate the PDF
-      const response = await fetch("/api/reprint-resume", {
+      const response = await fetch("/api/resumes/reprint", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
