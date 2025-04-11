@@ -9,7 +9,6 @@ import React, { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 
-
 const Navbar: React.FC = () => {
   const { theme, setTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -22,7 +21,7 @@ const Navbar: React.FC = () => {
   ];
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -48,9 +47,13 @@ const Navbar: React.FC = () => {
               <Link
                 key={item.name}
                 href={item.href}
-                className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
+                className="relative text-muted-foreground hover:text-foreground transition-colors group"
               >
                 {item.name}
+                <motion.span
+                  className="absolute bottom-0 left-0 w-full h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform origin-left"
+                  initial={false}
+                />
               </Link>
             ))}
           </div>
@@ -58,7 +61,7 @@ const Navbar: React.FC = () => {
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center space-x-4">
             <motion.button
-              className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors rounded-lg"
+              className="p-2 text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-accent/50"
               aria-label="Toggle theme"
               onClick={() => setTheme(theme === "light" ? "dark" : "light")}
               whileHover={{ scale: 1.05 }}
@@ -71,7 +74,7 @@ const Navbar: React.FC = () => {
               )}
             </motion.button>
             <Link href="/login">
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm">
                 Get Started
               </Button>
             </Link>
@@ -80,7 +83,7 @@ const Navbar: React.FC = () => {
           {/* Mobile menu button */}
           <div className="md:hidden flex items-center space-x-4">
             <motion.button
-              className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors rounded-lg"
+              className="p-2 text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-accent/50"
               aria-label="Toggle theme"
               onClick={() => setTheme(theme === "light" ? "dark" : "light")}
               whileHover={{ scale: 1.05 }}
@@ -94,7 +97,7 @@ const Navbar: React.FC = () => {
             </motion.button>
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors rounded-lg"
+              className="p-2 text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-accent/50"
             >
               {isMenuOpen ? (
                 <X className="w-5 h-5" />
@@ -113,14 +116,14 @@ const Navbar: React.FC = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800"
+            className="md:hidden bg-background border-b border-border/40"
           >
             <div className="px-4 py-3 space-y-3">
               {navItems.map(item => (
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="block px-3 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors rounded-lg"
+                  className="block px-3 py-2 text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors rounded-lg"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.name}
@@ -128,7 +131,7 @@ const Navbar: React.FC = () => {
               ))}
               <div className="pt-2 space-y-2">
                 <Link href="/login" className="block">
-                  <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                  <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm">
                     Get Started
                   </Button>
                 </Link>

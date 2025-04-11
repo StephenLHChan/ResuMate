@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "framer-motion";
 import {
   FileText,
   Settings,
@@ -92,7 +93,7 @@ const Sidebar = (): React.ReactElement => {
           variant="ghost"
           size="icon"
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="h-8 w-8"
+          className="h-8 w-8 hover:bg-accent/50"
         >
           {isCollapsed ? (
             <ChevronRight className="h-4 w-4" />
@@ -112,14 +113,22 @@ const Sidebar = (): React.ReactElement => {
               <Link
                 href={item.href}
                 className={cn(
-                  "flex items-center space-x-3 rounded-lg px-2 py-2 text-sm font-medium transition-colors",
+                  "group flex items-center space-x-3 rounded-lg px-2 py-2 text-sm font-medium transition-all",
                   isActive
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
                 )}
               >
                 <item.icon className="h-5 w-5" />
-                {!isCollapsed && <span>{item.name}</span>}
+                {!isCollapsed && (
+                  <motion.span
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {item.name}
+                  </motion.span>
+                )}
               </Link>
 
               {item.children && !isCollapsed && (
@@ -131,14 +140,20 @@ const Sidebar = (): React.ReactElement => {
                         key={child.name}
                         href={child.href}
                         className={cn(
-                          "flex items-center space-x-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                          "group flex items-center space-x-3 rounded-lg px-3 py-2 text-sm font-medium transition-all",
                           isChildActive
-                            ? "bg-primary text-primary-foreground"
-                            : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                            ? "bg-primary/10 text-primary shadow-sm"
+                            : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
                         )}
                       >
                         <child.icon className="h-4 w-4" />
-                        <span>{child.name}</span>
+                        <motion.span
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          {child.name}
+                        </motion.span>
                       </Link>
                     );
                   })}
@@ -156,7 +171,7 @@ const Sidebar = (): React.ReactElement => {
             <Button
               variant="ghost"
               className={cn(
-                "w-full justify-start",
+                "w-full justify-start hover:bg-accent/50",
                 isCollapsed && "justify-center"
               )}
             >
@@ -175,14 +190,19 @@ const Sidebar = (): React.ReactElement => {
                   </div>
                 )}
                 {!isCollapsed && (
-                  <div className="flex flex-col items-start">
+                  <motion.div
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="flex flex-col items-start"
+                  >
                     <span className="text-sm font-medium">
                       {session?.user?.name || "User"}
                     </span>
                     <span className="text-xs text-muted-foreground">
                       {session?.user?.email}
                     </span>
-                  </div>
+                  </motion.div>
                 )}
               </div>
             </Button>
