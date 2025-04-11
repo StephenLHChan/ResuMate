@@ -9,17 +9,45 @@ import SignIn from "@/components/sign-in";
 
 const SignInPage = (): React.ReactElement => (
   <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden">
-    {/* Animated Background Pattern */}
+    {/* Animated Background Elements */}
     <div className="absolute inset-0 -z-10">
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
+      {/* Animated Gradient Overlay */}
       <motion.div
-        className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5"
+        className="absolute inset-0 bg-gradient-to-br "
         animate={{
           opacity: [0.5, 0.8, 0.5],
           scale: [1, 1.1, 1],
         }}
         transition={{
           duration: 8,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      />
+
+      {/* Floating Circles */}
+      <motion.div
+        className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full bg-primary/5"
+        animate={{
+          x: [0, 20, 0],
+          y: [0, -20, 0],
+          scale: [1, 1.1, 1],
+        }}
+        transition={{
+          duration: 10,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      />
+      <motion.div
+        className="absolute bottom-1/4 right-1/4 w-48 h-48 rounded-full bg-primary/5"
+        animate={{
+          x: [0, -20, 0],
+          y: [0, 20, 0],
+          scale: [1, 1.1, 1],
+        }}
+        transition={{
+          duration: 12,
           repeat: Infinity,
           ease: "easeInOut",
         }}
