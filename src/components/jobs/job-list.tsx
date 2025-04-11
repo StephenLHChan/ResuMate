@@ -21,54 +21,73 @@ import {
 } from "@/components/ui/collapsible";
 import { Skeleton } from "@/components/ui/skeleton";
 
-interface Job {
-  id: string;
-  title: string;
-  companyName: string;
-  description: string;
-  requirements: string[];
-  jobUrl: string;
-  salaryMin?: number;
-  salaryMax?: number;
-  location?: string;
-  createdAt: string;
-  isAddedToApplication?: boolean;
-}
+import type { Prisma } from "@prisma/client";
+
+type JobWithApplications = Prisma.JobGetPayload<{
+  include: { applications: true };
+}>;
 
 interface PaginationState {
   page: number;
   pageSize: number;
   total: number;
+  nextPageKey?: string;
+  totalCount: number;
 }
 
 export const JobList = (): React.ReactElement => {
-  const [jobs, setJobs] = useState<Job[]>([]);
+  const [jobs, setJobs] = useState<JobWithApplications[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [pagination, setPagination] = useState<PaginationState>({
     page: 1,
     pageSize: 10,
     total: 0,
+    totalCount: 0,
   });
   const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchJobs();
-  }, [pagination.page]);
+  }, []);
 
   const fetchJobs = async (): Promise<void> => {
     try {
+      setIsLoading(true);
+      setError(null);
       const response = await fetch(
-        `/api/jobs?page=${pagination.page}&pageSize=${pagination.pageSize}`
+        `/api/jobs?pageSize=${pagination.pageSize}${
+          pagination.nextPageKey ? `&nextPageKey=${pagination.nextPageKey}` : ""
+        }`
       );
-      if (!response.ok) throw new Error("Failed to fetch jobs");
+      if (!response.ok) {
+        throw new Error("Failed to fetch jobs");
+      }
       const data = await response.json();
-      setJobs(data.jobs);
-      setPagination(prev => ({ ...prev, total: data.total }));
+
+      // If this is the initial load (no nextPageKey), replace the list
+      // Otherwise, append to the existing list
+      setJobs(prevJobs =>
+        pagination.nextPageKey ? [...prevJobs, ...data.items] : data.items
+      );
+
+      setPagination(prev => ({
+        ...prev,
+        nextPageKey: data.nextPageKey,
+        totalCount: data.totalCount,
+      }));
     } catch (error) {
       console.error("Error fetching jobs:", error);
+      setError("Failed to load jobs. Please try again.");
       toast.error("Failed to load jobs");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const loadMore = (): void => {
+    if (pagination.nextPageKey) {
+      fetchJobs();
     }
   };
 
@@ -157,58 +176,88 @@ export const JobList = (): React.ReactElement => {
     );
   }
 
+  if (error) {
+    return (
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex flex-col items-center justify-center space-y-2 text-center">
+            <div className="text-destructive">{error}</div>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setError(null);
+                fetchJobs();
+              }}
+            >
+              Try Again
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <div className="space-y-4">
       {jobs.map(job => (
-        <Collapsible key={job.id} className="space-y-2">
+        <Collapsible key={job.id} className="space-y-1">
           <Card>
-            <CardHeader className="pb-2">
+            <CardHeader className="pb-1">
               <div className="flex justify-between items-start">
                 <div className="flex items-center gap-2">
                   <CollapsibleTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                      <ChevronDown className="h-4 w-4" />
+                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                      <ChevronDown className="h-3 w-3" />
                     </Button>
                   </CollapsibleTrigger>
                   <div>
-                    <CardTitle className="text-lg">{job.title}</CardTitle>
-                    <CardDescription>{job.companyName}</CardDescription>
+                    <CardTitle className="text-base">{job.title}</CardTitle>
+                    <CardDescription className="text-sm">
+                      {job.companyName}
+                    </CardDescription>
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  {!job.isAddedToApplication && (
+                <div className="flex gap-1">
+                  {job.applications.length === 0 && (
                     <Button
                       variant="ghost"
                       size="icon"
+                      className="h-6 w-6"
                       onClick={() => handleAddToApplication(job.id)}
                       disabled={isLoading}
                     >
-                      <Plus className="h-4 w-4" />
+                      <Plus className="h-3 w-3" />
                     </Button>
                   )}
                   <Button
                     variant="ghost"
                     size="icon"
+                    className="h-6 w-6"
                     onClick={() => deleteJobFromThisUser(job.id)}
                     disabled={isLoading}
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="h-3 w-3" />
                   </Button>
                 </div>
               </div>
-              <div className="flex items-center gap-4 mt-2">
+              <div className="flex items-center gap-2 mt-1">
                 <Badge
-                  variant={job.isAddedToApplication ? "default" : "secondary"}
+                  variant={
+                    job.applications.length > 0 ? "default" : "secondary"
+                  }
+                  className="text-xs"
                 >
-                  {job.isAddedToApplication
+                  {job.applications.length > 0
                     ? "Added to Application"
                     : "Not Added"}
                 </Badge>
                 {job.location && (
-                  <Badge variant="outline">{job.location}</Badge>
+                  <Badge variant="outline" className="text-xs">
+                    {job.location}
+                  </Badge>
                 )}
                 {(job.salaryMin || job.salaryMax) && (
-                  <Badge variant="outline">
+                  <Badge variant="outline" className="text-xs">
                     ${job.salaryMin?.toLocaleString() ?? "N/A"} - $
                     {job.salaryMax?.toLocaleString() ?? "N/A"}
                   </Badge>
@@ -251,16 +300,14 @@ export const JobList = (): React.ReactElement => {
         </Button>
         <span className="text-sm text-muted-foreground">
           Page {pagination.page} of{" "}
-          {Math.ceil(pagination.total / pagination.pageSize)}
+          {Math.ceil(pagination.totalCount / pagination.pageSize)}
         </span>
         <Button
           variant="outline"
-          onClick={() =>
-            setPagination(prev => ({ ...prev, page: prev.page + 1 }))
-          }
-          disabled={pagination.page * pagination.pageSize >= pagination.total}
+          onClick={loadMore}
+          disabled={!pagination.nextPageKey}
         >
-          Next
+          Load More
         </Button>
       </div>
     </div>

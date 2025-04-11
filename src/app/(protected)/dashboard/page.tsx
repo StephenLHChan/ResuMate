@@ -3,7 +3,7 @@
 import { type Resume } from "@prisma/client";
 import { useEffect, useState } from "react";
 
-import HomePage from "@/components/home-page";
+import Dashboard from "@/components/dashboard";
 
 const Page = (): React.ReactElement => {
   const [recentResumes, setRecentResumes] = useState<Resume[]>([]);
@@ -26,13 +26,13 @@ const Page = (): React.ReactElement => {
       }
 
       const data = await response.json();
-      return data;
+      return data.items;
     };
 
     fetchRecentResumes().then(data => setRecentResumes(data));
   }, []);
 
-  return <HomePage recentResumes={recentResumes} />;
+  return <Dashboard recentResumes={recentResumes} />;
 };
 
 export default Page;

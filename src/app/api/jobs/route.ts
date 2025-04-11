@@ -6,8 +6,8 @@ import { prisma } from "@/lib/prisma";
 import { jobSchema } from "@/lib/schemas/job";
 
 const paginationSchema = z.object({
-  page: z.coerce.number().int().positive().default(1),
-  pageSize: z.coerce.number().int().positive().max(100).default(10),
+  nextPageKey: z.string().nullable(),
+  pageSize: z.number().int().positive().max(100).optional().default(10),
 });
 
 export const GET = async (req: Request): Promise<NextResponse> => {
@@ -20,16 +20,15 @@ export const GET = async (req: Request): Promise<NextResponse> => {
     // Parse and validate pagination parameters
     const { searchParams } = new URL(req.url);
     const paginationParams = paginationSchema.parse({
-      page: searchParams.get("page"),
-      pageSize: searchParams.get("pageSize"),
+      nextPageKey: searchParams.get("nextPageKey"),
+      pageSize: Number(searchParams.get("pageSize")) || 10,
     });
 
-    // Calculate skip and take for pagination
-    const skip = (paginationParams.page - 1) * paginationParams.pageSize;
-    const take = paginationParams.pageSize;
+    let nextPageKey = paginationParams.nextPageKey;
+    const pageSize = paginationParams.pageSize;
 
-    // Get total count for pagination
-    const total = await prisma.job.count({
+    // Get total count
+    const totalCount = await prisma.job.count({
       where: {
         OR: [
           {
@@ -50,31 +49,43 @@ export const GET = async (req: Request): Promise<NextResponse> => {
       },
     });
 
-    // Get paginated jobs
-    const jobs = await prisma.job.findMany({
+    // Get paginated jobs using nextPageKey
+    const items = await prisma.job.findMany({
       where: {
-        OR: [
+        AND: [
           {
-            users: {
-              some: {
-                userId: session.user.id,
+            OR: [
+              {
+                users: {
+                  some: {
+                    userId: session.user.id,
+                  },
+                },
               },
-            },
-          },
-          {
-            applications: {
-              some: {
-                userId: session.user.id,
+              {
+                applications: {
+                  some: {
+                    userId: session.user.id,
+                  },
+                },
               },
-            },
+            ],
           },
+          ...(nextPageKey
+            ? [
+                {
+                  id: {
+                    lt: nextPageKey,
+                  },
+                },
+              ]
+            : []),
         ],
       },
       orderBy: {
-        createdAt: "desc",
+        id: "desc",
       },
-      skip,
-      take,
+      take: pageSize + 1, // Fetch one extra to determine if there's a next page
       include: {
         applications: {
           where: {
@@ -87,18 +98,15 @@ export const GET = async (req: Request): Promise<NextResponse> => {
       },
     });
 
-    // Transform jobs to include isAddedToApplication flag
-    const transformedJobs = jobs.map(job => ({
-      ...job,
-      isAddedToApplication: job.applications.length > 0,
-      applications: undefined, // Remove the applications field from the response
-    }));
+    // Determine if there's a next page and get the next nextPageKey
+    const hasNextPage = items.length > pageSize;
+    nextPageKey = hasNextPage ? items[pageSize - 1].id : null;
 
     return NextResponse.json({
-      jobs: transformedJobs,
-      total,
-      page: paginationParams.page,
-      pageSize: paginationParams.pageSize,
+      totalCount,
+      items,
+      pageSize,
+      nextPageKey,
     });
   } catch (error) {
     console.error("Error fetching jobs:", error);
