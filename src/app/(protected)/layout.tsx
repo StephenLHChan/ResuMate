@@ -5,7 +5,7 @@ import Sidebar from "@/components/sidebar";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Profile | ResuMate",
+  title: "ResuMate",
   description: "Your profile information",
 };
 
