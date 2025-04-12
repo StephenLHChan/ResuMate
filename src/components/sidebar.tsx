@@ -75,7 +75,7 @@ const Sidebar = (): React.ReactElement => {
       {/* Logo */}
       <div className="flex h-16 items-center justify-between border-b px-4">
         <Link
-          href="/home"
+          href="/dashboard"
           className={cn(
             "flex items-center space-x-2",
             isCollapsed && "justify-center"
