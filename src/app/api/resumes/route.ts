@@ -29,7 +29,13 @@ export const GET = async (request: Request): Promise<NextResponse> => {
       take: limit,
     });
 
-    return NextResponse.json(resumes);
+    const totalCount = await prisma.resume.count({
+      where: {
+        userId: session.user.id,
+      },
+    });
+
+    return NextResponse.json({ totalCount, items: resumes });
   } catch (error) {
     console.error("Error fetching resumes:", error);
     return NextResponse.json(

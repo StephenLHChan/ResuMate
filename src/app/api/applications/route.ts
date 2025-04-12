@@ -16,13 +16,14 @@ export const GET = async (req: Request): Promise<NextResponse> => {
     }
 
     const { searchParams } = new URL(req.url);
-    const page = parseInt(searchParams.get("page") || "1");
+    let nextPageKey = searchParams.get("nextPageKey");
     const pageSize = 10;
 
-    const [applications, total] = await Promise.all([
+    const [applications, totalCount] = await Promise.all([
       prisma.application.findMany({
         where: {
           userId: session.user.id,
+          ...(nextPageKey ? { id: { lt: nextPageKey } } : {}),
         },
         include: {
           job: true,
@@ -33,9 +34,8 @@ export const GET = async (req: Request): Promise<NextResponse> => {
           },
         },
         orderBy: {
-          createdAt: "desc",
+          id: "desc",
         },
-        skip: (page - 1) * pageSize,
         take: pageSize,
       }),
       prisma.application.count({
@@ -45,7 +45,10 @@ export const GET = async (req: Request): Promise<NextResponse> => {
       }),
     ]);
 
-    const totalPages = Math.ceil(total / pageSize);
+    const hasNextPage = applications.length === pageSize;
+    nextPageKey = hasNextPage
+      ? applications[applications.length - 1]?.id
+      : null;
 
     // Transform the data to match the frontend's expected structure
     const transformedApplications = applications.map(app => ({
@@ -70,14 +73,10 @@ export const GET = async (req: Request): Promise<NextResponse> => {
     }));
 
     return NextResponse.json({
-      applications: transformedApplications,
-      pagination: {
-        total,
-        page,
-        totalPages,
-        hasNextPage: page < totalPages,
-        hasPreviousPage: page > 1,
-      },
+      items: transformedApplications,
+      totalCount,
+      pageSize,
+      nextPageKey,
     });
   } catch (error) {
     console.error("Error fetching applications:", error);

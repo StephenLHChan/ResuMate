@@ -33,7 +33,10 @@ export const GET = async (): Promise<NextResponse> => {
       orderBy: { issueDate: "desc" },
     });
 
-    return NextResponse.json(certifications);
+    return NextResponse.json({
+      totalCount: certifications.length,
+      items: certifications,
+    });
   } catch (error) {
     console.error("Error fetching certifications:", error);
     return NextResponse.json(

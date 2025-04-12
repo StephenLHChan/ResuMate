@@ -72,7 +72,7 @@ const CertificationsPage = (): React.ReactElement => {
       const response = await fetch("/api/profile/certification");
       if (response.ok) {
         const data = await response.json();
-        setCertifications(data);
+        setCertifications(data.items);
       }
     } catch (error) {
       console.error("Error fetching certifications:", error);

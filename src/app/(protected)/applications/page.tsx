@@ -2,7 +2,6 @@
 
 import {
   ChevronDown,
-  ChevronLeft,
   ChevronRight,
   Loader2,
   Pencil,
@@ -55,10 +54,7 @@ interface Application {
 
 interface PaginationInfo {
   total: number;
-  page: number;
-  totalPages: number;
-  hasNextPage: boolean;
-  hasPreviousPage: boolean;
+  nextPageKey: string | null;
 }
 
 const ApplicationPage = (): React.ReactElement => {
@@ -68,29 +64,26 @@ const ApplicationPage = (): React.ReactElement => {
   const [isLoadingApplications, setIsLoadingApplications] = useState(true);
   const [pagination, setPagination] = useState<PaginationInfo>({
     total: 0,
-    page: 1,
-    totalPages: 0,
-    hasNextPage: false,
-    hasPreviousPage: false,
+    nextPageKey: null,
   });
 
-  const fetchApplications = async (page = 1): Promise<void> => {
+  const fetchApplications = async (nextPageKey?: string): Promise<void> => {
     try {
-      const response = await fetch(`/api/applications?page=${page}`);
+      const url = new URL("/api/applications", window.location.origin);
+      if (nextPageKey) {
+        url.searchParams.set("nextPageKey", nextPageKey);
+      }
+
+      const response = await fetch(url.toString());
       if (!response.ok) {
         throw new Error("Failed to fetch applications");
       }
       const data = await response.json();
-      setApplications(data.applications || []);
-      setPagination(
-        data.pagination || {
-          total: 0,
-          page: 1,
-          totalPages: 0,
-          hasNextPage: false,
-          hasPreviousPage: false,
-        }
-      );
+      setApplications(prev => [...prev, ...(data.items || [])]);
+      setPagination({
+        total: data.totalCount || 0,
+        nextPageKey: data.nextPageKey || null,
+      });
     } catch (error) {
       console.error("Error fetching applications:", error);
       setApplications([]); // Set empty array on error
@@ -150,7 +143,7 @@ const ApplicationPage = (): React.ReactElement => {
         const resumeId = response.headers.get("X-Resume-Id");
         if (resumeId) {
           // Refresh the applications to get the updated resume list
-          await fetchApplications(pagination.page);
+          await fetchApplications();
         }
       }
 
@@ -370,9 +363,7 @@ const ApplicationPage = (): React.ReactElement => {
                           <div className="flex gap-2">
                             <ApplicationForm
                               application={application}
-                              onSuccess={() =>
-                                fetchApplications(pagination.page)
-                              }
+                              onSuccess={() => fetchApplications()}
                             >
                               <Button variant="ghost" size="icon">
                                 <Pencil className="h-4 w-4" />
@@ -548,22 +539,14 @@ const ApplicationPage = (): React.ReactElement => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => fetchApplications(pagination.page - 1)}
-                    disabled={!pagination.hasPreviousPage}
+                    onClick={() => {
+                      if (pagination.nextPageKey) {
+                        fetchApplications(pagination.nextPageKey);
+                      }
+                    }}
+                    disabled={!pagination.nextPageKey}
                   >
-                    <ChevronLeft className="h-4 w-4" />
-                    Previous
-                  </Button>
-                  <div className="text-sm">
-                    Page {pagination.page} of {pagination.totalPages}
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => fetchApplications(pagination.page + 1)}
-                    disabled={!pagination.hasNextPage}
-                  >
-                    Next
+                    Load More
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                 </div>
