@@ -9,7 +9,7 @@ import { type APIResponse, type APIError } from "@/lib/types";
 
 const paginationSchema = z.object({
   nextPageKey: z.string().nullable(),
-  pageSize: z.number().int().positive().max(100).default(10),
+  pageSize: z.coerce.number().int().positive().max(100).optional().default(10),
 });
 
 export const GET = async (
@@ -24,7 +24,7 @@ export const GET = async (
     const { searchParams } = new URL(req.url);
     const paginationParams = paginationSchema.parse({
       nextPageKey: searchParams.get("nextPageKey"),
-      pageSize: Number(searchParams.get("pageSize")) || 10,
+      pageSize: searchParams.get("pageSize") || undefined,
     });
 
     let nextPageKey = paginationParams.nextPageKey;
