@@ -203,3 +203,14 @@ export interface JobContent {
   description: string | null;
   requirements: string[];
 }
+
+export interface APIResponse<T> {
+  items: T[];
+  totalCount: number;
+  nextPageKey: string | null;
+  pageSize: number;
+}
+
+export interface APIError {
+  error: string;
+}

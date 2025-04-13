@@ -1,23 +1,26 @@
+import { type Job } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { jobSchema } from "@/lib/schemas/job";
+import { type APIResponse, type APIError } from "@/lib/types";
 
 const paginationSchema = z.object({
   nextPageKey: z.string().nullable(),
-  pageSize: z.number().int().positive().max(100).optional().default(10),
+  pageSize: z.number().int().positive().max(100).default(10),
 });
 
-export const GET = async (req: Request): Promise<NextResponse> => {
+export const GET = async (
+  req: Request
+): Promise<NextResponse<APIResponse<Job> | APIError>> => {
   try {
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Parse and validate pagination parameters
     const { searchParams } = new URL(req.url);
     const paginationParams = paginationSchema.parse({
       nextPageKey: searchParams.get("nextPageKey"),
@@ -27,76 +30,76 @@ export const GET = async (req: Request): Promise<NextResponse> => {
     let nextPageKey = paginationParams.nextPageKey;
     const pageSize = paginationParams.pageSize;
 
-    // Get total count
-    const totalCount = await prisma.job.count({
-      where: {
-        OR: [
-          {
-            users: {
-              some: {
-                userId: session.user.id,
-              },
-            },
-          },
-          {
-            applications: {
-              some: {
-                userId: session.user.id,
-              },
-            },
-          },
-        ],
-      },
-    });
-
-    // Get paginated jobs using nextPageKey
-    const items = await prisma.job.findMany({
-      where: {
-        AND: [
-          {
-            OR: [
-              {
-                users: {
-                  some: {
-                    userId: session.user.id,
-                  },
+    const [totalCount, items] = await Promise.all([
+      prisma.job.count({
+        where: {
+          OR: [
+            {
+              users: {
+                some: {
+                  userId: session.user.id,
                 },
               },
-              {
-                applications: {
-                  some: {
-                    userId: session.user.id,
-                  },
+            },
+            {
+              applications: {
+                some: {
+                  userId: session.user.id,
                 },
               },
-            ],
-          },
-          ...(nextPageKey
-            ? [
+            },
+          ],
+        },
+      }),
+      // Get paginated jobs using nextPageKey
+      prisma.job.findMany({
+        where: {
+          AND: [
+            {
+              OR: [
                 {
-                  id: {
-                    lt: nextPageKey,
+                  users: {
+                    some: {
+                      userId: session.user.id,
+                    },
                   },
                 },
-              ]
-            : []),
-        ],
-      },
-      orderBy: {
-        id: "desc",
-      },
-      take: pageSize + 1, // Fetch one extra to determine if there's a next page
-      include: {
-        applications: {
-          where: {
-            userId: session.user.id,
-          },
-          select: {
-            id: true,
+                {
+                  applications: {
+                    some: {
+                      userId: session.user.id,
+                    },
+                  },
+                },
+              ],
+            },
+            ...(nextPageKey
+              ? [
+                  {
+                    id: {
+                      lt: nextPageKey,
+                    },
+                  },
+                ]
+              : []),
+          ],
+        },
+        orderBy: {
+          id: "desc",
+        },
+        take: pageSize + 1, // Fetch one extra to determine if there's a next page
+        include: {
+          applications: {
+            where: {
+              userId: session.user.id,
+            },
+            select: {
+              id: true,
+            },
           },
         },
-      },
-    });
+      }),
+    ]);
 
     // Determine if there's a next page and get the next nextPageKey
     const hasNextPage = items.length > pageSize;
