@@ -5,12 +5,8 @@ import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { jobSchema } from "@/lib/schemas/job";
+import { paginationSchema } from "@/lib/schemas/pagination";
 import { type APIResponse, type APIError } from "@/lib/types";
-
-const paginationSchema = z.object({
-  nextPageKey: z.string().nullable(),
-  pageSize: z.coerce.number().int().positive().max(100).optional().default(10),
-});
 
 export const GET = async (
   req: Request
@@ -24,11 +20,11 @@ export const GET = async (
     const { searchParams } = new URL(req.url);
     const paginationParams = paginationSchema.parse({
       nextPageKey: searchParams.get("nextPageKey"),
-      pageSize: searchParams.get("pageSize") || undefined,
+      pageSize: searchParams.get("pageSize"),
     });
 
     let nextPageKey = paginationParams.nextPageKey;
-    const pageSize = paginationParams.pageSize;
+    const pageSize = paginationParams.pageSize ?? 10;
 
     const [totalCount, items] = await Promise.all([
       prisma.job.count({
@@ -103,11 +99,12 @@ export const GET = async (
 
     // Determine if there's a next page and get the next nextPageKey
     const hasNextPage = items.length > pageSize;
-    nextPageKey = hasNextPage ? items[pageSize - 1].id : null;
+    nextPageKey = hasNextPage ? items[pageSize - 1].id : undefined;
+    const itemsToReturn = items.slice(0, pageSize);
 
     return NextResponse.json({
       totalCount,
-      items,
+      items: itemsToReturn,
       pageSize,
       nextPageKey,
     });
