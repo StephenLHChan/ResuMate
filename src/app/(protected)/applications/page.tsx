@@ -6,6 +6,7 @@ import {
   ChevronRight,
   Loader2,
   Pencil,
+  Send,
   Trash2,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -344,7 +345,10 @@ const ApplicationPage = (): React.ReactElement => {
   return (
     <div className="container mx-auto py-8">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Applications</h1>
+        <div className="flex items-center gap-2">
+          <Send className="h-7 w-7 text-primary" />
+          <h1 className="text-3xl font-bold">Applications</h1>
+        </div>
       </div>
 
       <Card>
