@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { type Education } from "@prisma/client";
 import { format } from "date-fns";
 import {
   Calendar as CalendarIcon,
@@ -34,16 +35,17 @@ import {
 } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
-import { educationSchema } from "@/lib/schemas/education";
+import {
+  educationSchema,
+  type EducationFormValues,
+} from "@/lib/schemas/education";
 import { cn } from "@/lib/utils";
-
-import type { APIEducation, EducationFormValues } from "@/lib/types";
 
 const EducationPage = (): React.ReactElement => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
-  const [education, setEducation] = useState<APIEducation[]>([]);
+  const [education, setEducation] = useState<Education[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [currentId, setCurrentId] = useState<string | null>(null);
 
@@ -97,8 +99,8 @@ const EducationPage = (): React.ReactElement => {
 
     // Both have end dates, sort by end date (most recent first)
     return (
-      new Date(b.endDate as string).getTime() -
-      new Date(a.endDate as string).getTime()
+      new Date(b.endDate?.toString() ?? "").getTime() -
+      new Date(a.endDate?.toString() ?? "").getTime()
     );
   });
 
@@ -153,7 +155,7 @@ const EducationPage = (): React.ReactElement => {
     }
   };
 
-  const handleEdit = (edu: APIEducation): void => {
+  const handleEdit = (edu: Education): void => {
     setIsEditing(true);
     setCurrentId(edu.id);
     form.reset({

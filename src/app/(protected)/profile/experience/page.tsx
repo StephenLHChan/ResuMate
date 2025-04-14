@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { type Experience } from "@prisma/client";
 import { format } from "date-fns";
 import {
   Calendar as CalendarIcon,
@@ -35,16 +36,18 @@ import {
 } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
-import { experienceSchema } from "@/lib/schemas/experience";
+import {
+  type ExperienceFormValues,
+  experienceSchema,
+} from "@/lib/schemas/experience";
+import { type APIResponse } from "@/lib/types";
 import { cn } from "@/lib/utils";
-
-import type { APIExperience, ExperienceFormValues } from "@/lib/types";
 
 const ExperiencePage = (): React.ReactElement => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
-  const [experiences, setExperiences] = useState<APIExperience[]>([]);
+  const [experiences, setExperiences] = useState<Experience[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [currentId, setCurrentId] = useState<string | null>(null);
 
@@ -72,8 +75,8 @@ const ExperiencePage = (): React.ReactElement => {
     try {
       const response = await fetch("/api/profile/experience");
       if (response.ok) {
-        const data = await response.json();
-        setExperiences(data);
+        const data: APIResponse<Experience> = await response.json();
+        setExperiences(data.items);
       }
     } catch (error) {
       console.error("Error fetching experience:", error);
@@ -97,8 +100,8 @@ const ExperiencePage = (): React.ReactElement => {
 
     // Both have end dates, sort by end date (most recent first)
     return (
-      new Date(b.endDate as string).getTime() -
-      new Date(a.endDate as string).getTime()
+      new Date(b.endDate?.toString() ?? "").getTime() -
+      new Date(a.endDate?.toString() ?? "").getTime()
     );
   });
 
@@ -152,7 +155,7 @@ const ExperiencePage = (): React.ReactElement => {
     }
   };
 
-  const handleEdit = (exp: APIExperience): void => {
+  const handleEdit = (exp: Experience): void => {
     setIsEditing(true);
     setCurrentId(exp.id);
     form.reset({

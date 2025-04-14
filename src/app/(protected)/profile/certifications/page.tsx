@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { type Certification } from "@prisma/client";
 import { format } from "date-fns";
 import {
   Calendar as CalendarIcon,
@@ -34,16 +35,19 @@ import {
 } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
-import { certificationSchema } from "@/lib/schemas/certification";
+import {
+  certificationSchema,
+  type CertificationFormValues,
+} from "@/lib/schemas/certification";
 import { cn } from "@/lib/utils";
 
-import type { APICertification, CertificationFormValues } from "@/lib/types";
+import type { APIResponse } from "@/lib/types";
 
 const CertificationsPage = (): React.ReactElement => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
-  const [certifications, setCertifications] = useState<APICertification[]>([]);
+  const [certifications, setCertifications] = useState<Certification[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [currentId, setCurrentId] = useState<string | null>(null);
 
@@ -71,7 +75,7 @@ const CertificationsPage = (): React.ReactElement => {
     try {
       const response = await fetch("/api/profile/certification");
       if (response.ok) {
-        const data = await response.json();
+        const data: APIResponse<Certification> = await response.json();
         setCertifications(data.items);
       }
     } catch (error) {
@@ -134,7 +138,7 @@ const CertificationsPage = (): React.ReactElement => {
     }
   };
 
-  const handleEdit = (cert: APICertification): void => {
+  const handleEdit = (cert: Certification): void => {
     setIsEditing(true);
     setCurrentId(cert.id);
     form.reset({
