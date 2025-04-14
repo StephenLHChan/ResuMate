@@ -30,6 +30,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
 import { type APIResponse } from "@/lib/types";
 
@@ -44,6 +45,45 @@ interface PaginationInfo {
   total: number;
   nextPageKey: string | null;
 }
+
+const ApplicationSkeleton = (): React.ReactElement => (
+  <Card>
+    <CardHeader className="pb-2">
+      <div className="flex justify-between items-start">
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-8 w-8 rounded-md" />
+          <div>
+            <Skeleton className="h-6 w-48 mb-2" />
+            <Skeleton className="h-4 w-32" />
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <Skeleton className="h-8 w-8 rounded-md" />
+          <Skeleton className="h-8 w-8 rounded-md" />
+        </div>
+      </div>
+      <div className="flex items-center gap-4 mt-2">
+        <Skeleton className="h-6 w-24" />
+      </div>
+    </CardHeader>
+    <CardContent>
+      <div className="space-y-4">
+        <div>
+          <Skeleton className="h-4 w-32 mb-2" />
+          <Skeleton className="h-20 w-full" />
+        </div>
+        <div>
+          <Skeleton className="h-4 w-32 mb-2" />
+          <Skeleton className="h-20 w-full" />
+        </div>
+        <div className="flex gap-2">
+          <Skeleton className="h-8 w-32" />
+          <Skeleton className="h-8 w-32" />
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+);
 
 const ApplicationPage = (): React.ReactElement => {
   const { toast } = useToast();
@@ -67,7 +107,9 @@ const ApplicationPage = (): React.ReactElement => {
         throw new Error("Failed to fetch applications");
       }
       const data: APIResponse<Application> = await response.json();
-      setApplications(prev => [...prev, ...(data.items || [])]);
+      setApplications(prev =>
+        nextPageKey ? [...prev, ...(data.items || [])] : data.items || []
+      );
       setPagination({
         total: data.totalCount || 0,
         nextPageKey: data.nextPageKey || null,
@@ -314,8 +356,10 @@ const ApplicationPage = (): React.ReactElement => {
         </CardHeader>
         <CardContent>
           {isLoadingApplications ? (
-            <div className="flex justify-center items-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin" />
+            <div className="space-y-4">
+              {[...Array(3)].map((_, index) => (
+                <ApplicationSkeleton key={index} />
+              ))}
             </div>
           ) : applications.length === 0 ? (
             <p className="text-center text-muted-foreground py-8">
