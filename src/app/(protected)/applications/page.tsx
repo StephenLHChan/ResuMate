@@ -1,6 +1,5 @@
 "use client";
 
-import { type Prisma } from "@prisma/client";
 import {
   ChevronDown,
   ChevronRight,
@@ -33,14 +32,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
-import { type APIResponse } from "@/lib/types";
 
-type Application = Prisma.ApplicationGetPayload<{
-  include: {
-    job: true;
-    resumes: { include: { resume: true } };
-  };
-}>;
+import type { ApplicationWithRelations, APIResponse } from "@/lib/types";
 
 interface PaginationInfo {
   total: number;
@@ -89,7 +82,9 @@ const ApplicationSkeleton = (): React.ReactElement => (
 const ApplicationPage = (): React.ReactElement => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [applications, setApplications] = useState<Application[]>([]);
+  const [applications, setApplications] = useState<ApplicationWithRelations[]>(
+    []
+  );
   const [isLoadingApplications, setIsLoadingApplications] = useState(true);
   const [pagination, setPagination] = useState<PaginationInfo>({
     total: 0,
@@ -107,7 +102,7 @@ const ApplicationPage = (): React.ReactElement => {
       if (!response.ok) {
         throw new Error("Failed to fetch applications");
       }
-      const data: APIResponse<Application> = await response.json();
+      const data: APIResponse<ApplicationWithRelations> = await response.json();
       setApplications(prev =>
         nextPageKey ? [...prev, ...(data.items || [])] : data.items || []
       );

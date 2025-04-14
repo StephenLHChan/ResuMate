@@ -11,6 +11,17 @@ export type ProfileWithUser = Prisma.ProfileGetPayload<{
   include: { user: true };
 }>;
 
+export type ApplicationWithRelations = Prisma.ApplicationGetPayload<{
+  include: {
+    job: true;
+    resumes: {
+      include: {
+        resume: true;
+      };
+    };
+  };
+}>;
+
 // User profile types
 export interface UserProfile {
   userId: string;

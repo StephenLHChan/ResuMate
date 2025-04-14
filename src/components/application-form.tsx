@@ -1,6 +1,5 @@
 "use client";
 
-import { type Prisma } from "@prisma/client";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 
@@ -24,12 +23,10 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 
-type Application = Prisma.ApplicationGetPayload<{
-  include: { job: true };
-}>;
+import type { ApplicationWithRelations } from "@/lib/types";
 
 interface ApplicationFormProps {
-  application?: Application;
+  application?: ApplicationWithRelations;
   onSuccess: () => void;
   children: React.ReactNode;
 }
