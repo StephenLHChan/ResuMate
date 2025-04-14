@@ -1,32 +1,5 @@
-import type {
-  BaseExperience,
-  BaseEducation,
-  BaseCertification,
-} from "@/lib/types";
-import type { Skill } from "@prisma/client";
-
-interface UserProfile {
-  preferredFirstName: string | null;
-  preferredLastName: string | null;
-  title: string | null;
-  phone: string | null;
-  location: string | null;
-  website: string | null;
-  linkedin: string | null;
-  github: string | null;
-  skills: Skill[];
-  experience: BaseExperience[];
-  education: BaseEducation[];
-  certifications: BaseCertification[];
-}
-
-interface JobInfo {
-  position: string;
-  companyName: string;
-  description: string;
-  requirements: string[];
-}
-
+import type { UserProfile } from "@/lib/types";
+import type { Job } from "@prisma/client";
 export const resumeGenerationPrompt = {
   system: `You are a professional resume writer with expertise in creating tailored resumes that highlight relevant skills and experiences. Your task is to create a resume that matches the job requirements while maintaining authenticity and professionalism.
 
@@ -67,12 +40,9 @@ Follow these guidelines:
     }
   ]
 }`,
-  user: (
-    userProfile: UserProfile,
-    jobInfo: JobInfo
-  ) => `Create a resume for a ${jobInfo.position} position at ${
-    jobInfo.companyName
-  }. Here's my profile information:
+  user: (userProfile: UserProfile, jobInfo: Job) => `Create a resume for a ${
+    jobInfo.title
+  } position at ${jobInfo.companyName}. Here's my profile information:
 
 Name: ${userProfile.preferredFirstName} ${userProfile.preferredLastName}
 Title: ${userProfile.title}

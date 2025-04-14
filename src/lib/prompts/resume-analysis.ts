@@ -1,3 +1,6 @@
+import type { ResumeContent } from "@/lib/types";
+import type { Job } from "@prisma/client";
+
 export const resumeAnalysisPrompt = {
   system: `You are an expert resume analyst and career coach. Your task is to analyze resumes and provide detailed, actionable feedback.
           
@@ -23,11 +26,14 @@ export const resumeAnalysisPrompt = {
     }
   }`,
 
-  user: (resumeContent: any, jobInfo?: any) => `Please analyze this resume:
+  user: (
+    resumeContent: ResumeContent,
+    jobInfo?: Job
+  ) => `Please analyze this resume:
   ${JSON.stringify(resumeContent)}
   ${
     jobInfo
-      ? `\nTarget Job Information:\nPosition: ${jobInfo.position}\nCompany: ${
+      ? `\nTarget Job Information:\nPosition: ${jobInfo.title}\nCompany: ${
           jobInfo.companyName
         }\nDescription: ${
           jobInfo.description
@@ -45,13 +51,13 @@ export const resumeSuggestionsPrompt = {
   5. Professional formatting`,
 
   user: (
-    resumeContent: any,
-    jobInfo?: any
+    resumeContent: ResumeContent,
+    jobInfo?: Job
   ) => `Please provide specific suggestions to improve this resume:
   ${JSON.stringify(resumeContent)}
   ${
     jobInfo
-      ? `\nTarget Job Information:\nPosition: ${jobInfo.position}\nCompany: ${
+      ? `\nTarget Job Information:\nPosition: ${jobInfo.title}\nCompany: ${
           jobInfo.companyName
         }\nDescription: ${
           jobInfo.description

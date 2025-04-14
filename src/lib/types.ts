@@ -83,6 +83,9 @@ export interface JobContent {
   companyName: string | null;
   description: string | null;
   requirements: string[];
+  salaryMin?: number | null;
+  salaryMax?: number | null;
+  location?: string | null;
 }
 
 export interface APIResponse<T> {

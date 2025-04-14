@@ -10,18 +10,11 @@ import { resumeGenerationPrompt } from "@/lib/prompts/resume-generation";
 import { resumeTemplate } from "@/lib/templates/resume-template";
 
 import type { UserProfile, ResumeContent } from "@/lib/types";
-import type { User } from "@prisma/client";
+import type { Job, User } from "@prisma/client";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
-
-interface JobInfo {
-  position: string;
-  companyName: string;
-  description: string;
-  requirements: string[];
-}
 
 interface ResumeAnalysis {
   strengths: string[];
@@ -40,7 +33,7 @@ interface ResumeAnalysis {
 export class ResumeService {
   static async generateResumeContent(
     userProfile: UserProfile,
-    jobInfo: JobInfo
+    jobInfo: Job
   ): Promise<ResumeContent> {
     const completion = await openai.chat.completions.create({
       model: "gpt-4-turbo-preview",
@@ -129,7 +122,7 @@ export class ResumeService {
 
   static async analyzeResume(
     resumeContent: ResumeContent,
-    jobInfo?: JobInfo
+    jobInfo?: Job
   ): Promise<ResumeAnalysis> {
     const completion = await openai.chat.completions.create({
       model: "gpt-4-turbo-preview",
@@ -157,7 +150,7 @@ export class ResumeService {
 
   static async generateResumeSuggestions(
     resumeContent: ResumeContent,
-    jobInfo?: JobInfo
+    jobInfo?: Job
   ): Promise<string[]> {
     const completion = await openai.chat.completions.create({
       model: "gpt-4-turbo-preview",

@@ -2,20 +2,11 @@ import OpenAI from "openai";
 
 import { prisma } from "@/lib/prisma";
 import { jobAnalysisPrompt } from "@/lib/prompts/job-analysis";
+import { type JobContent } from "@/lib/types";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
-
-export interface JobContent {
-  title: string | null;
-  companyName: string | null;
-  description: string | null;
-  requirements: string[];
-  salaryMin?: number | null;
-  salaryMax?: number | null;
-  location?: string | null;
-}
 
 export class JobService {
   static async analyzeJob(
@@ -40,7 +31,6 @@ export class JobService {
       }
     }
 
-    // Process the job description using OpenAI
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
