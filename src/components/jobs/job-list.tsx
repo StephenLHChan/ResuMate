@@ -20,6 +20,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Skeleton } from "@/components/ui/skeleton";
+import { type APIResponse } from "@/lib/types";
 
 import type { Prisma } from "@prisma/client";
 
@@ -63,7 +64,7 @@ export const JobList = (): React.ReactElement => {
       if (!response.ok) {
         throw new Error("Failed to fetch jobs");
       }
-      const data = await response.json();
+      const data: APIResponse<JobWithApplications> = await response.json();
 
       // If this is the initial load (no nextPageKey), replace the list
       // Otherwise, append to the existing list

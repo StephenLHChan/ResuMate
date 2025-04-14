@@ -30,6 +30,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/components/ui/use-toast";
+import { type APIResponse } from "@/lib/types";
 
 interface Application {
   id: string;
@@ -78,7 +79,7 @@ const ApplicationPage = (): React.ReactElement => {
       if (!response.ok) {
         throw new Error("Failed to fetch applications");
       }
-      const data = await response.json();
+      const data: APIResponse<Application> = await response.json();
       setApplications(prev => [...prev, ...(data.items || [])]);
       setPagination({
         total: data.totalCount || 0,
