@@ -1,16 +1,21 @@
+import { type Experience } from "@prisma/client";
 import { NextResponse } from "next/server";
+import { z } from "zod";
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { experienceSchema } from "@/lib/schemas/experience";
+import { paginationSchema } from "@/lib/schemas/pagination";
+import { type APIResponse, type APIError } from "@/lib/types";
 
 // GET: Fetch all experiences for the current user
-export const GET = async (): Promise<NextResponse> => {
+export const GET = async (
+  req: Request
+): Promise<NextResponse<APIResponse<Experience> | APIError>> => {
   try {
     const session = await auth();
-
     if (!session?.user?.email) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
@@ -19,22 +24,63 @@ export const GET = async (): Promise<NextResponse> => {
     });
 
     if (!user || !user.profile) {
-      return NextResponse.json(
-        { message: "Profile not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
 
-    const experiences = await prisma.experience.findMany({
-      where: { profileId: user.profile.id },
-      orderBy: { startDate: "desc" },
+    const { searchParams } = new URL(req.url);
+    const paginationParams = paginationSchema.parse({
+      nextPageKey: searchParams.get("nextPageKey"),
+      pageSize: searchParams.get("pageSize"),
     });
 
-    return NextResponse.json(experiences);
+    let nextPageKey = paginationParams.nextPageKey;
+    const pageSize = paginationParams.pageSize ?? 10;
+
+    const [totalCount, items] = await Promise.all([
+      prisma.experience.count({
+        where: { profileId: user.profile.id },
+      }),
+      prisma.experience.findMany({
+        where: {
+          AND: [
+            { profileId: user.profile.id },
+            ...(nextPageKey
+              ? [
+                  {
+                    id: {
+                      lt: nextPageKey,
+                    },
+                  },
+                ]
+              : []),
+          ],
+        },
+        orderBy: { startDate: "desc" },
+        take: pageSize + 1, // Fetch one extra to determine if there's a next page
+      }),
+    ]);
+
+    // Determine if there's a next page and get the next nextPageKey
+    const hasNextPage = items.length > pageSize;
+    nextPageKey = hasNextPage ? items[pageSize - 1].id : undefined;
+    const itemsToReturn = items.slice(0, pageSize);
+
+    return NextResponse.json({
+      totalCount,
+      items: itemsToReturn,
+      pageSize,
+      nextPageKey,
+    });
   } catch (error) {
     console.error("Error fetching experiences:", error);
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: "Invalid pagination parameters" },
+        { status: 400 }
+      );
+    }
     return NextResponse.json(
-      { message: "Internal server error" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }

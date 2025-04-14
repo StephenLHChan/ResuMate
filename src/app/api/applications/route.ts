@@ -1,29 +1,58 @@
+import { type Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { paginationSchema } from "@/lib/schemas/pagination";
+import { type APIResponse, type APIError } from "@/lib/types";
+
+type ApplicationWithRelations = Prisma.ApplicationGetPayload<{
+  include: { job: true; resumes: { include: { resume: true } } };
+}>;
 
 const applicationSchema = z.object({
   jobId: z.string(),
 });
 
-export const GET = async (req: Request): Promise<NextResponse> => {
+export const GET = async (
+  req: Request
+): Promise<NextResponse<APIResponse<ApplicationWithRelations> | APIError>> => {
   try {
     const session = await auth();
-    if (!session?.user?.email) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { searchParams } = new URL(req.url);
-    let nextPageKey = searchParams.get("nextPageKey");
-    const pageSize = 10;
+    const paginationParams = paginationSchema.parse({
+      nextPageKey: searchParams.get("nextPageKey"),
+      pageSize: searchParams.get("pageSize"),
+    });
 
-    const [applications, totalCount] = await Promise.all([
-      prisma.application.findMany({
+    let nextPageKey = paginationParams.nextPageKey;
+    const pageSize = paginationParams.pageSize ?? 10;
+
+    const [totalCount, items] = await Promise.all([
+      prisma.application.count({
         where: {
           userId: session.user.id,
-          ...(nextPageKey ? { id: { lt: nextPageKey } } : {}),
+        },
+      }),
+      prisma.application.findMany({
+        where: {
+          AND: [
+            { userId: session.user.id },
+            ...(nextPageKey
+              ? [
+                  {
+                    id: {
+                      lt: nextPageKey,
+                    },
+                  },
+                ]
+              : []),
+          ],
         },
         include: {
           job: true,
@@ -36,52 +65,30 @@ export const GET = async (req: Request): Promise<NextResponse> => {
         orderBy: {
           id: "desc",
         },
-        take: pageSize,
-      }),
-      prisma.application.count({
-        where: {
-          userId: session.user.id,
-        },
+        take: pageSize + 1, // Fetch one extra to determine if there's a next page
       }),
     ]);
 
-    const hasNextPage = applications.length === pageSize;
-    nextPageKey = hasNextPage
-      ? applications[applications.length - 1]?.id
-      : null;
-
-    // Transform the data to match the frontend's expected structure
-    const transformedApplications = applications.map(app => ({
-      id: app.id,
-      company: app.job.companyName || "",
-      position: app.job.title || "",
-      jobDescription: app.job.description || "",
-      requirements: app.job.requirements || [],
-      coverLetterUrl: null,
-      status: app.status,
-      notes: app.notes,
-      jobUrl: app.job.url,
-      createdAt: app.createdAt.toISOString(),
-      resumes: app.resumes.map(r => ({
-        id: r.id,
-        resume: {
-          id: r.resume.id,
-          title: r.resume.title,
-          content: r.resume.content,
-        },
-      })),
-    }));
+    const hasNextPage = items.length > pageSize;
+    nextPageKey = hasNextPage ? items[pageSize - 1].id : undefined;
+    const itemsToReturn = items.slice(0, pageSize);
 
     return NextResponse.json({
-      items: transformedApplications,
       totalCount,
+      items: itemsToReturn,
       pageSize,
       nextPageKey,
     });
   } catch (error) {
     console.error("Error fetching applications:", error);
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: "Invalid pagination parameters" },
+        { status: 400 }
+      );
+    }
     return NextResponse.json(
-      { error: "Failed to fetch applications" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }

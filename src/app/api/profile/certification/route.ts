@@ -1,46 +1,86 @@
+import { type Certification } from "@prisma/client";
 import { NextResponse } from "next/server";
+import { z } from "zod";
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { certificationSchema } from "@/lib/schemas/certification";
+import { paginationSchema } from "@/lib/schemas/pagination";
+import { type APIResponse, type APIError } from "@/lib/types";
 
 // GET: Fetch all certifications for the current user
-export const GET = async (): Promise<NextResponse> => {
+export const GET = async (
+  req: Request
+): Promise<NextResponse<APIResponse<Certification> | APIError>> => {
   try {
-    // Get the current session
     const session = await auth();
 
     if (!session?.user?.email) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Find user and their profile by email
+    const { searchParams } = new URL(req.url);
+    const paginationParams = paginationSchema.parse({
+      nextPageKey: searchParams.get("nextPageKey"),
+      pageSize: searchParams.get("pageSize") || undefined,
+    });
+
+    let nextPageKey = paginationParams.nextPageKey;
+    const pageSize = paginationParams.pageSize ?? 10;
+
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
       include: { profile: true },
     });
 
     if (!user || !user.profile) {
-      return NextResponse.json(
-        { message: "Profile not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
 
-    // Get all certifications for this profile
-    const certifications = await prisma.certification.findMany({
-      where: { profileId: user.profile.id },
-      orderBy: { issueDate: "desc" },
-    });
+    const [totalCount, items] = await Promise.all([
+      prisma.certification.count({
+        where: { profileId: user.profile.id },
+      }),
+      prisma.certification.findMany({
+        where: {
+          AND: [
+            { profileId: user.profile.id },
+            ...(nextPageKey
+              ? [
+                  {
+                    id: {
+                      lt: nextPageKey,
+                    },
+                  },
+                ]
+              : []),
+          ],
+        },
+        orderBy: { issueDate: "desc" },
+        take: pageSize + 1, // Fetch one extra to determine if there's a next page
+      }),
+    ]);
+
+    // Determine if there's a next page and get the next nextPageKey
+    const hasNextPage = items.length > pageSize;
+    nextPageKey = hasNextPage ? items[pageSize - 1].id : undefined;
 
     return NextResponse.json({
-      totalCount: certifications.length,
-      items: certifications,
+      totalCount,
+      items: items.slice(0, pageSize),
+      pageSize,
+      nextPageKey,
     });
   } catch (error) {
     console.error("Error fetching certifications:", error);
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: "Invalid pagination parameters" },
+        { status: 400 }
+      );
+    }
     return NextResponse.json(
-      { message: "Internal server error" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }
@@ -52,7 +92,7 @@ export const POST = async (req: Request): Promise<NextResponse> => {
     const session = await auth();
 
     if (!session?.user?.email) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
@@ -61,10 +101,7 @@ export const POST = async (req: Request): Promise<NextResponse> => {
     });
 
     if (!user || !user.profile) {
-      return NextResponse.json(
-        { message: "Profile not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
 
     const body = await req.json();
@@ -74,8 +111,8 @@ export const POST = async (req: Request): Promise<NextResponse> => {
     if (!validationResult.success) {
       return NextResponse.json(
         {
-          message: "Validation error",
-          errors: validationResult.error.format(),
+          error: "Validation error",
+          details: validationResult.error.format(),
         },
         { status: 400 }
       );
@@ -91,7 +128,6 @@ export const POST = async (req: Request): Promise<NextResponse> => {
       description,
     } = validationResult.data;
 
-    // Create new certification
     const certification = await prisma.certification.create({
       data: {
         profileId: user.profile.id,
@@ -108,8 +144,14 @@ export const POST = async (req: Request): Promise<NextResponse> => {
     return NextResponse.json(certification);
   } catch (error) {
     console.error("Error creating certification:", error);
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: "Invalid request data" },
+        { status: 400 }
+      );
+    }
     return NextResponse.json(
-      { message: "Internal server error" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }

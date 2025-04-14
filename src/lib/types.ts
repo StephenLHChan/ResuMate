@@ -207,7 +207,7 @@ export interface JobContent {
 export interface APIResponse<T> {
   items: T[];
   totalCount: number;
-  nextPageKey: string | null;
+  nextPageKey?: string;
   pageSize: number;
 }
 
