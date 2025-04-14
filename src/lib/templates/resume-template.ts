@@ -1,61 +1,24 @@
-import type {
-  APIExperience,
-  APIEducation,
-  APICertification,
-  APIProject,
-} from "@/lib/types";
-import type { Skill } from "@prisma/client";
+import type { ResumeData } from "@/lib/types";
+import type { Prisma } from "@prisma/client";
 
+// Helper function to format date to MMM yyyy
+const formatDate = (dateString: string): string => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", { month: "short", year: "numeric" });
+};
 
-interface Experience {
-  position: string;
-  company: string;
-  description: string;
-  startDate: string;
-  endDate: string;
-}
+// Helper function to check if a certification is expired
+const isCertExpired = (expiryDate: string | null): boolean => {
+  if (!expiryDate) return false;
+  return new Date(expiryDate) < new Date();
+};
 
-interface Education {
-  degree: string;
-  field: string;
-  institution: string;
-  startDate: string;
-  endDate: string;
-}
-
-interface Certification {
-  name: string;
-  issuer: string;
-  issueDate: string;
-  expiryDate: string | null;
-}
-
-interface ResumeData {
-  summary: string;
-  experience: Experience[];
-  education: Education[];
-  certifications: Certification[];
-}
-
-interface TemplateProfile {
-  preferredFirstName: string | null;
-  preferredLastName: string | null;
-  title: string | null;
-  phone: string | null;
-  location: string | null;
-  website: string | null;
-  linkedin: string | null;
-  github: string | null;
-  skills: Skill[];
-  experience: APIExperience[];
-  education: APIEducation[];
-  certifications: APICertification[];
-  projects: APIProject[];
-  email: string;
-}
+type ProfileWithUser = Prisma.ProfileGetPayload<{
+  include: { user: true };
+}>;
 
 export const resumeTemplate = (
-  profile: TemplateProfile,
+  profile: ProfileWithUser,
   resumeData: ResumeData
 ): string => `
 <!DOCTYPE html>
@@ -156,7 +119,7 @@ export const resumeTemplate = (
 }</div>
       <div class="title">${profile.title}</div>
       <div class="contact-info">
-        ${profile.email} 
+        ${profile.user.email} 
         ${profile.phone ? `| ${profile.phone}` : ""}
         ${profile.location ? `| ${profile.location}` : ""}
       </div>
@@ -177,7 +140,11 @@ export const resumeTemplate = (
         <div class="experience-item">
           <div class="item-header">
             <div class="item-title">${exp.position}</div>
-            <div class="item-date">${exp.startDate} - ${exp.endDate}</div>
+            <div class="item-date">${formatDate(
+              exp.startDate.toISOString()
+            )} - ${
+            exp.endDate ? formatDate(exp.endDate.toISOString()) : "present"
+          }</div>
           </div>
           <div class="item-subtitle">${exp.company}</div>
           <div class="item-description">${exp.description}</div>
@@ -195,7 +162,11 @@ export const resumeTemplate = (
         <div class="education-item">
           <div class="item-header">
             <div class="item-title">${edu.degree} in ${edu.field}</div>
-            <div class="item-date">${edu.startDate} - ${edu.endDate}</div>
+            <div class="item-date">${formatDate(
+              edu.startDate.toISOString()
+            )} - ${
+            edu.endDate ? formatDate(edu.endDate.toISOString()) : "present"
+          }</div>
           </div>
           <div class="item-subtitle">${edu.institution}</div>
         </div>
@@ -215,9 +186,15 @@ export const resumeTemplate = (
         <div class="certification-item">
           <div class="item-header">
             <div class="item-title">${cert.name}</div>
-            <div class="item-date">${cert.issueDate}${
-            cert.expiryDate ? ` - ${cert.expiryDate}` : ""
-          }</div>
+            <div class="item-date">${
+              cert.expiryDate
+                ? isCertExpired(cert.expiryDate.toISOString())
+                  ? formatDate(cert.issueDate.toISOString())
+                  : `${formatDate(cert.issueDate.toISOString())} - ${formatDate(
+                      cert.expiryDate.toISOString()
+                    )}`
+                : formatDate(cert.issueDate.toISOString())
+            }</div>
           </div>
           <div class="item-subtitle">${cert.issuer}</div>
         </div>

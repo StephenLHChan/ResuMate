@@ -14,22 +14,19 @@ export const POST = async (request: Request): Promise<NextResponse> => {
     const { applicationId, jobInfo } = await request.json();
 
     // Get user's profile data
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
+    const profile = await prisma.profile.findUnique({
+      where: { userId: session.user.id },
       include: {
-        profile: {
-          include: {
-            experience: true,
-            education: true,
-            certifications: true,
-            projects: true,
-            skills: true,
-          },
-        },
+        user: true,
+        skills: true,
+        experience: true,
+        education: true,
+        certifications: true,
+        projects: true,
       },
     });
 
-    if (!user?.profile) {
+    if (!profile) {
       return NextResponse.json(
         { message: "Profile not found" },
         { status: 404 }
@@ -38,24 +35,20 @@ export const POST = async (request: Request): Promise<NextResponse> => {
 
     // Generate resume content
     const resumeContent = await ResumeService.generateResumeContent(
-      user.profile,
+      profile,
       jobInfo
     );
 
     // Create resume record
     const resume = await ResumeService.createResumeRecord(
-      user.id,
+      profile.userId,
       `Resume for ${jobInfo.position} at ${jobInfo.companyName}`,
       JSON.stringify(resumeContent),
       applicationId
     );
 
     // Generate PDF
-    const pdf = await ResumeService.generatePDF(
-      user,
-      user.profile,
-      resumeContent
-    );
+    const pdf = await ResumeService.generatePDF(profile, resumeContent);
 
     // Return both the PDF and the resume ID
     return new NextResponse(pdf, {

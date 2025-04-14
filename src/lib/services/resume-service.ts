@@ -9,8 +9,12 @@ import {
 import { resumeGenerationPrompt } from "@/lib/prompts/resume-generation";
 import { resumeTemplate } from "@/lib/templates/resume-template";
 
-import type { UserProfile, ResumeContent } from "@/lib/types";
-import type { Job, User } from "@prisma/client";
+import type { UserProfile, ResumeData } from "@/lib/types";
+import type { Job, Prisma } from "@prisma/client";
+
+type ProfileWithUser = Prisma.ProfileGetPayload<{
+  include: { user: true };
+}>;
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -34,7 +38,7 @@ export class ResumeService {
   static async generateResumeContent(
     userProfile: UserProfile,
     jobInfo: Job
-  ): Promise<ResumeContent> {
+  ): Promise<ResumeData> {
     const completion = await openai.chat.completions.create({
       model: "gpt-4-turbo-preview",
       messages: [
@@ -92,18 +96,15 @@ export class ResumeService {
   }
 
   static async generatePDF(
-    user: User,
-    userProfile: UserProfile,
-    resumeContent: ResumeContent
+    userProfile: ProfileWithUser,
+    resumeContent: ResumeData
   ): Promise<Uint8Array> {
     const browser = await puppeteer.launch({
       headless: true,
     });
     const page = await browser.newPage();
 
-    await page.setContent(
-      resumeTemplate({ ...userProfile, email: user.email }, resumeContent)
-    );
+    await page.setContent(resumeTemplate(userProfile, resumeContent));
 
     const pdf = await page.pdf({
       format: "A4",
@@ -121,7 +122,7 @@ export class ResumeService {
   }
 
   static async analyzeResume(
-    resumeContent: ResumeContent,
+    resumeContent: ResumeData,
     jobInfo?: Job
   ): Promise<ResumeAnalysis> {
     const completion = await openai.chat.completions.create({
@@ -149,7 +150,7 @@ export class ResumeService {
   }
 
   static async generateResumeSuggestions(
-    resumeContent: ResumeContent,
+    resumeContent: ResumeData,
     jobInfo?: Job
   ): Promise<string[]> {
     const completion = await openai.chat.completions.create({

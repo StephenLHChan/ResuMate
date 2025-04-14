@@ -6,37 +6,6 @@ import type {
   Skill,
 } from "@prisma/client";
 
-// Resume template types
-export interface ResumeCertification {
-  name: string;
-  issuer: string;
-  issueDate: string;
-  expiryDate: string | null;
-}
-
-export interface ResumeExperience {
-  position: string;
-  company: string;
-  description: string;
-  startDate: string;
-  endDate: string;
-}
-
-export interface ResumeEducation {
-  degree: string;
-  field: string;
-  institution: string;
-  startDate: string;
-  endDate: string;
-}
-
-export interface ResumeData {
-  summary: string;
-  experience: ResumeExperience[];
-  education: ResumeEducation[];
-  certifications: ResumeCertification[];
-}
-
 // User profile types
 export interface UserProfile {
   preferredFirstName: string | null;
@@ -54,28 +23,11 @@ export interface UserProfile {
   projects: Project[];
 }
 
-export interface ResumeContent {
+export interface ResumeData {
   summary: string;
-  experience: Array<{
-    position: string;
-    company: string;
-    description: string;
-    startDate: string;
-    endDate: string;
-  }>;
-  education: Array<{
-    degree: string;
-    field: string;
-    institution: string;
-    startDate: string;
-    endDate: string;
-  }>;
-  certifications: Array<{
-    name: string;
-    issuer: string;
-    issueDate: string;
-    expiryDate: string | null;
-  }>;
+  experience: Experience[];
+  education: Education[];
+  certifications: Certification[];
 }
 
 export interface JobContent {
