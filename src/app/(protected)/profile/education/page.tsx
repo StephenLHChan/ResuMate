@@ -39,6 +39,7 @@ import {
   educationSchema,
   type EducationFormValues,
 } from "@/lib/schemas/education";
+import { type APIResponse } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const EducationPage = (): React.ReactElement => {
@@ -74,8 +75,8 @@ const EducationPage = (): React.ReactElement => {
     try {
       const response = await fetch("/api/profile/education");
       if (response.ok) {
-        const data = await response.json();
-        setEducation(data);
+        const data: APIResponse<Education> = await response.json();
+        setEducation(data.items);
       }
     } catch (error) {
       console.error("Error fetching education:", error);
