@@ -59,7 +59,6 @@ export class ResumeService {
   }
 
   static async createResumeRecord(
-    userId: string,
     title: string,
     content: string,
     applicationId?: string

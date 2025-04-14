@@ -41,7 +41,6 @@ export const POST = async (request: Request): Promise<NextResponse> => {
 
     // Create resume record
     const resume = await ResumeService.createResumeRecord(
-      profile.userId,
       `Resume for ${jobInfo.position} at ${jobInfo.companyName}`,
       JSON.stringify(resumeContent),
       applicationId
