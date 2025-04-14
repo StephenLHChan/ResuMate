@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { type Project } from "@prisma/client";
 import { format } from "date-fns";
 import {
   Calendar as CalendarIcon,
@@ -37,18 +38,8 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { projectSchema, type ProjectFormValues } from "@/lib/schemas/project";
+import { type APIResponse } from "@/lib/types";
 import { cn } from "@/lib/utils";
-
-interface Project {
-  id: string;
-  name: string;
-  description: string;
-  startDate: string;
-  endDate: string | null;
-  technologies: string[];
-  projectUrl: string | null;
-  githubUrl: string | null;
-}
 
 const ProjectsPage = (): React.ReactElement => {
   const router = useRouter();
@@ -86,8 +77,8 @@ const ProjectsPage = (): React.ReactElement => {
     try {
       const response = await fetch("/api/profile/project");
       if (response.ok) {
-        const data = await response.json();
-        setProjects(data);
+        const data: APIResponse<Project> = await response.json();
+        setProjects(data.items);
       }
     } catch (error) {
       console.error("Error fetching projects:", error);
@@ -111,8 +102,8 @@ const ProjectsPage = (): React.ReactElement => {
 
     // Both have end dates, sort by end date (most recent first)
     return (
-      new Date(b.endDate as string).getTime() -
-      new Date(a.endDate as string).getTime()
+      new Date(b.endDate?.toString() ?? "").getTime() -
+      new Date(a.endDate?.toString() ?? "").getTime()
     );
   });
 
@@ -267,8 +258,8 @@ const ProjectsPage = (): React.ReactElement => {
                       <div className="flex items-center gap-2 text-muted-foreground">
                         <CalendarIcon className="h-4 w-4" />
                         <p className="text-sm">
-                          {formatDate(project.startDate)} -{" "}
-                          {formatDate(project.endDate)}
+                          {formatDate(project.startDate?.toString() ?? null)} -{" "}
+                          {formatDate(project.endDate?.toString() ?? null)}
                         </p>
                       </div>
 
