@@ -1,5 +1,6 @@
 "use client";
 
+import { type Prisma } from "@prisma/client";
 import {
   ChevronDown,
   ChevronRight,
@@ -32,26 +33,12 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { type APIResponse } from "@/lib/types";
 
-interface Application {
-  id: string;
-  company: string;
-  position: string;
-  jobDescription: string;
-  requirements: string[];
-  coverLetterUrl: string | null;
-  status: string;
-  notes: string | null;
-  jobUrl: string | null;
-  createdAt: string;
-  resumes: {
-    id: string;
-    resume: {
-      id: string;
-      title: string;
-      content: string;
-    };
-  }[];
-}
+type Application = Prisma.ApplicationGetPayload<{
+  include: {
+    job: true;
+    resumes: { include: { resume: true } };
+  };
+}>;
 
 interface PaginationInfo {
   total: number;
@@ -124,10 +111,10 @@ const ApplicationPage = (): React.ReactElement => {
         body: JSON.stringify({
           applicationId,
           jobInfo: {
-            companyName: application.company,
-            position: application.position,
-            description: application.jobDescription,
-            requirements: application.requirements,
+            companyName: application.job.companyName,
+            position: application.job.title,
+            description: application.job.description,
+            requirements: application.job.requirements,
           },
         }),
       });
@@ -354,10 +341,10 @@ const ApplicationPage = (): React.ReactElement => {
                             </CollapsibleTrigger>
                             <div>
                               <CardTitle className="text-lg">
-                                {application.position}
+                                {application.job.title}
                               </CardTitle>
                               <CardDescription>
-                                {application.company}
+                                {application.job.companyName}
                               </CardDescription>
                             </div>
                           </div>
@@ -430,15 +417,17 @@ const ApplicationPage = (): React.ReactElement => {
                             <div>
                               <h3 className="font-semibold">Description</h3>
                               <p className="whitespace-pre-wrap">
-                                {application.jobDescription}
+                                {application.job.description}
                               </p>
                             </div>
                             <div>
                               <h3 className="font-semibold">Requirements</h3>
                               <ul className="list-disc pl-5">
-                                {application.requirements.map((req, index) => (
-                                  <li key={index}>{req}</li>
-                                ))}
+                                {application.job.requirements.map(
+                                  (req, index) => (
+                                    <li key={index}>{req}</li>
+                                  )
+                                )}
                               </ul>
                             </div>
                             {application.notes && (

@@ -1,5 +1,6 @@
 "use client";
 
+import { type Prisma } from "@prisma/client";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 
@@ -23,17 +24,12 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 
+type Application = Prisma.ApplicationGetPayload<{
+  include: { job: true };
+}>;
+
 interface ApplicationFormProps {
-  application?: {
-    id: string;
-    company: string;
-    position: string;
-    jobDescription: string;
-    requirements: string[];
-    status: string;
-    notes: string | null;
-    jobUrl: string | null;
-  };
+  application?: Application;
   onSuccess: () => void;
   children: React.ReactNode;
 }
@@ -47,13 +43,13 @@ const ApplicationForm = ({
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    company: application?.company || "",
-    position: application?.position || "",
-    jobDescription: application?.jobDescription || "",
-    requirements: application?.requirements.join("\n") || "",
+    company: application?.job.companyName || "",
+    position: application?.job.title || "",
+    jobDescription: application?.job.description || "",
+    requirements: application?.job.requirements.join("\n") || "",
     status: application?.status || "pending",
     notes: application?.notes || "",
-    jobUrl: application?.jobUrl || "",
+    jobUrl: application?.job.url || "",
   });
 
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
