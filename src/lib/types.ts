@@ -4,10 +4,16 @@ import type {
   Education,
   Experience,
   Skill,
+  Prisma,
 } from "@prisma/client";
+
+export type ProfileWithUser = Prisma.ProfileGetPayload<{
+  include: { user: true };
+}>;
 
 // User profile types
 export interface UserProfile {
+  userId: string;
   preferredFirstName: string | null;
   preferredLastName: string | null;
   title: string | null;

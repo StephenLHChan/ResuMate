@@ -9,12 +9,8 @@ import {
 import { resumeGenerationPrompt } from "@/lib/prompts/resume-generation";
 import { resumeTemplate } from "@/lib/templates/resume-template";
 
-import type { UserProfile, ResumeData } from "@/lib/types";
-import type { Job, Prisma } from "@prisma/client";
-
-type ProfileWithUser = Prisma.ProfileGetPayload<{
-  include: { user: true };
-}>;
+import type { UserProfile, ResumeData, ProfileWithUser } from "@/lib/types";
+import type { Job } from "@prisma/client";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,

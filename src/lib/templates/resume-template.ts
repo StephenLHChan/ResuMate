@@ -1,5 +1,4 @@
-import type { ResumeData } from "@/lib/types";
-import type { Prisma } from "@prisma/client";
+import type { ProfileWithUser, ResumeData } from "@/lib/types";
 
 // Helper function to format date to MMM yyyy
 const formatDate = (dateString: string): string => {
@@ -12,10 +11,6 @@ const isCertExpired = (expiryDate: string | null): boolean => {
   if (!expiryDate) return false;
   return new Date(expiryDate) < new Date();
 };
-
-type ProfileWithUser = Prisma.ProfileGetPayload<{
-  include: { user: true };
-}>;
 
 export const resumeTemplate = (
   profile: ProfileWithUser,
