@@ -1,4 +1,4 @@
-import type { UserProfile } from "@/lib/types";
+import type { ProfileWithRelations } from "@/lib/types";
 import type { Job } from "@prisma/client";
 export const resumeGenerationPrompt = {
   system: `You are a professional resume writer with expertise in creating tailored resumes that highlight relevant skills and experiences. Your task is to create a resume that matches the job requirements while maintaining authenticity and professionalism.
@@ -40,9 +40,12 @@ Follow these guidelines:
     }
   ]
 }`,
-  user: (userProfile: UserProfile, jobInfo: Job) => `Create a resume for a ${
-    jobInfo.title
-  } position at ${jobInfo.companyName}. Here's my profile information:
+  user: (
+    userProfile: ProfileWithRelations,
+    jobInfo: Job
+  ) => `Create a resume for a ${jobInfo.title} position at ${
+    jobInfo.companyName
+  }. Here's my profile information:
 
 Name: ${userProfile.preferredFirstName} ${userProfile.preferredLastName}
 Title: ${userProfile.title}

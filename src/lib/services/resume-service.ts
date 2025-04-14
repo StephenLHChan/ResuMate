@@ -9,7 +9,7 @@ import {
 import { resumeGenerationPrompt } from "@/lib/prompts/resume-generation";
 import { resumeTemplate } from "@/lib/templates/resume-template";
 
-import type { UserProfile, ResumeData, ProfileWithUser } from "@/lib/types";
+import type { ResumeData, ProfileWithRelations } from "@/lib/types";
 import type { Job } from "@prisma/client";
 
 const openai = new OpenAI({
@@ -32,7 +32,7 @@ interface ResumeAnalysis {
 
 export class ResumeService {
   static async generateResumeContent(
-    userProfile: UserProfile,
+    userProfile: ProfileWithRelations,
     jobInfo: Job
   ): Promise<ResumeData> {
     const completion = await openai.chat.completions.create({
@@ -92,7 +92,7 @@ export class ResumeService {
   }
 
   static async generatePDF(
-    userProfile: ProfileWithUser,
+    userProfile: ProfileWithRelations,
     resumeContent: ResumeData
   ): Promise<Uint8Array> {
     const browser = await puppeteer.launch({

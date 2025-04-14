@@ -1,11 +1,20 @@
 import type {
-  Project,
   Certification,
   Education,
   Experience,
-  Skill,
   Prisma,
 } from "@prisma/client";
+
+export type ProfileWithRelations = Prisma.ProfileGetPayload<{
+  include: {
+    user: true;
+    skills: true;
+    experience: true;
+    education: true;
+    certifications: true;
+    projects: true;
+  };
+}>;
 
 export type ProfileWithUser = Prisma.ProfileGetPayload<{
   include: { user: true };
@@ -21,24 +30,6 @@ export type ApplicationWithRelations = Prisma.ApplicationGetPayload<{
     };
   };
 }>;
-
-// User profile types
-export interface UserProfile {
-  userId: string;
-  preferredFirstName: string | null;
-  preferredLastName: string | null;
-  title: string | null;
-  phone: string | null;
-  location: string | null;
-  website: string | null;
-  linkedin: string | null;
-  github: string | null;
-  skills: Skill[];
-  experience: Experience[];
-  education: Education[];
-  certifications: Certification[];
-  projects: Project[];
-}
 
 export interface ResumeData {
   summary: string;
