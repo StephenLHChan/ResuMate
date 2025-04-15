@@ -53,6 +53,32 @@ model VerificationToken {
   @@id([identifier, token])
 }
 
+model Subscription {
+  id            String    @id @default(cuid())
+  userId        String    @unique
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status        String    @default("inactive") // active, inactive, canceled
+  plan          String    @default("free") // free, premium
+  startDate     DateTime
+  endDate       DateTime?
+  stripeCustomerId String?
+  stripeSubscriptionId String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  history       SubscriptionHistory[]
+}
+
+model SubscriptionHistory {
+  id              String    @id @default(cuid())
+  subscriptionId  String
+  subscription    Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  status          String    // active, inactive, canceled
+  plan            String    // free, premium
+  startDate       DateTime
+  endDate         DateTime?
+  createdAt       DateTime  @default(now())
+}
+
 model User {
   id            String          @id @default(cuid())
   name          String?
@@ -66,6 +92,7 @@ model User {
   resumes       Resume[]
   applications  Application[]
   jobs          JobUser[]
+  subscription  Subscription?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
