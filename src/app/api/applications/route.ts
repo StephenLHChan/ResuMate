@@ -1,15 +1,15 @@
-import { type Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { paginationSchema } from "@/lib/schemas/pagination";
-import { type APIResponse, type APIError } from "@/lib/types";
 
-type ApplicationWithRelations = Prisma.ApplicationGetPayload<{
-  include: { job: true; resumes: { include: { resume: true } } };
-}>;
+import type {
+  ApplicationWithRelations,
+  APIResponse,
+  APIError,
+} from "@/lib/types";
 
 const applicationSchema = z.object({
   jobId: z.string(),
