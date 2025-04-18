@@ -7,6 +7,7 @@ import {
   resumeSuggestionsPrompt,
 } from "@/lib/prompts/resume-analysis";
 import { resumeGenerationPrompt } from "@/lib/prompts/resume-generation";
+import { SubscriptionService } from "@/lib/services/subscription-service";
 import { resumeTemplate } from "@/lib/templates/resume-template";
 
 import type { ResumeData, ProfileWithRelations } from "@/lib/types";
@@ -35,6 +36,15 @@ export class ResumeService {
     userProfile: ProfileWithRelations,
     jobInfo: Job
   ): Promise<ResumeData> {
+    // Check if user has premium subscription
+    const isPremium = await SubscriptionService.isPremiumUser(
+      userProfile.userId
+    );
+
+    if (!isPremium) {
+      throw new Error("Premium subscription required to generate resumes");
+    }
+
     const completion = await openai.chat.completions.create({
       model: "gpt-4-turbo-preview",
       messages: [
