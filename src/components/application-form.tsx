@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
+import axiosInstance from "@/lib/axios";
 
 import type { ApplicationWithRelations } from "@/lib/types";
 
@@ -58,32 +59,19 @@ const ApplicationForm = ({
         .split("\n")
         .filter(req => req.trim() !== "");
 
-      const response = await fetch(
-        application
-          ? `/api/applications/${application.id}`
-          : "/api/applications",
-        {
-          method: application ? "PATCH" : "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            company: formData.company,
-            position: formData.position,
-            jobDescription: formData.jobDescription,
-            requirements,
-            status: formData.status,
-            notes: formData.notes || null,
-            jobUrl: formData.jobUrl || null,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(
-          `Failed to ${application ? "update" : "create"} application`
-        );
-      }
+      await axiosInstance({
+        method: application ? "PATCH" : "POST",
+        url: application ? `/applications/${application.id}` : "/applications",
+        data: {
+          company: formData.company,
+          position: formData.position,
+          jobDescription: formData.jobDescription,
+          requirements,
+          status: formData.status,
+          notes: formData.notes || null,
+          jobUrl: formData.jobUrl || null,
+        },
+      });
 
       toast({
         title: "Success",
@@ -95,7 +83,7 @@ const ApplicationForm = ({
       setIsOpen(false);
       onSuccess();
     } catch (error) {
-      console.error("Error saving application:", error);
+      console.error("Error submitting application:", error);
       toast({
         title: "Error",
         description: `Failed to ${

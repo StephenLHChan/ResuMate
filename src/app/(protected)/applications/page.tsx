@@ -8,7 +8,7 @@ import {
   Send,
   Trash2,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 
 import ApplicationForm from "@/components/application-form";
 import { Button } from "@/components/ui/button";
@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
+import axiosInstance from "@/lib/axios";
 
 import type { ApplicationWithRelations, APIResponse } from "@/lib/types";
 
@@ -93,16 +94,12 @@ const ApplicationPage = (): React.ReactElement => {
 
   const fetchApplications = async (nextPageKey?: string): Promise<void> => {
     try {
-      const url = new URL("/api/applications", window.location.origin);
-      if (nextPageKey) {
-        url.searchParams.set("nextPageKey", nextPageKey);
-      }
+      const { data } = await axiosInstance.get<
+        APIResponse<ApplicationWithRelations>
+      >("/applications", {
+        params: nextPageKey ? { nextPageKey } : undefined,
+      });
 
-      const response = await fetch(url.toString());
-      if (!response.ok) {
-        throw new Error("Failed to fetch applications");
-      }
-      const data: APIResponse<ApplicationWithRelations> = await response.json();
       setApplications(prev =>
         nextPageKey ? [...prev, ...(data.items || [])] : data.items || []
       );

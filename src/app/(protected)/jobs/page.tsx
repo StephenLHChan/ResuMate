@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
+import axiosInstance from "@/lib/axios";
 
 const JobsPage = (): React.ReactElement => {
   const { toast } = useToast();
@@ -53,22 +54,14 @@ const JobsPage = (): React.ReactElement => {
           location: manualJob.location || undefined,
         };
       } else {
-        const processResponse = await fetch("/api/jobs/process", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
+        const { data: processedJob } = await axiosInstance.post(
+          "/jobs/process",
+          {
             type: inputType,
             content: jobInput,
-          }),
-        });
+          }
+        );
 
-        if (!processResponse.ok) {
-          throw new Error("Failed to process job information");
-        }
-
-        const processedJob = await processResponse.json();
         jobInfo = {
           title: processedJob.title,
           companyName: processedJob.companyName,
@@ -81,33 +74,18 @@ const JobsPage = (): React.ReactElement => {
       }
 
       // Create the job record
-      const jobResponse = await fetch("/api/jobs", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...jobInfo,
-          url: inputType === "url" ? jobInput : null,
-        }),
+      const { data: newJob } = await axiosInstance.post("/jobs", {
+        ...jobInfo,
+        url: inputType === "url" ? jobInput : null,
       });
 
-      if (!jobResponse.ok) {
-        throw new Error("Failed to create job");
-      }
+      await axiosInstance.post(`/jobs/${newJob.id}/user-link`);
 
-      const newJob = await jobResponse.json();
-
-      // Link the job to the current user
-      const linkResponse = await fetch(`/api/jobs/${newJob.id}/user-link`, {
-        method: "POST",
+      toast({
+        title: "Success",
+        description: "Job created successfully",
       });
 
-      if (!linkResponse.ok) {
-        throw new Error("Failed to link job to user");
-      }
-
-      // Clear the input
       setJobInput("");
       setManualJob({
         title: "",
@@ -118,16 +96,12 @@ const JobsPage = (): React.ReactElement => {
         salaryMax: "",
         location: "",
       });
-
-      toast({
-        title: "Success",
-        description: "Job created successfully",
-      });
+      setInputType("url");
     } catch (error) {
-      console.error("Error processing job:", error);
+      console.error("Error creating job:", error);
       toast({
         title: "Error",
-        description: "Failed to process job information",
+        description: "Failed to create job",
         variant: "destructive",
       });
     } finally {
