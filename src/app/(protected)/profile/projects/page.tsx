@@ -15,7 +15,6 @@ import {
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -37,12 +36,14 @@ import {
 } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/use-toast";
 import { projectSchema, type ProjectFormValues } from "@/lib/schemas/project";
 import { type APIResponse } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const ProjectsPage = (): React.ReactElement => {
   const router = useRouter();
+  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -82,7 +83,11 @@ const ProjectsPage = (): React.ReactElement => {
       }
     } catch (error) {
       console.error("Error fetching projects:", error);
-      toast.error("Failed to load project data");
+      toast({
+        title: "Error",
+        description: "Failed to load project data",
+        variant: "destructive",
+      });
     } finally {
       setFetchLoading(false);
     }
@@ -133,7 +138,10 @@ const ProjectsPage = (): React.ReactElement => {
       });
 
       if (response.ok) {
-        toast.success(isEditing ? "Project updated" : "Project added");
+        toast({
+          title: "Success",
+          description: isEditing ? "Project updated" : "Project added",
+        });
         form.reset({
           name: "",
           description: "",
@@ -149,11 +157,19 @@ const ProjectsPage = (): React.ReactElement => {
         fetchProjects();
       } else {
         const error = await response.json();
-        toast.error(error.message || "Failed to save project");
+        toast({
+          title: "Error",
+          description: error.message || "Failed to save project",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error("Error saving project:", error);
-      toast.error("Something went wrong");
+      toast({
+        title: "Error",
+        description: "Something went wrong",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -182,15 +198,26 @@ const ProjectsPage = (): React.ReactElement => {
         });
 
         if (response.ok) {
-          toast.success("Project deleted");
+          toast({
+            title: "Success",
+            description: "Project deleted",
+          });
           fetchProjects();
         } else {
           const error = await response.json();
-          toast.error(error.message || "Failed to delete project");
+          toast({
+            title: "Error",
+            description: error.message || "Failed to delete project",
+            variant: "destructive",
+          });
         }
       } catch (error) {
         console.error("Error deleting project:", error);
-        toast.error("Something went wrong");
+        toast({
+          title: "Error",
+          description: "Something went wrong",
+          variant: "destructive",
+        });
       }
     }
   };

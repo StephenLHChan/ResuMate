@@ -14,7 +14,6 @@ import {
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -35,16 +34,17 @@ import {
 } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/use-toast";
 import {
   certificationSchema,
   type CertificationFormValues,
 } from "@/lib/schemas/certification";
+import { type APIResponse } from "@/lib/types";
 import { cn } from "@/lib/utils";
-
-import type { APIResponse } from "@/lib/types";
 
 const CertificationsPage = (): React.ReactElement => {
   const router = useRouter();
+  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
   const [certifications, setCertifications] = useState<Certification[]>([]);
@@ -80,7 +80,11 @@ const CertificationsPage = (): React.ReactElement => {
       }
     } catch (error) {
       console.error("Error fetching certifications:", error);
-      toast.error("Failed to load certification data");
+      toast({
+        title: "Error",
+        description: "Failed to load certification data",
+        variant: "destructive",
+      });
     } finally {
       setFetchLoading(false);
     }
@@ -111,9 +115,12 @@ const CertificationsPage = (): React.ReactElement => {
       });
 
       if (response.ok) {
-        toast.success(
-          isEditing ? "Certification updated" : "Certification added"
-        );
+        toast({
+          title: "Success",
+          description: isEditing
+            ? "Certification updated"
+            : "Certification added",
+        });
         form.reset({
           name: "",
           issuer: "",
@@ -128,11 +135,19 @@ const CertificationsPage = (): React.ReactElement => {
         fetchCertifications();
       } else {
         const error = await response.json();
-        toast.error(error.message || "Failed to save certification");
+        toast({
+          title: "Error",
+          description: error.message || "Failed to save certification",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error("Error saving certification:", error);
-      toast.error("Something went wrong");
+      toast({
+        title: "Error",
+        description: "Something went wrong",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -160,15 +175,26 @@ const CertificationsPage = (): React.ReactElement => {
         });
 
         if (response.ok) {
-          toast.success("Certification deleted");
+          toast({
+            title: "Success",
+            description: "Certification deleted",
+          });
           fetchCertifications();
         } else {
           const error = await response.json();
-          toast.error(error.message || "Failed to delete certification");
+          toast({
+            title: "Error",
+            description: error.message || "Failed to delete certification",
+            variant: "destructive",
+          });
         }
       } catch (error) {
         console.error("Error deleting certification:", error);
-        toast.error("Something went wrong");
+        toast({
+          title: "Error",
+          description: "Something went wrong",
+          variant: "destructive",
+        });
       }
     }
   };

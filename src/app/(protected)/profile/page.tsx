@@ -15,7 +15,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -48,6 +47,7 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SkillRating } from "@/components/ui/skill-rating";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/use-toast";
 import { canadaProvinces } from "@/lib/data/canada-provinces";
 import { countries } from "@/lib/data/countries";
 import { usStates } from "@/lib/data/us-states";
@@ -64,6 +64,7 @@ interface StateType {
 
 const ProfilePage = (): React.ReactElement => {
   const router = useRouter();
+  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
   const [showPreferredNameFields, setShowPreferredNameFields] = useState(false);
@@ -164,14 +165,18 @@ const ProfilePage = (): React.ReactElement => {
         }
       } catch (error) {
         console.error("Error fetching profile:", error);
-        toast.error("Failed to load profile data");
+        toast({
+          title: "Error",
+          description: "Failed to load profile data",
+          variant: "destructive",
+        });
       } finally {
         setFetchLoading(false);
       }
     };
 
     fetchProfile();
-  }, [form]);
+  }, [form, toast]);
 
   // TODO: Update city and state when zip code changes
 
@@ -217,15 +222,26 @@ const ProfilePage = (): React.ReactElement => {
       });
 
       if (response.ok) {
-        toast.success("Profile updated successfully");
+        toast({
+          title: "Success",
+          description: "Profile updated successfully",
+        });
         router.refresh();
       } else {
         const errorData = await response.json();
-        toast.error(errorData.message || "Failed to update profile");
+        toast({
+          title: "Error",
+          description: errorData.message || "Failed to update profile",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error("Error updating profile:", error);
-      toast.error("Something went wrong");
+      toast({
+        title: "Error",
+        description: "Something went wrong",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }

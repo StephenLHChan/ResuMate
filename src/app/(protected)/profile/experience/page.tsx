@@ -7,14 +7,12 @@ import {
   Calendar as CalendarIcon,
   Pencil,
   Trash2,
-  Building,
   Briefcase,
   Loader2,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -36,18 +34,20 @@ import {
 } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/use-toast";
 import {
-  type ExperienceFormValues,
   experienceSchema,
+  type ExperienceFormValues,
 } from "@/lib/schemas/experience";
 import { type APIResponse } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const ExperiencePage = (): React.ReactElement => {
   const router = useRouter();
+  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
-  const [experiences, setExperiences] = useState<Experience[]>([]);
+  const [experience, setExperience] = useState<Experience[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [currentId, setCurrentId] = useState<string | null>(null);
 
@@ -57,8 +57,10 @@ const ExperiencePage = (): React.ReactElement => {
     defaultValues: {
       company: "",
       position: "",
-      description: "",
+      startDate: undefined,
+      endDate: undefined,
       currentlyWorking: false,
+      description: "",
     },
   });
 
@@ -76,18 +78,22 @@ const ExperiencePage = (): React.ReactElement => {
       const response = await fetch("/api/profile/experience");
       if (response.ok) {
         const data: APIResponse<Experience> = await response.json();
-        setExperiences(data.items);
+        setExperience(data.items);
       }
     } catch (error) {
       console.error("Error fetching experience:", error);
-      toast.error("Failed to load experience data");
+      toast({
+        title: "Error",
+        description: "Failed to load experience data",
+        variant: "destructive",
+      });
     } finally {
       setFetchLoading(false);
     }
   };
 
   // Sort experiences by end date (most recent first) with current jobs appearing first
-  const sortedExperiences = [...experiences].sort((a, b) => {
+  const sortedExperiences = [...experience].sort((a, b) => {
     // Current job (no end date) should appear first
     if (!a.endDate && b.endDate) return -1;
     if (a.endDate && !b.endDate) return 1;
@@ -131,25 +137,29 @@ const ExperiencePage = (): React.ReactElement => {
       });
 
       if (response.ok) {
-        toast.success(isEditing ? "Experience updated" : "Experience added");
-        form.reset({
-          company: "",
-          position: "",
-          startDate: undefined,
-          endDate: undefined,
-          currentlyWorking: false,
-          description: "",
+        toast({
+          title: "Success",
+          description: isEditing ? "Experience updated" : "Experience added",
         });
+        form.reset();
         setIsEditing(false);
         setCurrentId(null);
         fetchExperience();
       } else {
         const error = await response.json();
-        toast.error(error.message || "Failed to save experience");
+        toast({
+          title: "Error",
+          description: error.message || "Failed to save experience",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error("Error saving experience:", error);
-      toast.error("Something went wrong");
+      toast({
+        title: "Error",
+        description: "Something went wrong",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -176,23 +186,69 @@ const ExperiencePage = (): React.ReactElement => {
         });
 
         if (response.ok) {
-          toast.success("Experience deleted");
+          toast({
+            title: "Success",
+            description: "Experience deleted",
+          });
           fetchExperience();
         } else {
           const error = await response.json();
-          toast.error(error.message || "Failed to delete experience");
+          toast({
+            title: "Error",
+            description: error.message || "Failed to delete experience",
+            variant: "destructive",
+          });
         }
       } catch (error) {
         console.error("Error deleting experience:", error);
-        toast.error("Something went wrong");
+        toast({
+          title: "Error",
+          description: "Something went wrong",
+          variant: "destructive",
+        });
       }
     }
   };
 
-  const formatDate = (date: string | Date | null): string => {
-    if (!date) return "Present";
-    return format(new Date(date), "MMM yyyy");
-  };
+  const ExperienceCard = ({
+    experience,
+  }: {
+    experience: Experience;
+  }): React.ReactElement => (
+    <Card className="mb-4">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium">
+          {experience.position}
+        </CardTitle>
+        <div className="flex space-x-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => handleEdit(experience)}
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => handleDelete(experience.id)}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="text-2xl font-bold">{experience.company}</div>
+        <p className="text-xs text-muted-foreground">
+          {format(new Date(experience.startDate), "MMM yyyy")} -{" "}
+          {experience.endDate
+            ? format(new Date(experience.endDate), "MMM yyyy")
+            : "Present"}
+        </p>
+        <p className="mt-2 text-sm">{experience.description}</p>
+      </CardContent>
+    </Card>
+  );
 
   return (
     <div className="container mx-auto py-10 space-y-6">
@@ -228,7 +284,7 @@ const ExperiencePage = (): React.ReactElement => {
             ))}
           </CardContent>
         </Card>
-      ) : experiences.length > 0 ? (
+      ) : experience.length > 0 ? (
         <Card>
           <CardHeader>
             <CardTitle>Your Experience</CardTitle>
@@ -236,56 +292,7 @@ const ExperiencePage = (): React.ReactElement => {
           <CardContent>
             <div className="space-y-6">
               {sortedExperiences.map(exp => (
-                <div
-                  key={exp.id}
-                  className="border rounded-lg p-5 hover:shadow-md transition-shadow bg-card"
-                >
-                  <div className="flex justify-between items-start">
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2 text-primary">
-                        <Building className="h-5 w-5" />
-                        <h3 className="text-lg font-semibold">
-                          {exp.position}
-                        </h3>
-                      </div>
-
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <h4 className="text-md">{exp.company}</h4>
-                      </div>
-
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <CalendarIcon className="h-4 w-4" />
-                        <p className="text-sm">
-                          {formatDate(exp.startDate)} -{" "}
-                          {formatDate(exp.endDate)}
-                        </p>
-                      </div>
-
-                      {exp.description && (
-                        <p className="text-sm text-muted-foreground">
-                          {exp.description}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="flex gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleEdit(exp)}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDelete(exp.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
+                <ExperienceCard key={exp.id} experience={exp} />
               ))}
             </div>
           </CardContent>

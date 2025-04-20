@@ -3,7 +3,6 @@
 import { ChevronDown, Trash2, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,8 +19,9 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Skeleton } from "@/components/ui/skeleton";
-import { type APIResponse } from "@/lib/types";
+import { useToast } from "@/components/ui/use-toast";
 
+import type { APIResponse } from "@/lib/types";
 import type { Prisma } from "@prisma/client";
 
 type JobWithApplications = Prisma.JobGetPayload<{
@@ -47,6 +47,8 @@ export const JobList = (): React.ReactElement => {
   });
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
+  const [loadingJobId, setLoadingJobId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchJobs();
@@ -80,7 +82,11 @@ export const JobList = (): React.ReactElement => {
     } catch (error) {
       console.error("Error fetching jobs:", error);
       setError("Failed to load jobs. Please try again.");
-      toast.error("Failed to load jobs");
+      toast({
+        title: "Error",
+        description: "Failed to load jobs",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -93,6 +99,7 @@ export const JobList = (): React.ReactElement => {
   };
 
   const handleAddToApplication = async (jobId: string): Promise<void> => {
+    setLoadingJobId(jobId);
     try {
       const response = await fetch("/api/applications", {
         method: "POST",
@@ -105,19 +112,32 @@ export const JobList = (): React.ReactElement => {
       if (!response.ok) {
         const error = await response.json();
         if (error.error === "Please create a profile first") {
-          toast.error("Please create a profile first");
+          toast({
+            title: "Error",
+            description: "Please create a profile first",
+            variant: "destructive",
+          });
           router.push("/profile");
           return;
         }
         throw new Error("Failed to add job to applications");
       }
 
-      toast.success("Job added to applications");
+      toast({
+        title: "Success",
+        description: "Job added to applications",
+      });
       // Refresh the jobs list to update the status
       fetchJobs();
     } catch (error) {
       console.error("Error adding job to application:", error);
-      toast.error("Failed to add job to applications");
+      toast({
+        title: "Error",
+        description: "Failed to add job to applications",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingJobId(null);
     }
   };
 
@@ -126,7 +146,7 @@ export const JobList = (): React.ReactElement => {
       return;
     }
 
-    setIsLoading(true);
+    setLoadingJobId(id);
 
     fetch(`/api/jobs/${id}/user-link`, {
       method: "DELETE",
@@ -135,15 +155,22 @@ export const JobList = (): React.ReactElement => {
         if (!response.ok) {
           throw new Error("Failed to unlink job");
         }
-        toast.success("Job removed successfully");
+        toast({
+          title: "Success",
+          description: "Job removed successfully",
+        });
         setJobs(prev => prev.filter(job => job.id !== id));
       })
       .catch(error => {
         console.error("Error unlinking job:", error);
-        toast.error("Failed to remove job");
+        toast({
+          title: "Error",
+          description: "Failed to remove job",
+          variant: "destructive",
+        });
       })
       .finally(() => {
-        setIsLoading(false);
+        setLoadingJobId(null);
       });
   };
 
@@ -225,7 +252,7 @@ export const JobList = (): React.ReactElement => {
                       size="icon"
                       className="h-6 w-6"
                       onClick={() => handleAddToApplication(job.id)}
-                      disabled={isLoading}
+                      disabled={loadingJobId === job.id}
                     >
                       <Plus className="h-3 w-3" />
                     </Button>
@@ -235,7 +262,7 @@ export const JobList = (): React.ReactElement => {
                     size="icon"
                     className="h-6 w-6"
                     onClick={() => deleteJobFromThisUser(job.id)}
-                    disabled={isLoading}
+                    disabled={loadingJobId === job.id}
                   >
                     <Trash2 className="h-3 w-3" />
                   </Button>

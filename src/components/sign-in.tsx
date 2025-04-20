@@ -4,8 +4,7 @@ import { Loader2 } from "lucide-react";
 import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
-import { toast } from "sonner";
+import React, { useState } from "react";
 
 import { login } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
@@ -17,17 +16,21 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
+import { useToast } from "@/components/ui/use-toast";
 const SignIn: React.FC = () => {
-  const [isLoading, setIsLoading] = React.useState(false);
-
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
   const handleGoogleSignIn = async (): Promise<void> => {
     try {
       setIsLoading(true);
       await login("google");
     } catch (error) {
-      console.error("Google sign in error:", error);
-      toast.error("Failed to sign in with Google");
+      console.error("Error signing in with Google:", error);
+      toast({
+        title: "Error",
+        description: "Failed to sign in with Google",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }

@@ -13,7 +13,6 @@ import {
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -35,6 +34,7 @@ import {
 } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/use-toast";
 import {
   educationSchema,
   type EducationFormValues,
@@ -44,6 +44,7 @@ import { cn } from "@/lib/utils";
 
 const EducationPage = (): React.ReactElement => {
   const router = useRouter();
+  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
   const [education, setEducation] = useState<Education[]>([]);
@@ -80,7 +81,11 @@ const EducationPage = (): React.ReactElement => {
       }
     } catch (error) {
       console.error("Error fetching education:", error);
-      toast.error("Failed to load education data");
+      toast({
+        title: "Error",
+        description: "Failed to load education data",
+        variant: "destructive",
+      });
     } finally {
       setFetchLoading(false);
     }
@@ -131,7 +136,10 @@ const EducationPage = (): React.ReactElement => {
       });
 
       if (response.ok) {
-        toast.success(isEditing ? "Education updated" : "Education added");
+        toast({
+          title: "Success",
+          description: isEditing ? "Education updated" : "Education added",
+        });
         form.reset({
           institution: "",
           degree: "",
@@ -146,11 +154,19 @@ const EducationPage = (): React.ReactElement => {
         fetchEducation();
       } else {
         const error = await response.json();
-        toast.error(error.message || "Failed to save education");
+        toast({
+          title: "Error",
+          description: error.message || "Failed to save education",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error("Error saving education:", error);
-      toast.error("Something went wrong");
+      toast({
+        title: "Error",
+        description: "Something went wrong",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -178,15 +194,26 @@ const EducationPage = (): React.ReactElement => {
         });
 
         if (response.ok) {
-          toast.success("Education deleted");
+          toast({
+            title: "Success",
+            description: "Education deleted",
+          });
           fetchEducation();
         } else {
           const error = await response.json();
-          toast.error(error.message || "Failed to delete education");
+          toast({
+            title: "Error",
+            description: error.message || "Failed to delete education",
+            variant: "destructive",
+          });
         }
       } catch (error) {
         console.error("Error deleting education:", error);
-        toast.error("Something went wrong");
+        toast({
+          title: "Error",
+          description: "Something went wrong",
+          variant: "destructive",
+        });
       }
     }
   };
