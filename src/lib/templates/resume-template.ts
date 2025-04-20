@@ -41,6 +41,8 @@ export const resumeTemplate = (
         font-weight: 700;
         margin-bottom: 0;
         color: #2c3e50;
+        line-height: 1.2;
+
       }
       
       .title {
@@ -71,7 +73,7 @@ export const resumeTemplate = (
         font-weight: 700;
         color: #2c3e50;
         border-bottom: 1px solid #bdc3c7;
-        padding-bottom: 0.1em;
+        padding-bottom: 0.05em;
         margin-bottom: 0.3em;
       }
       
@@ -163,13 +165,29 @@ export const resumeTemplate = (
               <div class="item-title">${exp.position}</div>
               <div class="item-subtitle">${exp.company}</div>
             </div>
-            <div class="item-date">${formatDate(
-              exp.startDate.toISOString()
-            )} - ${
-            exp.endDate ? formatDate(exp.endDate.toISOString()) : "present"
+            <div class="item-date">${
+              exp.startDate
+                ? formatDate(
+                    typeof exp.startDate === "string"
+                      ? exp.startDate
+                      : exp.startDate.toISOString()
+                  )
+                : "N/A"
+            } - ${
+            exp.endDate
+              ? formatDate(
+                  typeof exp.endDate === "string"
+                    ? exp.endDate
+                    : exp.endDate.toISOString()
+                )
+              : "present"
           }</div>
           </div>
-          <div class="item-description">${exp.description}</div>
+          ${
+            exp.description
+              ? `<div class="item-description">${exp.description}</div>`
+              : ""
+          }
         </div>
       `
         )
@@ -187,10 +205,22 @@ export const resumeTemplate = (
               <div class="item-title">${edu.degree} in ${edu.field}</div>
               <div class="item-subtitle">${edu.institution}</div>
             </div>
-            <div class="item-date">${formatDate(
-              edu.startDate.toISOString()
-            )} - ${
-            edu.endDate ? formatDate(edu.endDate.toISOString()) : "present"
+            <div class="item-date">${
+              edu.startDate
+                ? formatDate(
+                    typeof edu.startDate === "string"
+                      ? edu.startDate
+                      : edu.startDate.toISOString()
+                  )
+                : "N/A"
+            } - ${
+            edu.endDate
+              ? formatDate(
+                  typeof edu.endDate === "string"
+                    ? edu.endDate
+                    : edu.endDate.toISOString()
+                )
+              : "present"
           }</div>
           </div>
         </div>
@@ -214,14 +244,27 @@ export const resumeTemplate = (
               <div class="item-subtitle">${cert.issuer}</div>
             </div>
             <div class="item-date">${
-              cert.expiryDate
-                ? isCertExpired(cert.expiryDate.toISOString())
-                  ? formatDate(cert.issueDate.toISOString())
-                  : `${formatDate(cert.issueDate.toISOString())} - ${formatDate(
-                      cert.expiryDate.toISOString()
-                    )}`
-                : formatDate(cert.issueDate.toISOString())
-            }</div>
+              cert.issueDate
+                ? formatDate(
+                    typeof cert.issueDate === "string"
+                      ? cert.issueDate
+                      : cert.issueDate.toISOString()
+                  )
+                : "N/A"
+            }${
+            cert.expiryDate &&
+            !isCertExpired(
+              typeof cert.expiryDate === "string"
+                ? cert.expiryDate
+                : cert.expiryDate.toISOString()
+            )
+              ? ` - ${formatDate(
+                  typeof cert.expiryDate === "string"
+                    ? cert.expiryDate
+                    : cert.expiryDate.toISOString()
+                )}`
+              : ""
+          }</div>
           </div>
         </div>
       `
