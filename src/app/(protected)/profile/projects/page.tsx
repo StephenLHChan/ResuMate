@@ -13,7 +13,7 @@ import {
   Github,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
@@ -68,12 +68,7 @@ const ProjectsPage = (): React.ReactElement => {
   // Watch for changes in the currentlyWorking field
   const isCurrentlyWorking = form.watch("currentlyWorking");
 
-  // Load project data on component mount
-  useEffect(() => {
-    fetchProjects();
-  }, []);
-
-  const fetchProjects = async (): Promise<void> => {
+  const fetchProjects = useCallback(async (): Promise<void> => {
     setFetchLoading(true);
     try {
       const response = await fetch("/api/profile/project");
@@ -91,7 +86,12 @@ const ProjectsPage = (): React.ReactElement => {
     } finally {
       setFetchLoading(false);
     }
-  };
+  }, [toast]);
+
+  // Load project data on component mount
+  useEffect(() => {
+    fetchProjects();
+  }, [fetchProjects]);
 
   // Sort projects by end date (most recent first) with current projects appearing first
   const sortedProjects = [...projects].sort((a, b) => {

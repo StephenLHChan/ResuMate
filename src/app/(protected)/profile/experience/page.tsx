@@ -11,7 +11,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
@@ -67,12 +67,7 @@ const ExperiencePage = (): React.ReactElement => {
   // Watch for changes in the currentlyWorking field
   const isCurrentlyWorking = form.watch("currentlyWorking");
 
-  // Load experience data on component mount
-  useEffect(() => {
-    fetchExperience();
-  }, []);
-
-  const fetchExperience = async (): Promise<void> => {
+  const fetchExperience = useCallback(async (): Promise<void> => {
     setFetchLoading(true);
     try {
       const response = await fetch("/api/profile/experience");
@@ -90,7 +85,12 @@ const ExperiencePage = (): React.ReactElement => {
     } finally {
       setFetchLoading(false);
     }
-  };
+  }, [toast]);
+
+  // Load experience data on component mount
+  useEffect(() => {
+    fetchExperience();
+  }, [fetchExperience]);
 
   // Sort experiences by end date (most recent first) with current jobs appearing first
   const sortedExperiences = [...experience].sort((a, b) => {
@@ -141,7 +141,14 @@ const ExperiencePage = (): React.ReactElement => {
           title: "Success",
           description: isEditing ? "Experience updated" : "Experience added",
         });
-        form.reset();
+        form.reset({
+          company: "",
+          position: "",
+          startDate: undefined,
+          endDate: undefined,
+          currentlyWorking: false,
+          description: "",
+        });
         setIsEditing(false);
         setCurrentId(null);
         fetchExperience();

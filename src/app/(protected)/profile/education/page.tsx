@@ -11,7 +11,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
@@ -66,12 +66,7 @@ const EducationPage = (): React.ReactElement => {
   // Watch for changes in the currentlyStudying field
   const isCurrentlyStudying = form.watch("currentlyStudying");
 
-  // Load education data on component mount
-  useEffect(() => {
-    fetchEducation();
-  }, []);
-
-  const fetchEducation = async (): Promise<void> => {
+  const fetchEducation = useCallback(async (): Promise<void> => {
     setFetchLoading(true);
     try {
       const response = await fetch("/api/profile/education");
@@ -89,7 +84,12 @@ const EducationPage = (): React.ReactElement => {
     } finally {
       setFetchLoading(false);
     }
-  };
+  }, [toast]);
+
+  // Load education data on component mount
+  useEffect(() => {
+    fetchEducation();
+  }, [fetchEducation]);
 
   // Sort education by end date (most recent first) with current studies appearing first
   const sortedEducation = [...education].sort((a, b) => {

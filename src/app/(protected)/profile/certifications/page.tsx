@@ -12,7 +12,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
@@ -65,12 +65,7 @@ const CertificationsPage = (): React.ReactElement => {
     },
   });
 
-  // Load certification data on component mount
-  useEffect(() => {
-    fetchCertifications();
-  }, []);
-
-  const fetchCertifications = async (): Promise<void> => {
+  const fetchCertifications = useCallback(async (): Promise<void> => {
     setFetchLoading(true);
     try {
       const response = await fetch("/api/profile/certification");
@@ -88,7 +83,12 @@ const CertificationsPage = (): React.ReactElement => {
     } finally {
       setFetchLoading(false);
     }
-  };
+  }, [toast]);
+
+  // Load certification data on component mount
+  useEffect(() => {
+    fetchCertifications();
+  }, [fetchCertifications]);
 
   // Sort certifications by issue date (most recent first)
   const sortedCertifications = [...certifications].sort(
