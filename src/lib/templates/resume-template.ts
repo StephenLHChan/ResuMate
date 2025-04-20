@@ -154,6 +154,9 @@ export const resumeTemplate = (
     
     <div class="summary">${resumeData.summary}</div>
     
+    ${
+      resumeData.experience && resumeData.experience.length > 0
+        ? `
     <div class="section">
       <div class="section-title">Work Experience</div>
       ${resumeData.experience
@@ -193,7 +196,13 @@ export const resumeTemplate = (
         )
         .join("")}
     </div>
+    `
+        : ""
+    }
     
+    ${
+      resumeData.education && resumeData.education.length > 0
+        ? `
     <div class="section">
       <div class="section-title">Education</div>
       ${resumeData.education
@@ -228,9 +237,12 @@ export const resumeTemplate = (
         )
         .join("")}
     </div>
+    `
+        : ""
+    }
     
     ${
-      resumeData.certifications.length > 0
+      resumeData.certifications && resumeData.certifications.length > 0
         ? `
     <div class="section">
       <div class="section-title">Certifications</div>
@@ -276,7 +288,7 @@ export const resumeTemplate = (
     }
 
     ${
-      resumeData.skills.length > 0
+      resumeData.skills && resumeData.skills.length > 0
         ? `
     <div class="section">
       <div class="section-title">Skills</div>
