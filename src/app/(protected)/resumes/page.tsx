@@ -1,14 +1,14 @@
 "use client";
 
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, FileText } from "lucide-react";
 import { useState, useEffect } from "react";
-import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/use-toast";
 import axiosInstance from "@/lib/axios";
 import { resumeTemplate } from "@/lib/templates/resume-template";
 import { type ProfileWithRelations, type ResumeData } from "@/lib/types";
@@ -16,6 +16,7 @@ import { type ProfileWithRelations, type ResumeData } from "@/lib/types";
 type ResumeSection = keyof Omit<ResumeData, "summary">;
 
 const ResumePage = (): React.ReactElement => {
+  const { toast } = useToast();
   const [formData, setFormData] = useState<ResumeData>({
     summary: "",
     experience: [],
@@ -86,14 +87,18 @@ const ResumePage = (): React.ReactElement => {
         }
       } catch (error) {
         console.error("Error fetching profile:", error);
-        toast.error("Failed to load profile data");
+        toast({
+          title: "Error",
+          description: "Failed to load profile data",
+          variant: "destructive",
+        });
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, []);
+  }, [toast]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -147,45 +152,57 @@ const ResumePage = (): React.ReactElement => {
       const _transformedData = transformResumeData(formData);
       // TODO: Add API call to save resume data
       await axiosInstance.post("/resumes", _transformedData);
-      toast.success("Resume data saved successfully");
+      toast({
+        title: "Success",
+        description: "Resume data saved successfully",
+      });
     } catch (error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to save resume data";
-      toast.error(errorMessage);
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
     }
   };
 
   const transformResumeData = (formData: ResumeData): ResumeData => ({
     summary: formData.summary,
-    experience: formData.experience.map(exp => ({
+    experience: formData.experience?.map(exp => ({
       ...exp,
       endDate: exp.endDate ? new Date(exp.endDate) : null,
       description: exp.description || null,
       profileId: profile?.id || "",
       isCurrent: false,
     })),
-    education: formData.education.map(edu => ({
+    education: formData.education?.map(edu => ({
       ...edu,
       endDate: edu.endDate ? new Date(edu.endDate) : null,
       description: edu.description || null,
       profileId: profile?.id || "",
     })),
-    certifications: formData.certifications.map(cert => ({
+    certifications: formData.certifications?.map(cert => ({
       ...cert,
       expiryDate: cert.expiryDate ? new Date(cert.expiryDate) : null,
       description: null,
       credentialUrl: null,
       profileId: profile?.id || "",
     })),
-    skills: formData.skills.map(skill => ({
+    skills: formData.skills?.map(skill => ({
       ...skill,
       profileId: profile?.id || "",
     })),
   });
 
   return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-8">Create Your Resume</h1>
+    <div className="container mx-auto py-10 space-y-6">
+      <div className="flex justify-between items-center">
+        <div className="flex items-center gap-2">
+          <FileText className="h-7 w-7 text-primary" />
+          <h1 className="text-3xl font-bold">Create Your Resume</h1>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Form Section */}
@@ -233,7 +250,7 @@ const ResumePage = (): React.ReactElement => {
                     Add Experience
                   </Button>
                 </div>
-                {formData.experience.map((exp, index) => (
+                {formData.experience?.map((exp, index) => (
                   <div key={exp.id} className="space-y-4">
                     <div className="flex justify-between items-center">
                       <h3 className="text-lg font-semibold">
@@ -360,7 +377,7 @@ const ResumePage = (): React.ReactElement => {
                     Add Certification
                   </Button>
                 </div>
-                {formData.certifications.map((cert, index) => (
+                {formData.certifications?.map((cert, index) => (
                   <div key={cert.id} className="space-y-4">
                     <div className="flex justify-between items-center">
                       <h3 className="text-lg font-semibold">
@@ -480,7 +497,7 @@ const ResumePage = (): React.ReactElement => {
                     Add Education
                   </Button>
                 </div>
-                {formData.education.map((edu, index) => (
+                {formData.education?.map((edu, index) => (
                   <div key={edu.id} className="space-y-4">
                     <div className="flex justify-between items-center">
                       <h3 className="text-lg font-semibold">
@@ -604,7 +621,7 @@ const ResumePage = (): React.ReactElement => {
                     Add Skill
                   </Button>
                 </div>
-                {formData.skills.map((skill, index) => (
+                {formData.skills?.map((skill, index) => (
                   <Card key={skill.id} className="p-4">
                     <div className="flex justify-end">
                       <Button
@@ -660,25 +677,28 @@ const ResumePage = (): React.ReactElement => {
           </CardHeader>
           <CardContent>
             {profile && (
-              <div
-                className="prose max-w-none"
-                style={{
-                  width: "210mm",
-                  minHeight: "297mm",
-                  padding: "10mm",
-                  backgroundColor: "white",
-                  boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-                  color: "#2c3e50",
-                  transform: "scale(0.8)",
-                  transformOrigin: "top center",
-                }}
-                dangerouslySetInnerHTML={{
-                  __html: resumeTemplate(
+              <div className="resume-preview-container">
+                <iframe
+                  title="Resume Preview"
+                  className="resume-preview-content"
+                  style={{
+                    width: "210mm",
+                    minHeight: "297mm",
+                    padding: "10mm",
+                    backgroundColor: "white",
+                    boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+                    color: "#2c3e50",
+                    transform: "scale(0.8)",
+                    transformOrigin: "top center",
+                    overflow: "hidden",
+                    border: "none",
+                  }}
+                  srcDoc={resumeTemplate(
                     profile,
                     transformResumeData(formData)
-                  ),
-                }}
-              />
+                  )}
+                />
+              </div>
             )}
           </CardContent>
         </Card>
