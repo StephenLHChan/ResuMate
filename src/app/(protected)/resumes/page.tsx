@@ -120,9 +120,9 @@ const ResumePage = (): React.ReactElement => {
     }
   };
 
-  const addItem = (
-    section: ResumeSection,
-    template: Omit<ResumeData[keyof Omit<ResumeData, "summary">][number], "id">
+  const addItem = <T extends ResumeSection>(
+    section: T,
+    template: Omit<ResumeData[T][number], "id">
   ): void => {
     setFormData(prev => ({
       ...prev,
@@ -159,37 +159,26 @@ const ResumePage = (): React.ReactElement => {
     summary: formData.summary,
     experience: formData.experience.map(exp => ({
       ...exp,
-      startDate: new Date(exp.startDate),
       endDate: exp.endDate ? new Date(exp.endDate) : null,
       description: exp.description || null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
       profileId: profile?.id || "",
       isCurrent: false,
     })),
     education: formData.education.map(edu => ({
       ...edu,
-      startDate: new Date(edu.startDate),
       endDate: edu.endDate ? new Date(edu.endDate) : null,
       description: edu.description || null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
       profileId: profile?.id || "",
     })),
     certifications: formData.certifications.map(cert => ({
       ...cert,
-      issueDate: new Date(cert.issueDate),
       expiryDate: cert.expiryDate ? new Date(cert.expiryDate) : null,
       description: null,
       credentialUrl: null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
       profileId: profile?.id || "",
     })),
     skills: formData.skills.map(skill => ({
       ...skill,
-      createdAt: new Date(),
-      updatedAt: new Date(),
       profileId: profile?.id || "",
     })),
   });
@@ -230,9 +219,13 @@ const ResumePage = (): React.ReactElement => {
                       addItem("experience", {
                         company: "",
                         position: "",
-                        startDate: "",
-                        endDate: "",
+                        startDate: new Date(),
+                        endDate: null,
                         description: "",
+                        isCurrent: false,
+                        profileId: profile?.id || "",
+                        createdAt: new Date(),
+                        updatedAt: new Date(),
                       })
                     }
                   >
@@ -249,7 +242,11 @@ const ResumePage = (): React.ReactElement => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => removeItem("experience", exp.id)}
+                        onClick={() => {
+                          if (exp.id) {
+                            removeItem("experience", exp.id);
+                          }
+                        }}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -351,9 +348,11 @@ const ResumePage = (): React.ReactElement => {
                       addItem("certifications", {
                         name: "",
                         issuer: "",
-                        issueDate: "",
-                        expiryDate: "",
+                        issueDate: new Date(),
+                        expiryDate: null,
                         credentialId: "",
+                        credentialUrl: null,
+                        description: null,
                       })
                     }
                   >
@@ -370,7 +369,11 @@ const ResumePage = (): React.ReactElement => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => removeItem("certifications", cert.id)}
+                        onClick={() => {
+                          if (cert.id) {
+                            removeItem("certifications", cert.id);
+                          }
+                        }}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -468,9 +471,8 @@ const ResumePage = (): React.ReactElement => {
                         institution: "",
                         degree: "",
                         field: "",
-                        startDate: "",
-                        endDate: "",
-                        description: "",
+                        startDate: new Date(),
+                        endDate: null,
                       })
                     }
                   >
@@ -487,7 +489,11 @@ const ResumePage = (): React.ReactElement => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => removeItem("education", edu.id)}
+                        onClick={() => {
+                          if (edu.id) {
+                            removeItem("education", edu.id);
+                          }
+                        }}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -590,7 +596,7 @@ const ResumePage = (): React.ReactElement => {
                     onClick={() =>
                       addItem("skills", {
                         name: "",
-                        level: "",
+                        rating: null,
                       })
                     }
                   >
@@ -605,7 +611,11 @@ const ResumePage = (): React.ReactElement => {
                         type="button"
                         variant="ghost"
                         size="sm"
-                        onClick={() => removeItem("skills", skill.id)}
+                        onClick={() => {
+                          if (skill.id) {
+                            removeItem("skills", skill.id);
+                          }
+                        }}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -624,9 +634,9 @@ const ResumePage = (): React.ReactElement => {
                       <div>
                         <Label>Level</Label>
                         <Input
-                          value={skill.level}
+                          value={skill.rating?.toString() || ""}
                           onChange={e =>
-                            handleInputChange(e, "skills", index, "level")
+                            handleInputChange(e, "skills", index, "rating")
                           }
                           required
                         />
@@ -652,6 +662,16 @@ const ResumePage = (): React.ReactElement => {
             {profile && (
               <div
                 className="prose max-w-none"
+                style={{
+                  width: "210mm",
+                  minHeight: "297mm",
+                  padding: "10mm",
+                  backgroundColor: "white",
+                  boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+                  color: "#2c3e50",
+                  transform: "scale(0.8)",
+                  transformOrigin: "top center",
+                }}
                 dangerouslySetInnerHTML={{
                   __html: resumeTemplate(
                     profile,
