@@ -2,6 +2,7 @@ import type {
   Certification,
   Education,
   Experience,
+  Skill,
   Prisma,
 } from "@prisma/client";
 
@@ -37,18 +38,12 @@ export type ApplicationWithRelations = Prisma.ApplicationGetPayload<{
   };
 }>;
 
-export interface Skill {
-  id: string;
-  name: string;
-  level?: string;
-}
-
 export interface ResumeData {
   summary: string;
-  experience: Experience[];
-  education: Education[];
-  certifications: Certification[];
-  skills: Skill[];
+  experience: Partial<Experience>[];
+  education: Partial<Education>[];
+  certifications: Partial<Certification>[];
+  skills: Partial<Skill>[];
 }
 
 export interface JobContent {
