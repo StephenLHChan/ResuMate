@@ -1,11 +1,5 @@
 "use client";
 
-import {
-  type Certification as PrismaCertification,
-  type Education as PrismaEducation,
-  type Experience as PrismaExperience,
-  type Skill as PrismaSkill,
-} from "@prisma/client";
 import { Plus, Trash2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -17,30 +11,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import axiosInstance from "@/lib/axios";
 import { resumeTemplate } from "@/lib/templates/resume-template";
-import {
-  type ProfileWithRelations,
-  type ResumeData,
-  type Skill,
-} from "@/lib/types";
+import { type ProfileWithRelations, type ResumeData } from "@/lib/types";
 
-type ResumeSection =
-  | "certifications"
-  | "skills"
-  | "education"
-  | "workExperience";
-
-interface FormData {
-  summary: string;
-  workExperience: PrismaExperience[];
-  education: PrismaEducation[];
-  certifications: PrismaCertification[];
-  skills: Skill[];
-}
+type ResumeSection = keyof Omit<ResumeData, "summary">;
 
 const ResumePage = (): React.ReactElement => {
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<ResumeData>({
     summary: "",
-    workExperience: [],
+    experience: [],
     education: [],
     certifications: [],
     skills: [],
@@ -61,7 +39,7 @@ const ResumePage = (): React.ReactElement => {
           setFormData({
             summary: profileData.bio || "",
             certifications: profileData.certifications.map(
-              (cert: PrismaCertification) => ({
+              (cert: ProfileWithRelations["certifications"][number]) => ({
                 id: cert.id,
                 name: cert.name,
                 issuer: cert.issuer,
@@ -72,24 +50,28 @@ const ResumePage = (): React.ReactElement => {
                 credentialId: cert.credentialId || "",
               })
             ),
-            skills: profileData.skills.map((skill: PrismaSkill) => ({
-              id: skill.id,
-              name: skill.name,
-              level: skill.rating?.toString() || "Intermediate",
-            })),
-            education: profileData.education.map((edu: PrismaEducation) => ({
-              id: edu.id,
-              institution: edu.institution,
-              degree: edu.degree,
-              field: edu.field,
-              startDate: new Date(edu.startDate).toISOString().split("T")[0],
-              endDate: edu.endDate
-                ? new Date(edu.endDate).toISOString().split("T")[0]
-                : "",
-              description: edu.description || "",
-            })),
-            workExperience: profileData.experience.map(
-              (exp: PrismaExperience) => ({
+            skills: profileData.skills.map(
+              (skill: ProfileWithRelations["skills"][number]) => ({
+                id: skill.id,
+                name: skill.name,
+                level: skill.rating?.toString() || "Intermediate",
+              })
+            ),
+            education: profileData.education.map(
+              (edu: ProfileWithRelations["education"][number]) => ({
+                id: edu.id,
+                institution: edu.institution,
+                degree: edu.degree,
+                field: edu.field,
+                startDate: new Date(edu.startDate).toISOString().split("T")[0],
+                endDate: edu.endDate
+                  ? new Date(edu.endDate).toISOString().split("T")[0]
+                  : "",
+                description: edu.description || "",
+              })
+            ),
+            experience: profileData.experience.map(
+              (exp: ProfileWithRelations["experience"][number]) => ({
                 id: exp.id,
                 company: exp.company,
                 position: exp.position,
@@ -115,7 +97,7 @@ const ResumePage = (): React.ReactElement => {
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-    section: keyof FormData,
+    section: keyof ResumeData,
     index?: number,
     field?: string
   ): void => {
@@ -124,7 +106,7 @@ const ResumePage = (): React.ReactElement => {
         ...prev,
         [section]: (
           prev[section] as Array<
-            PrismaCertification | Skill | PrismaEducation | PrismaExperience
+            ResumeData[keyof Omit<ResumeData, "summary">][number]
           >
         ).map((item, i) =>
           i === index ? { ...item, [field]: e.target.value } : item
@@ -140,10 +122,7 @@ const ResumePage = (): React.ReactElement => {
 
   const addItem = (
     section: ResumeSection,
-    template: Omit<
-      PrismaCertification | Skill | PrismaEducation | PrismaExperience,
-      "id"
-    >
+    template: Omit<ResumeData[keyof Omit<ResumeData, "summary">][number], "id">
   ): void => {
     setFormData(prev => ({
       ...prev,
@@ -156,7 +135,7 @@ const ResumePage = (): React.ReactElement => {
       ...prev,
       [section]: (
         prev[section] as Array<
-          PrismaCertification | Skill | PrismaEducation | PrismaExperience
+          ResumeData[keyof Omit<ResumeData, "summary">][number]
         >
       ).filter(item => item.id !== id),
     }));
@@ -176,9 +155,9 @@ const ResumePage = (): React.ReactElement => {
     }
   };
 
-  const transformResumeData = (formData: FormData): ResumeData => ({
+  const transformResumeData = (formData: ResumeData): ResumeData => ({
     summary: formData.summary,
-    experience: formData.workExperience.map(exp => ({
+    experience: formData.experience.map(exp => ({
       ...exp,
       startDate: new Date(exp.startDate),
       endDate: exp.endDate ? new Date(exp.endDate) : null,
@@ -248,7 +227,7 @@ const ResumePage = (): React.ReactElement => {
                     variant="outline"
                     size="sm"
                     onClick={() =>
-                      addItem("workExperience", {
+                      addItem("experience", {
                         company: "",
                         position: "",
                         startDate: "",
@@ -261,7 +240,7 @@ const ResumePage = (): React.ReactElement => {
                     Add Experience
                   </Button>
                 </div>
-                {formData.workExperience.map((exp, index) => (
+                {formData.experience.map((exp, index) => (
                   <div key={exp.id} className="space-y-4">
                     <div className="flex justify-between items-center">
                       <h3 className="text-lg font-semibold">
@@ -270,7 +249,7 @@ const ResumePage = (): React.ReactElement => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => removeItem("workExperience", exp.id)}
+                        onClick={() => removeItem("experience", exp.id)}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -282,12 +261,7 @@ const ResumePage = (): React.ReactElement => {
                           id={`company-${exp.id}`}
                           value={exp.company}
                           onChange={e =>
-                            handleInputChange(
-                              e,
-                              "workExperience",
-                              index,
-                              "company"
-                            )
+                            handleInputChange(e, "experience", index, "company")
                           }
                         />
                       </div>
@@ -299,7 +273,7 @@ const ResumePage = (): React.ReactElement => {
                           onChange={e =>
                             handleInputChange(
                               e,
-                              "workExperience",
+                              "experience",
                               index,
                               "position"
                             )
@@ -321,7 +295,7 @@ const ResumePage = (): React.ReactElement => {
                           onChange={e =>
                             handleInputChange(
                               e,
-                              "workExperience",
+                              "experience",
                               index,
                               "startDate"
                             )
@@ -339,12 +313,7 @@ const ResumePage = (): React.ReactElement => {
                               : exp.endDate || ""
                           }
                           onChange={e =>
-                            handleInputChange(
-                              e,
-                              "workExperience",
-                              index,
-                              "endDate"
-                            )
+                            handleInputChange(e, "experience", index, "endDate")
                           }
                         />
                       </div>
@@ -359,7 +328,7 @@ const ResumePage = (): React.ReactElement => {
                         onChange={e =>
                           handleInputChange(
                             e,
-                            "workExperience",
+                            "experience",
                             index,
                             "description"
                           )
