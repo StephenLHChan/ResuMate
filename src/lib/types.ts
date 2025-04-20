@@ -17,7 +17,13 @@ export type ProfileWithRelations = Prisma.ProfileGetPayload<{
 }>;
 
 export type ProfileWithUser = Prisma.ProfileGetPayload<{
-  include: { user: true };
+  include: {
+    user: {
+      select: {
+        email: true;
+      };
+    };
+  };
 }>;
 
 export type ApplicationWithRelations = Prisma.ApplicationGetPayload<{
@@ -31,11 +37,18 @@ export type ApplicationWithRelations = Prisma.ApplicationGetPayload<{
   };
 }>;
 
+export interface Skill {
+  id: string;
+  name: string;
+  level?: string;
+}
+
 export interface ResumeData {
   summary: string;
   experience: Experience[];
   education: Education[];
   certifications: Certification[];
+  skills: Skill[];
 }
 
 export interface JobContent {

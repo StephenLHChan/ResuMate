@@ -40,7 +40,7 @@ interface NavigationItem {
 
 const navigation: NavigationItem[] = [
   { name: "Dashboard", href: "/dashboard", icon: Home },
-  { name: "Resumes", href: "/resume", icon: FileText },
+  { name: "Resumes", href: "/resumes", icon: FileText },
   { name: "Jobs", href: "/jobs", icon: Briefcase },
   { name: "Applications", href: "/applications", icon: Send },
   {

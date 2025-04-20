@@ -20,6 +20,7 @@ export const GET = async (): Promise<NextResponse> => {
       include: {
         profile: {
           include: {
+            user: true,
             skills: true,
             experience: true,
             education: true,
