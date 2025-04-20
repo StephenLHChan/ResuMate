@@ -9,27 +9,24 @@ export const POST = async (request: Request): Promise<NextResponse> => {
     const { resumeContent } = await request.json();
     const session = await auth();
 
-    if (!session?.user?.email) {
+    if (!session?.user?.id) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
     // Get user's profile data
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
+    const profile = await prisma.profile.findUnique({
+      where: { userId: session.user.id },
       include: {
-        profile: {
-          include: {
-            skills: true,
-            experience: true,
-            education: true,
-            certifications: true,
-            projects: true,
-          },
-        },
+        skills: true,
+        experience: true,
+        education: true,
+        certifications: true,
+        projects: true,
+        user: true,
       },
     });
 
-    if (!user?.profile) {
+    if (!profile) {
       return NextResponse.json(
         { message: "Profile not found" },
         { status: 404 }
@@ -41,7 +38,7 @@ export const POST = async (request: Request): Promise<NextResponse> => {
 
     // Convert HTML to PDF using Puppeteer
 
-    const pdf = await ResumeService.generatePDF(user, user.profile, parsedData);
+    const pdf = await ResumeService.generatePDF(profile, parsedData);
 
     // Return the PDF
     return new NextResponse(pdf, {
