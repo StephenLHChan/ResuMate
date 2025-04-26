@@ -167,15 +167,81 @@ model Education {
   updatedAt   DateTime  @updatedAt
 }
 
+model ResumeWork {
+  id          String    @id @default(cuid())
+  resumeId    String
+  resume      Resume    @relation(fields: [resumeId], references: [id], onDelete: Cascade, name: "ResumeToWorkExperience")
+  company     String
+  position    String
+  startDate   DateTime
+  endDate     DateTime?
+  description String? @db.Text
+  isCurrent   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model ResumeEducation {
+  id          String    @id @default(cuid())
+  resumeId    String
+  resume      Resume    @relation(fields: [resumeId], references: [id], onDelete: Cascade, name: "ResumeToEducationDetail")
+  institution String
+  degree      String
+  field       String
+  startDate   DateTime
+  endDate     DateTime?
+  description String? @db.Text
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model ResumeSkill {
+  id        String   @id @default(cuid())
+  resumeId  String
+  resume    Resume   @relation(fields: [resumeId], references: [id], onDelete: Cascade, name: "ResumeToSkillDetail")
+  name      String
+  rating    Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ResumeCertification {
+  id            String    @id @default(cuid())
+  resumeId      String
+  resume        Resume    @relation(fields: [resumeId], references: [id], onDelete: Cascade, name: "ResumeToCertificationDetail")
+  name          String
+  issuer        String
+  issueDate     DateTime
+  expiryDate    DateTime?
+  credentialId  String?
+  credentialUrl String?
+  description   String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model ResumeSummary {
+  id        String   @id @default(cuid())
+  resumeId  String
+  resume    Resume   @relation(fields: [resumeId], references: [id], onDelete: Cascade, name: "ResumeToSummary")
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Resume {
   id          String    @id @default(cuid())
   userId      String
   user        User      @relation(fields: [userId], references: [id])
   title       String
-  content     String
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   applications ApplicationResume[]
+  workExperiences ResumeWork[] @relation("ResumeToWorkExperience")
+  educationDetails ResumeEducation[] @relation("ResumeToEducationDetail")
+  skillDetails ResumeSkill[] @relation("ResumeToSkillDetail")
+  certificationDetails ResumeCertification[] @relation("ResumeToCertificationDetail")
+  summaries ResumeSummary[] @relation("ResumeToSummary")
 }
 
 model Job {

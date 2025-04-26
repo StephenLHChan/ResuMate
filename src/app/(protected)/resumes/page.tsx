@@ -15,6 +15,11 @@ import { type ProfileWithRelations, type ResumeData } from "@/lib/types";
 
 type ResumeSection = keyof Omit<ResumeData, "summary">;
 
+type ResumeItem = {
+  id: string;
+  [key: string]: any;
+};
+
 const ResumePage = (): React.ReactElement => {
   const { toast } = useToast();
   const [formData, setFormData] = useState<ResumeData>({
@@ -33,13 +38,17 @@ const ResumePage = (): React.ReactElement => {
         setLoading(true);
         // Fetch profile data
         const { data: profileData } = await axiosInstance.get("/profile");
-        setProfile(profileData);
+        if (!profileData || Object.keys(profileData).length == 0) {
+          setProfile(null);
+        } else {
+          setProfile(profileData);
+        }
 
         // Transform profile data into resume data format
-        if (profileData) {
+        if (profileData && Object.keys(profileData).length > 0) {
           setFormData({
             summary: profileData.bio || "",
-            certifications: profileData.certifications.map(
+            certifications: profileData?.certifications?.map(
               (cert: ProfileWithRelations["certifications"][number]) => ({
                 id: cert.id,
                 name: cert.name,
@@ -51,14 +60,14 @@ const ResumePage = (): React.ReactElement => {
                 credentialId: cert.credentialId || "",
               })
             ),
-            skills: profileData.skills.map(
+            skills: profileData?.skills?.map(
               (skill: ProfileWithRelations["skills"][number]) => ({
                 id: skill.id,
                 name: skill.name,
                 level: skill.rating?.toString() || "Intermediate",
               })
             ),
-            education: profileData.education.map(
+            education: profileData?.education?.map(
               (edu: ProfileWithRelations["education"][number]) => ({
                 id: edu.id,
                 institution: edu.institution,
@@ -71,7 +80,7 @@ const ResumePage = (): React.ReactElement => {
                 description: edu.description || "",
               })
             ),
-            experience: profileData.experience.map(
+            experience: profileData?.experience?.map(
               (exp: ProfileWithRelations["experience"][number]) => ({
                 id: exp.id,
                 company: exp.company,
@@ -98,7 +107,7 @@ const ResumePage = (): React.ReactElement => {
     };
 
     fetchData();
-  }, [toast]);
+  }, []);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -109,11 +118,7 @@ const ResumePage = (): React.ReactElement => {
     if (index !== undefined && field && section !== "summary") {
       setFormData(prev => ({
         ...prev,
-        [section]: (
-          prev[section] as Array<
-            ResumeData[keyof Omit<ResumeData, "summary">][number]
-          >
-        ).map((item, i) =>
+        [section]: (prev[section] as ResumeItem[]).map((item, i) =>
           i === index ? { ...item, [field]: e.target.value } : item
         ),
       }));
@@ -131,18 +136,17 @@ const ResumePage = (): React.ReactElement => {
   ): void => {
     setFormData(prev => ({
       ...prev,
-      [section]: [...prev[section], { ...template, id: Date.now().toString() }],
+      [section]: [
+        ...(prev[section] as ResumeItem[]),
+        { ...template, id: Date.now().toString() },
+      ],
     }));
   };
 
   const removeItem = (section: ResumeSection, id: string): void => {
     setFormData(prev => ({
       ...prev,
-      [section]: (
-        prev[section] as Array<
-          ResumeData[keyof Omit<ResumeData, "summary">][number]
-        >
-      ).filter(item => item.id !== id),
+      [section]: (prev[section] as ResumeItem[]).filter(item => item.id !== id),
     }));
   };
 
@@ -194,6 +198,19 @@ const ResumePage = (): React.ReactElement => {
       profileId: profile?.id || "",
     })),
   });
+
+  if (!profile) {
+    return (
+      <div className="container mx-auto py-10 space-y-6">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <FileText className="h-7 w-7 text-primary" />
+            <h1 className="text-3xl font-bold">Create Your Resume</h1>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto py-10 space-y-6">
