@@ -175,7 +175,7 @@ model ResumeWork {
   position    String
   startDate   DateTime
   endDate     DateTime?
-  description String? @db.Text
+  description String[]
   isCurrent   Boolean   @default(false)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -190,7 +190,6 @@ model ResumeEducation {
   field       String
   startDate   DateTime
   endDate     DateTime?
-  description String? @db.Text
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 }
@@ -200,7 +199,6 @@ model ResumeSkill {
   resumeId  String
   resume    Resume   @relation(fields: [resumeId], references: [id], onDelete: Cascade, name: "ResumeToSkillDetail")
   name      String
-  rating    Int?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -213,9 +211,7 @@ model ResumeCertification {
   issuer        String
   issueDate     DateTime
   expiryDate    DateTime?
-  credentialId  String?
   credentialUrl String?
-  description   String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
