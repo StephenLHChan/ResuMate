@@ -86,13 +86,23 @@ export const POST = async (request: Request): Promise<NextResponse> => {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const { title, content } = await request.json();
-
-    if (!title || !content) {
-      return new NextResponse("Title and content are required", {
-        status: 400,
-      });
-    }
+    const {
+      title,
+      firstName,
+      lastName,
+      email,
+      phone,
+      location,
+      website,
+      linkedin,
+      github,
+      summary,
+      experience,
+      education,
+      certifications,
+      skills,
+      professionalTitle,
+    } = await request.json();
 
     const resume = await prisma.resume.create({
       data: {
@@ -102,7 +112,42 @@ export const POST = async (request: Request): Promise<NextResponse> => {
           },
         },
         title,
-        content,
+        professionalTitle,
+        firstName,
+        lastName,
+        email,
+        phone,
+        location,
+        website,
+        linkedin,
+        github,
+        summaries: summary
+          ? {
+              create: {
+                content: summary,
+              },
+            }
+          : undefined,
+        workExperiences: experience
+          ? {
+              create: experience,
+            }
+          : undefined,
+        educationDetails: education
+          ? {
+              create: education,
+            }
+          : undefined,
+        certificationDetails: certifications
+          ? {
+              create: certifications,
+            }
+          : undefined,
+        skillDetails: skills
+          ? {
+              create: skills,
+            }
+          : undefined,
       },
     });
 

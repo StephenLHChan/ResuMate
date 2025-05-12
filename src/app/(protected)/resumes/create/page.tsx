@@ -28,8 +28,16 @@ const CreateResumePage = (): React.ReactElement => {
     education: [],
     certifications: [],
     skills: [],
-    name: "",
+    firstName: "",
+    lastName: "",
     email: "",
+    phone: "",
+    location: "",
+    website: "",
+    linkedin: "",
+    github: "",
+    title: "",
+    professionalTitle: "",
   });
   const [profile, setProfile] = useState<ProfileWithRelations | null>(null);
   const [_loading, setLoading] = useState(true);
@@ -41,12 +49,6 @@ const CreateResumePage = (): React.ReactElement => {
         const { data: profileData } = await axiosInstance.get("/profile");
         if (profileData && Object.keys(profileData).length > 0) {
           setProfile(profileData);
-          toast({
-            title: "Profile Information Available",
-            description:
-              "Your profile information has been loaded. You can use this to save time filling out your resume.",
-            duration: 5000,
-          });
         } else {
           toast({
             title: "No Profile Information",
@@ -74,19 +76,20 @@ const CreateResumePage = (): React.ReactElement => {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     section: keyof ResumeData,
     index?: number,
-    field?: string
+    field?: string,
+    value?: any
   ): void => {
     if (index !== undefined && field && section !== "summary") {
       setFormData(prev => ({
         ...prev,
         [section]: (prev[section] as ResumeItem[]).map((item, i) =>
-          i === index ? { ...item, [field]: e.target.value } : item
+          i === index ? { ...item, [field]: value || e.target.value } : item
         ),
       }));
     } else {
       setFormData(prev => ({
         ...prev,
-        [section]: e.target.value,
+        [section]: value || e.target.value,
       }));
     }
   };
@@ -98,7 +101,7 @@ const CreateResumePage = (): React.ReactElement => {
     setFormData(prev => ({
       ...prev,
       [section]: [
-        ...(prev[section] as ResumeItem[]),
+        ...(prev[section] as Array<ResumeData[T][number]>),
         { ...template, id: Date.now().toString() },
       ],
     }));
@@ -149,24 +152,56 @@ const CreateResumePage = (): React.ReactElement => {
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Personal Information */}
               <div className="space-y-4">
+                <h3 className="text-lg font-medium">Personal Information</h3>
+                <div className="space-y-2">
+                  <Label htmlFor="title">Resume Title</Label>
+                  <Input
+                    id="title"
+                    value={formData.title}
+                    onChange={e => handleInputChange(e, "title")}
+                    placeholder="e.g. Software Engineer Resume"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="professionalTitle">Professional Title</Label>
+                  <Input
+                    id="professionalTitle"
+                    value={formData.professionalTitle}
+                    onChange={e => handleInputChange(e, "professionalTitle")}
+                    placeholder="e.g. Senior Software Engineer"
+                  />
+                </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="name">Full Name</Label>
+                    <Label htmlFor="firstName">First Name</Label>
                     <Input
-                      id="name"
+                      id="firstName"
                       value={
-                        formData.name ||
-                        (profile?.preferredFirstName &&
-                        profile?.preferredLastName
-                          ? `${profile.preferredFirstName} ${profile.preferredLastName}`
-                          : profile?.legalFirstName && profile?.legalLastName
-                          ? `${profile.legalFirstName} ${profile.legalLastName}`
-                          : "")
+                        formData.firstName ||
+                        profile?.preferredFirstName ||
+                        profile?.legalFirstName ||
+                        ""
                       }
-                      onChange={e => handleInputChange(e, "name")}
-                      placeholder="Enter your full name"
+                      onChange={e => handleInputChange(e, "firstName")}
+                      placeholder="Enter your first name"
                     />
                   </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="lastName">Last Name</Label>
+                    <Input
+                      id="lastName"
+                      value={
+                        formData.lastName ||
+                        profile?.preferredLastName ||
+                        profile?.legalLastName ||
+                        ""
+                      }
+                      onChange={e => handleInputChange(e, "lastName")}
+                      placeholder="Enter your last name"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
                     <Input
@@ -174,6 +209,55 @@ const CreateResumePage = (): React.ReactElement => {
                       value={formData.email || profile?.user?.email || ""}
                       onChange={e => handleInputChange(e, "email")}
                       placeholder="Enter your email"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Phone</Label>
+                    <Input
+                      id="phone"
+                      value={formData.phone || profile?.phone || ""}
+                      onChange={e => handleInputChange(e, "phone")}
+                      placeholder="Enter your phone number"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="location">Location</Label>
+                    <Input
+                      id="location"
+                      value={formData.location || profile?.location || ""}
+                      onChange={e => handleInputChange(e, "location")}
+                      placeholder="e.g. San Francisco, CA"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="website">Website</Label>
+                    <Input
+                      id="website"
+                      value={formData.website || profile?.website || ""}
+                      onChange={e => handleInputChange(e, "website")}
+                      placeholder="Enter your website URL"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="linkedin">LinkedIn</Label>
+                    <Input
+                      id="linkedin"
+                      value={formData.linkedin || profile?.linkedin || ""}
+                      onChange={e => handleInputChange(e, "linkedin")}
+                      placeholder="Enter your LinkedIn URL"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="github">GitHub</Label>
+                    <Input
+                      id="github"
+                      value={formData.github || profile?.github || ""}
+                      onChange={e => handleInputChange(e, "github")}
+                      placeholder="Enter your GitHub URL"
                     />
                   </div>
                 </div>
@@ -187,7 +271,6 @@ const CreateResumePage = (): React.ReactElement => {
                   name="summary"
                   value={formData.summary}
                   onChange={e => handleInputChange(e, "summary")}
-                  required
                 />
               </div>
 
@@ -205,7 +288,7 @@ const CreateResumePage = (): React.ReactElement => {
                         position: "",
                         startDate: new Date(),
                         endDate: null,
-                        description: "",
+                        descriptions: [""],
                         isCurrent: false,
                       })
                     }
@@ -297,21 +380,78 @@ const CreateResumePage = (): React.ReactElement => {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor={`description-${exp.id}`}>
+                      <Label htmlFor={`descriptions-${exp.id}`}>
                         Description
                       </Label>
-                      <Textarea
-                        id={`description-${exp.id}`}
-                        value={exp.description || ""}
-                        onChange={e =>
-                          handleInputChange(
-                            e,
-                            "experience",
-                            index,
-                            "description"
+                      <div className="space-y-2">
+                        {(exp.descriptions || [""]).map(
+                          (desc: string, descIndex: number) => (
+                            <div key={descIndex} className="flex gap-2">
+                              <Textarea
+                                id={`descriptions-${exp.id}-${descIndex}`}
+                                value={desc}
+                                onChange={(
+                                  e: React.ChangeEvent<HTMLTextAreaElement>
+                                ) => {
+                                  const newDescriptions = [
+                                    ...(exp.descriptions || []),
+                                  ];
+                                  newDescriptions[descIndex] = e.target.value;
+                                  handleInputChange(
+                                    e,
+                                    "experience",
+                                    index,
+                                    "descriptions",
+                                    newDescriptions
+                                  );
+                                }}
+                                placeholder="Enter a bullet point"
+                              />
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  const newDescriptions = [
+                                    ...(exp.descriptions || []),
+                                  ];
+                                  newDescriptions.splice(descIndex, 1);
+                                  handleInputChange(
+                                    {} as React.ChangeEvent<HTMLTextAreaElement>,
+                                    "experience",
+                                    index,
+                                    "descriptions",
+                                    newDescriptions
+                                  );
+                                }}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
                           )
-                        }
-                      />
+                        )}
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const newDescriptions = [
+                              ...(exp.descriptions || []),
+                              "",
+                            ];
+                            handleInputChange(
+                              {} as React.ChangeEvent<HTMLTextAreaElement>,
+                              "experience",
+                              index,
+                              "descriptions",
+                              newDescriptions
+                            );
+                          }}
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Bullet Point
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -608,7 +748,6 @@ const CreateResumePage = (): React.ReactElement => {
                           onChange={e =>
                             handleInputChange(e, "skills", index, "name")
                           }
-                          required
                         />
                       </div>
                       <div>
@@ -618,7 +757,6 @@ const CreateResumePage = (): React.ReactElement => {
                           onChange={e =>
                             handleInputChange(e, "skills", index, "rating")
                           }
-                          required
                         />
                       </div>
                     </div>
@@ -650,52 +788,12 @@ const CreateResumePage = (): React.ReactElement => {
                   backgroundColor: "white",
                   boxShadow: "0 0 10px rgba(0,0,0,0.1)",
                   color: "#2c3e50",
-                  transform: "scale(0.8)",
+                  transform: "scale(0.5)",
                   transformOrigin: "top center",
                   overflow: "hidden",
                   border: "none",
                 }}
-                srcDoc={resumeTemplate(
-                  profile || {
-                    id: "",
-                    userId: "",
-                    legalFirstName: "",
-                    legalLastName: "",
-                    preferredFirstName: "",
-                    preferredLastName: "",
-                    hasPreferredName: false,
-                    title: "",
-                    bio: "",
-                    address: "",
-                    city: "",
-                    state: "",
-                    zipCode: "",
-                    country: "",
-                    location: "",
-                    phone: "",
-                    website: "",
-                    linkedin: "",
-                    github: "",
-                    createdAt: new Date(),
-                    updatedAt: new Date(),
-                    user: {
-                      id: "",
-                      name: null,
-                      email: "",
-                      emailVerified: null,
-                      image: null,
-                      password: null,
-                      createdAt: new Date(),
-                      updatedAt: new Date(),
-                    },
-                    skills: [],
-                    experience: [],
-                    education: [],
-                    certifications: [],
-                    projects: [],
-                  },
-                  formData
-                )}
+                srcDoc={resumeTemplate(formData)}
               />
             </div>
           </CardContent>

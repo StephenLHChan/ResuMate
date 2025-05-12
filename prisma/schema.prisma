@@ -175,7 +175,7 @@ model ResumeWork {
   position    String
   startDate   DateTime
   endDate     DateTime?
-  description String[]
+  descriptions String[]  @db.Text
   isCurrent   Boolean   @default(false)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -229,7 +229,16 @@ model Resume {
   id          String    @id @default(cuid())
   userId      String
   user        User      @relation(fields: [userId], references: [id])
-  title       String
+  title       String?   // Resume title (e.g., "Software Engineer Resume for Amazon")
+  professionalTitle String? // Professional title (e.g., "Software Engineer")
+  firstName   String?
+  lastName    String? 
+  email       String?
+  phone       String?
+  location    String?
+  website     String?
+  linkedin    String?
+  github      String?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   applications ApplicationResume[]

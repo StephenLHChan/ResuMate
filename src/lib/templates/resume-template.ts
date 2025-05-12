@@ -1,4 +1,4 @@
-import type { ProfileWithRelations, ResumeData } from "@/lib/types";
+import type { ResumeData } from "@/lib/types";
 
 // Helper function to format date to MMM yyyy
 const formatDate = (dateString: string): string => {
@@ -12,10 +12,7 @@ const isCertExpired = (expiryDate: string | null): boolean => {
   return new Date(expiryDate) < new Date();
 };
 
-export const resumeTemplate = (
-  profile: ProfileWithRelations,
-  resumeData: ResumeData
-): string => `
+export const resumeTemplate = (resumeData: ResumeData): string => `
 <!DOCTYPE html>
 <html>
   <head>
@@ -136,19 +133,19 @@ export const resumeTemplate = (
   </head>
   <body>
     <div class="header">
-      <div class="name">${profile.preferredFirstName} ${
-  profile.preferredLastName
-}</div>
-      <div class="title">${profile.title}</div>
+      <div class="name">
+        ${resumeData.firstName} ${resumeData.lastName}
+      </div>
+      <div class="title">${resumeData.professionalTitle}</div>
       <div class="contact-info">
-        ${profile.user.email} 
-        ${profile.phone ? `| ${profile.phone}` : ""}
-        ${profile.location ? `| ${profile.location}` : ""}
+        ${resumeData.email} 
+        ${resumeData.phone ? `| ${resumeData.phone}` : ""}
+        ${resumeData.location ? `| ${resumeData.location}` : ""}
       </div>
       <div class="contact-info">
-        ${profile.website ? `${profile.website}` : ""}
-        ${profile.linkedin ? `| ${profile.linkedin}` : ""}
-        ${profile.github ? `| ${profile.github}` : ""}
+        ${resumeData.website ? `${resumeData.website}` : ""}
+        ${resumeData.linkedin ? `| ${resumeData.linkedin}` : ""}
+        ${resumeData.github ? `| ${resumeData.github}` : ""}
       </div>
     </div>
     
@@ -187,8 +184,12 @@ export const resumeTemplate = (
           }</div>
           </div>
           ${
-            exp.description
-              ? `<div class="item-description">${exp.description}</div>`
+            exp.descriptions && exp.descriptions.length > 0
+              ? `<div class="item-description">
+                  <ul class="list-disc pl-4">
+                    ${exp.descriptions.map(desc => `<li>${desc}</li>`).join("")}
+                  </ul>
+                </div>`
               : ""
           }
         </div>
