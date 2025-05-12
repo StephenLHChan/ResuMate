@@ -1,10 +1,4 @@
-import type {
-  Certification,
-  Education,
-  Experience,
-  Skill,
-  Prisma,
-} from "@prisma/client";
+import type { Certification, Education, Skill, Prisma } from "@prisma/client";
 
 export type ProfileWithRelations = Prisma.ProfileGetPayload<{
   include: {
@@ -38,12 +32,40 @@ export type ApplicationWithRelations = Prisma.ApplicationGetPayload<{
   };
 }>;
 
+export type ResumeWithRelations = Prisma.ResumeGetPayload<{
+  include: {
+    workExperiences: true;
+    educationDetails: true;
+    skillDetails: true;
+    certificationDetails: true;
+    summaries: true;
+  };
+}>;
+
 export interface ResumeData {
   summary: string;
-  experience: Partial<Experience>[];
+  experience: Array<{
+    id?: string;
+    company: string;
+    position: string;
+    startDate: Date;
+    endDate?: Date | null;
+    descriptions: string[];
+    isCurrent: boolean;
+  }>;
   education: Partial<Education>[];
   certifications: Partial<Certification>[];
   skills: Partial<Skill>[];
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string;
+  location?: string;
+  website?: string;
+  linkedin?: string;
+  github?: string;
+  title: string;
+  professionalTitle?: string;
 }
 
 export interface JobContent {

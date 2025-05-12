@@ -3,39 +3,39 @@ import puppeteer from "puppeteer";
 
 import { prisma } from "@/lib/prisma";
 import {
-  resumeAnalysisPrompt,
+  // resumeAnalysisPrompt,
   resumeSuggestionsPrompt,
 } from "@/lib/prompts/resume-analysis";
 import { resumeGenerationPrompt } from "@/lib/prompts/resume-generation";
 import { SubscriptionService } from "@/lib/services/subscription-service";
 import { resumeTemplate } from "@/lib/templates/resume-template";
 
-import type { ResumeData, ProfileWithRelations } from "@/lib/types";
+import type { ResumeWithRelations, ProfileWithRelations } from "@/lib/types";
 import type { Job } from "@prisma/client";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-interface ResumeAnalysis {
-  strengths: string[];
-  weaknesses: string[];
-  suggestions: string[];
-  keywords: string[];
-  score: number;
-  improvements: {
-    summary: string;
-    experience: string[];
-    skills: string[];
-    education: string[];
-  };
-}
+// interface ResumeAnalysis {
+//   strengths: string[];
+//   weaknesses: string[];
+//   suggestions: string[];
+//   keywords: string[];
+//   score: number;
+//   improvements: {
+//     summary: string;
+//     experience: string[];
+//     skills: string[];
+//     education: string[];
+//   };
+// }
 
 export class ResumeService {
   static async generateResumeContent(
     userProfile: ProfileWithRelations,
     jobInfo: Job
-  ): Promise<ResumeData> {
+  ): Promise<ResumeWithRelations> {
     // Check if user has premium subscription
     const isPremium = await SubscriptionService.isPremiumUser(
       userProfile.userId
@@ -102,14 +102,14 @@ export class ResumeService {
 
   static async generatePDF(
     userProfile: ProfileWithRelations,
-    resumeContent: ResumeData
+    resumeContent: ResumeWithRelations
   ): Promise<Uint8Array> {
     const browser = await puppeteer.launch({
       headless: true,
     });
     const page = await browser.newPage();
 
-    await page.setContent(resumeTemplate(userProfile, resumeContent));
+    await page.setContent(resumeTemplate(resumeContent));
 
     const pdf = await page.pdf({
       format: "A4",
@@ -126,36 +126,36 @@ export class ResumeService {
     return pdf;
   }
 
-  static async analyzeResume(
-    resumeContent: ResumeData,
-    jobInfo?: Job
-  ): Promise<ResumeAnalysis> {
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4-turbo-preview",
-      messages: [
-        {
-          role: "system",
-          content: resumeAnalysisPrompt.system,
-        },
-        {
-          role: "user",
-          content: resumeAnalysisPrompt.user(resumeContent, jobInfo),
-        },
-      ],
-      response_format: { type: "json_object" },
-      temperature: 0.3,
-    });
+  // static async analyzeResume(
+  //   resumeContent: ResumeWithRelations,
+  //   jobInfo?: Job
+  // ): Promise<ResumeAnalysis> {
+  //   const completion = await openai.chat.completions.create({
+  //     model: "gpt-4-turbo-preview",
+  //     messages: [
+  //       {
+  //         role: "system",
+  //         content: resumeAnalysisPrompt.system,
+  //       },
+  //       {
+  //         role: "user",
+  //         content: resumeAnalysisPrompt.user(resumeContent, jobInfo),
+  //       },
+  //     ],
+  //     response_format: { type: "json_object" },
+  //     temperature: 0.3,
+  //   });
 
-    const analysis = completion.choices[0]?.message?.content;
-    if (!analysis) {
-      throw new Error("Failed to analyze resume");
-    }
+  //   const analysis = completion.choices[0]?.message?.content;
+  //   if (!analysis) {
+  //     throw new Error("Failed to analyze resume");
+  //   }
 
-    return JSON.parse(analysis);
-  }
+  //   return JSON.parse(analysis);
+  // }
 
   static async generateResumeSuggestions(
-    resumeContent: ResumeData,
+    resumeContent: ResumeWithRelations,
     jobInfo?: Job
   ): Promise<string[]> {
     const completion = await openai.chat.completions.create({

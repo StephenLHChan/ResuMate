@@ -1,4 +1,4 @@
-import type { ResumeData } from "@/lib/types";
+import type { ResumeWithRelations } from "@/lib/types";
 
 // Helper function to format date to MMM yyyy
 const formatDate = (dateString: string): string => {
@@ -12,7 +12,7 @@ const isCertExpired = (expiryDate: string | null): boolean => {
   return new Date(expiryDate) < new Date();
 };
 
-export const resumeTemplate = (resumeData: ResumeData): string => `
+export const resumeTemplate = (resumeData: ResumeWithRelations): string => `
 <!DOCTYPE html>
 <html>
   <head>
@@ -149,14 +149,14 @@ export const resumeTemplate = (resumeData: ResumeData): string => `
       </div>
     </div>
     
-    <div class="summary">${resumeData.summary}</div>
+    <div class="summary">${resumeData.summaries[0].content}</div>
     
     ${
-      resumeData.experience && resumeData.experience.length > 0
+      resumeData.workExperiences && resumeData.workExperiences.length > 0
         ? `
     <div class="section">
       <div class="section-title">Work Experience</div>
-      ${resumeData.experience
+      ${resumeData.workExperiences
         .map(
           exp => `
         <div class="experience-item">
@@ -202,11 +202,11 @@ export const resumeTemplate = (resumeData: ResumeData): string => `
     }
     
     ${
-      resumeData.education && resumeData.education.length > 0
+      resumeData.educationDetails && resumeData.educationDetails.length > 0
         ? `
     <div class="section">
       <div class="section-title">Education</div>
-      ${resumeData.education
+      ${resumeData.educationDetails
         .map(
           edu => `
         <div class="education-item">
@@ -243,11 +243,12 @@ export const resumeTemplate = (resumeData: ResumeData): string => `
     }
     
     ${
-      resumeData.certifications && resumeData.certifications.length > 0
+      resumeData.certificationDetails &&
+      resumeData.certificationDetails.length > 0
         ? `
     <div class="section">
       <div class="section-title">Certifications</div>
-      ${resumeData.certifications
+      ${resumeData.certificationDetails
         .map(
           cert => `
         <div class="certification-item">
@@ -289,12 +290,12 @@ export const resumeTemplate = (resumeData: ResumeData): string => `
     }
 
     ${
-      resumeData.skills && resumeData.skills.length > 0
+      resumeData.skillDetails && resumeData.skillDetails.length > 0
         ? `
     <div class="section">
       <div class="section-title">Skills</div>
       <div class="skills-list">
-        ${resumeData.skills
+        ${resumeData.skillDetails
           .map(
             skill => `
           <div class="skill-item">${skill.name}</div>
