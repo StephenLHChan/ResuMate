@@ -18,7 +18,11 @@ const ResumePage = (): React.ReactElement => {
     const fetchResumes = async (): Promise<void> => {
       try {
         setLoading(true);
-        const { data } = await axiosInstance.get("/resumes");
+        const { data } = await axiosInstance.get("/resumes", {
+          params: {
+            pageSize: 20,
+          },
+        });
         // Ensure data is an array, if not, use empty array
         setResumes(data.items);
       } catch (error) {
