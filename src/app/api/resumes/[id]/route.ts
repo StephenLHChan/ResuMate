@@ -13,7 +13,7 @@ export const GET = async (
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id } = params;
+    const { id } = await params;
 
     const resume = await prisma.resume.findFirst({
       where: {
@@ -21,7 +21,6 @@ export const GET = async (
         userId: session.user.id,
       },
       include: {
-        summaries: true,
         workExperiences: true,
         educationDetails: true,
         certificationDetails: true,
@@ -46,7 +45,7 @@ export const GET = async (
       website: resume.website,
       linkedin: resume.linkedin,
       github: resume.github,
-      summary: resume.summaries[0]?.content || "",
+      summary: resume.summary || "",
       experience: resume.workExperiences.map(exp => ({
         id: exp.id,
         company: exp.company,
@@ -128,14 +127,7 @@ export const PUT = async (
         website: data.website,
         linkedin: data.linkedin,
         github: data.github,
-        summaries: {
-          deleteMany: {},
-          create: data.summary
-            ? {
-                content: data.summary,
-              }
-            : undefined,
-        },
+        summary: data.summary,
         workExperiences: {
           deleteMany: {},
           create: data.experience,
