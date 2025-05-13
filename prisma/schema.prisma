@@ -216,14 +216,6 @@ model ResumeCertification {
   updatedAt     DateTime  @updatedAt
 }
 
-model ResumeSummary {
-  id        String   @id @default(cuid())
-  resumeId  String
-  resume    Resume   @relation(fields: [resumeId], references: [id], onDelete: Cascade, name: "ResumeToSummary")
-  content   String   @db.Text
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
 
 model Resume {
   id          String    @id @default(cuid())
@@ -241,12 +233,12 @@ model Resume {
   github      String?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  summary String? @db.Text
   applications ApplicationResume[]
   workExperiences ResumeWork[] @relation("ResumeToWorkExperience")
   educationDetails ResumeEducation[] @relation("ResumeToEducationDetail")
   skillDetails ResumeSkill[] @relation("ResumeToSkillDetail")
   certificationDetails ResumeCertification[] @relation("ResumeToCertificationDetail")
-  summaries ResumeSummary[] @relation("ResumeToSummary")
 }
 
 model Job {
