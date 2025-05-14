@@ -4,12 +4,12 @@ import { FileText } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
+import ResumeForm from "@/components/resume/ResumeForm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import axiosInstance from "@/lib/axios";
 import { resumeTemplate } from "@/lib/templates/resume-template";
 import { type ProfileWithRelations, type ResumeData } from "@/lib/types";
-import ResumeForm from "@/components/resume/ResumeForm";
 
 const CreateResumePage = (): React.ReactElement => {
   const router = useRouter();
@@ -18,7 +18,7 @@ const CreateResumePage = (): React.ReactElement => {
   const [_loading, setLoading] = useState(true);
   const [formData, setFormData] = useState<ResumeData>({
     summary: "",
-    experience: [],
+    workExperiences: [],
     education: [],
     certifications: [],
     skills: [],
@@ -107,49 +107,19 @@ const CreateResumePage = (): React.ReactElement => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Form Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Resume Information</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResumeForm
-              initialData={formData}
-              onSubmit={handleSubmit}
-              submitButtonText="Save Resume"
-            />
-          </CardContent>
-        </Card>
-
-        {/* Preview Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Resume Preview</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="resume-preview-container">
-              <iframe
-                title="Resume Preview"
-                className="resume-preview-content"
-                style={{
-                  width: "210mm",
-                  minHeight: "297mm",
-                  padding: "10mm",
-                  backgroundColor: "white",
-                  boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-                  color: "#2c3e50",
-                  transform: "scale(0.5)",
-                  transformOrigin: "top center",
-                  overflow: "hidden",
-                  border: "none",
-                }}
-                srcDoc={resumeTemplate(formData)}
-              />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      {/* Form Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Resume Information</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ResumeForm
+            initialData={formData}
+            onSubmit={handleSubmit}
+            submitButtonText="Save Resume"
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 };

@@ -43,8 +43,8 @@ export type ResumeWithRelations = Prisma.ResumeGetPayload<{
 }>;
 
 export interface ResumeData {
-  summary: string;
-  experience: Array<{
+  summary: string | null;
+  workExperiences: Array<{
     id?: string;
     company: string;
     position: string;

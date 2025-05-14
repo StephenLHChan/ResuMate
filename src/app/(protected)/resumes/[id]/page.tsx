@@ -16,7 +16,7 @@ const EditResumePage = (): React.ReactElement => {
   const { toast } = useToast();
   const [formData, setFormData] = useState<ResumeData>({
     summary: "",
-    experience: [],
+    workExperiences: [],
     education: [],
     certifications: [],
     skills: [],
