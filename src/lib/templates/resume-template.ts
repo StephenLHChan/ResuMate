@@ -1,21 +1,20 @@
-import type { ResumeWithRelations } from "@/lib/types";
+import type { ResumeData } from "@/lib/types";
 
 // Helper function to format date to MMM yyyy
-const formatDate = (dateString: string): string => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString("en-US", { month: "short", year: "numeric" });
+const formatDate = (date: Date | string | null | undefined): string => {
+  if (!date) return "";
+  if (date instanceof Date) {
+    return date.toISOString().split("T")[0];
+  }
+  return date;
 };
 
-// Helper function to check if a certification is expired
-const isCertExpired = (expiryDate: string | null): boolean => {
-  if (!expiryDate) return false;
-  return new Date(expiryDate) < new Date();
-};
-
-export const resumeTemplate = (resumeData: ResumeWithRelations): string => `
+export const resumeTemplate = (resumeData: ResumeData): string => `
 <!DOCTYPE html>
 <html>
   <head>
+    <meta charset="UTF-8" />
+    <title>Resume</title>
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
       
@@ -149,153 +148,107 @@ export const resumeTemplate = (resumeData: ResumeWithRelations): string => `
       </div>
     </div>
     
-    <div class="summary">${resumeData.summaries[0].content}</div>
+    ${
+      resumeData.summary
+        ? `<div class="summary">${resumeData.summary}</div>`
+        : ""
+    }
     
     ${
       resumeData.workExperiences && resumeData.workExperiences.length > 0
         ? `
     <div class="section">
       <div class="section-title">Work Experience</div>
-      ${resumeData.workExperiences
-        .map(
-          exp => `
-        <div class="experience-item">
-          <div class="item-header">
-            <div class="item-title-with-subtitle">
-              <div class="item-title">${exp.position}</div>
-              <div class="item-subtitle">${exp.company}</div>
+      <div class="experience-list">
+        ${resumeData.workExperiences
+          .map(
+            exp => `
+          <div class="experience-item">
+            <div class="experience-header">
+              <div class="experience-title">${exp.position}</div>
+              <div class="experience-company">${exp.company}</div>
+              <div class="experience-date">${formatDate(exp.startDate)} - ${
+              exp.isCurrent ? "Present" : formatDate(exp.endDate)
+            }</div>
             </div>
-            <div class="item-date">${
-              exp.startDate
-                ? formatDate(
-                    typeof exp.startDate === "string"
-                      ? exp.startDate
-                      : exp.startDate.toISOString()
-                  )
-                : "N/A"
-            } - ${
-            exp.endDate
-              ? formatDate(
-                  typeof exp.endDate === "string"
-                    ? exp.endDate
-                    : exp.endDate.toISOString()
-                )
-              : "present"
-          }</div>
-          </div>
-          ${
-            exp.descriptions && exp.descriptions.length > 0
-              ? `<div class="item-description">
-                  <ul class="list-disc pl-4">
-                    ${exp.descriptions.map(desc => `<li>${desc}</li>`).join("")}
-                  </ul>
-                </div>`
-              : ""
-          }
-        </div>
-      `
-        )
-        .join("")}
-    </div>
-    `
-        : ""
-    }
-    
-    ${
-      resumeData.educationDetails && resumeData.educationDetails.length > 0
-        ? `
-    <div class="section">
-      <div class="section-title">Education</div>
-      ${resumeData.educationDetails
-        .map(
-          edu => `
-        <div class="education-item">
-          <div class="item-header">
-            <div class="item-title-with-subtitle">
-              <div class="item-title">${edu.degree} in ${edu.field}</div>
-              <div class="item-subtitle">${edu.institution}</div>
+            <div class="experience-description">
+              ${exp.descriptions.map(desc => `<p>${desc}</p>`).join("")}
             </div>
-            <div class="item-date">${
-              edu.startDate
-                ? formatDate(
-                    typeof edu.startDate === "string"
-                      ? edu.startDate
-                      : edu.startDate.toISOString()
-                  )
-                : "N/A"
-            } - ${
-            edu.endDate
-              ? formatDate(
-                  typeof edu.endDate === "string"
-                    ? edu.endDate
-                    : edu.endDate.toISOString()
-                )
-              : "present"
-          }</div>
           </div>
-        </div>
-      `
-        )
-        .join("")}
-    </div>
-    `
-        : ""
-    }
-    
-    ${
-      resumeData.certificationDetails &&
-      resumeData.certificationDetails.length > 0
-        ? `
-    <div class="section">
-      <div class="section-title">Certifications</div>
-      ${resumeData.certificationDetails
-        .map(
-          cert => `
-        <div class="certification-item">
-          <div class="item-header">
-            <div class="item-title-with-subtitle">
-              <div class="item-title">${cert.name}</div>
-              <div class="item-subtitle">${cert.issuer}</div>
-            </div>
-            <div class="item-date">${
-              cert.issueDate
-                ? formatDate(
-                    typeof cert.issueDate === "string"
-                      ? cert.issueDate
-                      : cert.issueDate.toISOString()
-                  )
-                : "N/A"
-            }${
-            cert.expiryDate &&
-            !isCertExpired(
-              typeof cert.expiryDate === "string"
-                ? cert.expiryDate
-                : cert.expiryDate.toISOString()
-            )
-              ? ` - ${formatDate(
-                  typeof cert.expiryDate === "string"
-                    ? cert.expiryDate
-                    : cert.expiryDate.toISOString()
-                )}`
-              : ""
-          }</div>
-          </div>
-        </div>
-      `
-        )
-        .join("")}
+        `
+          )
+          .join("")}
+      </div>
     </div>
     `
         : ""
     }
 
     ${
-      resumeData.skillDetails && resumeData.skillDetails.length > 0
+      resumeData.education && resumeData.education.length > 0
+        ? `
+    <div class="section">
+      <div class="section-title">Education</div>
+      <div class="education-list">
+        ${resumeData.education
+          .map(
+            edu => `
+          <div class="education-item">
+            <div class="education-header">
+              <div class="education-degree">${edu.degree} in ${edu.field}</div>
+              <div class="education-institution">${edu.institution}</div>
+              <div class="education-date">${formatDate(
+                edu.startDate
+              )} - ${formatDate(edu.endDate)}</div>
+            </div>
+          </div>
+        `
+          )
+          .join("")}
+      </div>
+    </div>
+    `
+        : ""
+    }
+
+    ${
+      resumeData.certifications && resumeData.certifications.length > 0
+        ? `
+    <div class="section">
+      <div class="section-title">Certifications</div>
+      <div class="certifications-list">
+        ${resumeData.certifications
+          .map(
+            cert => `
+          <div class="certification-item">
+            <div class="certification-header">
+              <div class="certification-name">${cert.name}</div>
+              <div class="certification-issuer">${cert.issuer}</div>
+              <div class="certification-date">Issued: ${formatDate(
+                cert.issueDate
+              )}${
+              cert.expiryDate
+                ? ` - Expires: ${formatDate(cert.expiryDate)}`
+                : ""
+            }</div>
+            </div>
+          </div>
+        `
+          )
+          .join("")}
+      </div>
+    </div>
+    `
+        : ""
+    }
+
+    ${
+      resumeData.skills && resumeData.skills.length > 0
         ? `
     <div class="section">
       <div class="section-title">Skills</div>
       <div class="skills-list">
-        ${resumeData.skillDetails
+        ${resumeData.skills
           .map(
             skill => `
           <div class="skill-item">${skill.name}</div>
