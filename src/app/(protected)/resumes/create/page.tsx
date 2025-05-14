@@ -8,13 +8,12 @@ import ResumeForm from "@/components/resume/ResumeForm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import axiosInstance from "@/lib/axios";
-import { resumeTemplate } from "@/lib/templates/resume-template";
-import { type ProfileWithRelations, type ResumeData } from "@/lib/types";
+
+import type { ResumeData } from "@/lib/types";
 
 const CreateResumePage = (): React.ReactElement => {
   const router = useRouter();
   const { toast } = useToast();
-  const [profile, setProfile] = useState<ProfileWithRelations | null>(null);
   const [_loading, setLoading] = useState(true);
   const [formData, setFormData] = useState<ResumeData>({
     summary: "",
@@ -40,7 +39,6 @@ const CreateResumePage = (): React.ReactElement => {
         setLoading(true);
         const { data: profileData } = await axiosInstance.get("/profile");
         if (profileData && Object.keys(profileData).length > 0) {
-          setProfile(profileData);
           setFormData(prev => ({
             ...prev,
             firstName:
