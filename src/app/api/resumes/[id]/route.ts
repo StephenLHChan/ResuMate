@@ -96,7 +96,7 @@ export const PUT = async (
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id } = params;
+    const { id } = await params;
     const data = await request.json();
 
     // Verify the resume belongs to the user
@@ -130,19 +130,63 @@ export const PUT = async (
         summary: data.summary,
         workExperiences: {
           deleteMany: {},
-          create: data.experience,
+          create: data.experience.map(
+            (exp: {
+              company: string;
+              position: string;
+              startDate: string | Date;
+              endDate?: string | Date | null;
+              descriptions: string[];
+              isCurrent: boolean;
+            }) => ({
+              company: exp.company,
+              position: exp.position,
+              startDate: new Date(exp.startDate),
+              endDate: exp.endDate ? new Date(exp.endDate) : null,
+              descriptions: exp.descriptions,
+              isCurrent: exp.isCurrent,
+            })
+          ),
         },
         educationDetails: {
           deleteMany: {},
-          create: data.education,
+          create: data.education.map(
+            (edu: {
+              institution: string;
+              degree: string;
+              field: string;
+              startDate: string | Date;
+              endDate?: string | Date | null;
+            }) => ({
+              institution: edu.institution,
+              degree: edu.degree,
+              field: edu.field,
+              startDate: new Date(edu.startDate),
+              endDate: edu.endDate ? new Date(edu.endDate) : null,
+            })
+          ),
         },
         certificationDetails: {
           deleteMany: {},
-          create: data.certifications,
+          create: data.certifications.map(
+            (cert: {
+              name: string;
+              issuer: string;
+              issueDate: string | Date;
+              expiryDate?: string | Date | null;
+            }) => ({
+              name: cert.name,
+              issuer: cert.issuer,
+              issueDate: new Date(cert.issueDate),
+              expiryDate: cert.expiryDate ? new Date(cert.expiryDate) : null,
+            })
+          ),
         },
         skillDetails: {
           deleteMany: {},
-          create: data.skills,
+          create: data.skills.map((skill: { name: string }) => ({
+            name: skill.name,
+          })),
         },
       },
     });

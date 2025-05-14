@@ -121,31 +121,71 @@ export const POST = async (request: Request): Promise<NextResponse> => {
         website,
         linkedin,
         github,
-        summaries: summary
-          ? {
-              create: {
-                content: summary,
-              },
-            }
-          : undefined,
+        summary,
         workExperiences: experience
           ? {
-              create: experience,
+              create: experience.map(
+                (exp: {
+                  company: string;
+                  position: string;
+                  startDate: string | Date;
+                  endDate?: string | Date | null;
+                  descriptions: string[];
+                  isCurrent: boolean;
+                }) => ({
+                  company: exp.company,
+                  position: exp.position,
+                  startDate: new Date(exp.startDate),
+                  endDate: exp.endDate ? new Date(exp.endDate) : null,
+                  descriptions: exp.descriptions,
+                  isCurrent: exp.isCurrent,
+                })
+              ),
             }
           : undefined,
         educationDetails: education
           ? {
-              create: education,
+              create: education.map(
+                (edu: {
+                  institution: string;
+                  degree: string;
+                  field: string;
+                  startDate: string | Date;
+                  endDate?: string | Date | null;
+                }) => ({
+                  institution: edu.institution,
+                  degree: edu.degree,
+                  field: edu.field,
+                  startDate: new Date(edu.startDate),
+                  endDate: edu.endDate ? new Date(edu.endDate) : null,
+                })
+              ),
             }
           : undefined,
         certificationDetails: certifications
           ? {
-              create: certifications,
+              create: certifications.map(
+                (cert: {
+                  name: string;
+                  issuer: string;
+                  issueDate: string | Date;
+                  expiryDate?: string | Date | null;
+                }) => ({
+                  name: cert.name,
+                  issuer: cert.issuer,
+                  issueDate: new Date(cert.issueDate),
+                  expiryDate: cert.expiryDate
+                    ? new Date(cert.expiryDate)
+                    : null,
+                })
+              ),
             }
           : undefined,
         skillDetails: skills
           ? {
-              create: skills,
+              create: skills.map((skill: { name: string }) => ({
+                name: skill.name,
+              })),
             }
           : undefined,
       },

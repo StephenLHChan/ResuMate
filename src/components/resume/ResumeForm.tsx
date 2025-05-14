@@ -57,12 +57,14 @@ const ResumeForm = ({
 
   const addItem = <T extends ResumeSection>(
     section: T,
-    template: Omit<ResumeData[T][number], "id">
+    template: Omit<ResumeData[T] extends Array<infer U> ? U : never, "id">
   ): void => {
     setFormData(prev => ({
       ...prev,
       [section]: [
-        ...(prev[section] as Array<ResumeData[T][number]>),
+        ...(prev[section] as Array<
+          ResumeData[T] extends Array<infer U> ? U : never
+        >),
         { ...template, id: Date.now().toString() },
       ],
     }));
@@ -89,13 +91,13 @@ const ResumeForm = ({
   };
 
   const handleAddDescription = (
-    exp: ResumeData["experience"][number],
+    exp: ResumeData["workExperiences"][number],
     index: number
   ): void => {
     const newDescriptions = [...exp.descriptions, ""];
     setFormData(prev => ({
       ...prev,
-      experience: prev.experience.map((item, i) =>
+      workExperiences: prev.workExperiences.map((item, i) =>
         i === index ? { ...item, descriptions: newDescriptions } : item
       ),
     }));
@@ -724,7 +726,7 @@ const ResumeForm = ({
                   backgroundColor: "white",
                   boxShadow: "0 0 10px rgba(0,0,0,0.1)",
                   color: "#2c3e50",
-                  transform: "scale(0.5)",
+                  transform: "scale(0.8)",
                   transformOrigin: "top center",
                   overflow: "hidden",
                   border: "none",
