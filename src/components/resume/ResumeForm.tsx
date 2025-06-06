@@ -94,10 +94,10 @@ const ResumeForm = ({
     exp: ResumeData["workExperiences"][number],
     index: number
   ): void => {
-    const newDescriptions = [...exp.descriptions, ""];
+    const newDescriptions = [...(exp.descriptions || []), ""];
     setFormData(prev => ({
       ...prev,
-      workExperiences: prev.workExperiences.map((item, i) =>
+      workExperiences: prev.workExperiences?.map((item, i) =>
         i === index ? { ...item, descriptions: newDescriptions } : item
       ),
     }));
@@ -108,10 +108,12 @@ const ResumeForm = ({
     index: number,
     descIndex: number
   ): void => {
-    const newDescriptions = exp.descriptions.filter((_, i) => i !== descIndex);
+    const newDescriptions = [...(exp.descriptions || [])].filter(
+      (_, i) => i !== descIndex
+    );
     setFormData(prev => ({
       ...prev,
-      workExperiences: prev.workExperiences.map((item, i) =>
+      workExperiences: prev.workExperiences?.map((item, i) =>
         i === index ? { ...item, descriptions: newDescriptions } : item
       ),
     }));
@@ -123,11 +125,11 @@ const ResumeForm = ({
     descIndex: number,
     value: string
   ): void => {
-    const newDescriptions = [...exp.descriptions];
+    const newDescriptions = [...(exp.descriptions || [])];
     newDescriptions[descIndex] = value;
     setFormData(prev => ({
       ...prev,
-      workExperiences: prev.workExperiences.map((item, i) =>
+      workExperiences: prev.workExperiences?.map((item, i) =>
         i === index ? { ...item, descriptions: newDescriptions } : item
       ),
     }));
@@ -379,7 +381,7 @@ const ResumeForm = ({
 
                     <div className="space-y-2">
                       <Label>Description</Label>
-                      {exp.descriptions.map((desc, descIndex) => (
+                      {exp.descriptions?.map((desc, descIndex) => (
                         <div key={descIndex} className="flex gap-2">
                           <Textarea
                             value={desc || ""}
@@ -394,7 +396,7 @@ const ResumeForm = ({
                             placeholder="Describe your responsibilities and achievements..."
                             className="min-h-[100px]"
                           />
-                          {exp.descriptions.length > 1 && (
+                          {exp.descriptions && exp.descriptions.length > 1 && (
                             <Button
                               type="button"
                               variant="ghost"

@@ -42,9 +42,9 @@ export type ResumeWithRelations = Prisma.ResumeGetPayload<{
   };
 }>;
 
-export interface ResumeData {
+export type ResumeData = {
   summary: string | null;
-  workExperiences: Array<{
+  workExperiences: Partial<{
     id?: string;
     company: string;
     position: string;
@@ -52,7 +52,7 @@ export interface ResumeData {
     endDate?: Date | null;
     descriptions: string[];
     isCurrent: boolean;
-  }>;
+  }>[];
   education: Partial<Education>[];
   certifications: Partial<Certification>[];
   skills: Partial<Skill>[];
@@ -66,7 +66,7 @@ export interface ResumeData {
   github?: string;
   title: string;
   professionalTitle?: string;
-}
+};
 
 export interface JobContent {
   title: string | null;

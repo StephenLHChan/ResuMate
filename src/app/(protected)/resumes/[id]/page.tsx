@@ -18,8 +18,8 @@ const EditResumePage = (): React.ReactElement => {
     summary: "",
     workExperiences: [],
     education: [],
-    certifications: [],
     skills: [],
+    certifications: [],
     firstName: "",
     lastName: "",
     email: "",
@@ -38,7 +38,33 @@ const EditResumePage = (): React.ReactElement => {
       try {
         setLoading(true);
         const { data } = await axiosInstance.get(`/resumes/${id}`);
-        setFormData(data);
+        setFormData({
+          ...data,
+          workExperiences: data.experience.map((exp: any) => ({
+            company: exp.company,
+            position: exp.position,
+            startDate: new Date(exp.startDate),
+            endDate: exp.endDate ? new Date(exp.endDate) : null,
+            descriptions: exp.descriptions,
+            isCurrent: exp.isCurrent,
+          })),
+          education: data.education.map((edu: any) => ({
+            institution: edu.institution,
+            degree: edu.degree,
+            field: edu.field,
+            startDate: new Date(edu.startDate),
+            endDate: edu.endDate ? new Date(edu.endDate) : null,
+          })),
+          skills: data.skills.map((skill: any) => ({
+            name: skill.name,
+          })),
+          certifications: data.certifications.map((cert: any) => ({
+            name: cert.name,
+            issuer: cert.issuer,
+            issueDate: new Date(cert.issueDate),
+            expiryDate: cert.expiryDate ? new Date(cert.expiryDate) : null,
+          })),
+        });
       } catch (error) {
         console.error("Error fetching resume:", error);
         toast({
@@ -56,18 +82,25 @@ const EditResumePage = (): React.ReactElement => {
 
   const handleSubmit = async (data: ResumeData): Promise<void> => {
     try {
-      await axiosInstance.put(`/resumes/${id}`, data);
+      const transformedData = {
+        ...data,
+        workExperiences: data.workExperiences.map(exp => ({ ...exp })),
+        education: data.education.map(edu => ({ ...edu })),
+        skills: data.skills.map(skill => ({ ...skill })),
+        certifications: data.certifications.map(cert => ({ ...cert })),
+      };
+
+      await axiosInstance.put(`/resumes/${id}`, transformedData);
       toast({
         title: "Success",
         description: "Resume updated successfully",
       });
       router.push("/resumes");
-    } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to update resume";
+    } catch (error) {
+      console.error("Error updating resume:", error);
       toast({
         title: "Error",
-        description: errorMessage,
+        description: "Failed to update resume",
         variant: "destructive",
       });
     }
@@ -94,9 +127,9 @@ const EditResumePage = (): React.ReactElement => {
           <ResumeForm
             initialData={formData}
             onSubmit={handleSubmit}
-            onCancel={() => router.push("/resumes")}
-            submitButtonText="Save Changes"
+            submitButtonText="Update Resume"
             showCancelButton
+            onCancel={() => router.push("/resumes")}
           />
         </CardContent>
       </Card>

@@ -172,7 +172,7 @@ export const resumeTemplate = (resumeData: ResumeData): string => `
             }</div>
             </div>
             <div class="experience-description">
-              ${exp.descriptions.map(desc => `<p>${desc}</p>`).join("")}
+              ${exp.descriptions?.map(desc => `<p>${desc}</p>`).join("")}
             </div>
           </div>
         `
