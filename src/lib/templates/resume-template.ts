@@ -156,6 +156,13 @@ export const resumeTemplate = (resumeData: ResumeData): string => `
         color: #2c3e50;
       }
 
+      .skill-item:not(:last-child)::after {
+        content: "|";
+        color: #7f8c8d;
+        margin-left: 0.5em;
+        font-weight: 100;
+      }
+
       .education-header, .certification-header, .experience-header {
         display: flex;
         justify-content: space-between;
@@ -193,14 +200,30 @@ export const resumeTemplate = (resumeData: ResumeData): string => `
       </div>
       <div class="title">${resumeData.professionalTitle}</div>
       <div class="contact-info">
-        ${resumeData.email} 
+        <a href="mailto:${
+          resumeData.email
+        }" style="color: inherit; text-decoration: none;">${
+  resumeData.email
+}</a>
         ${resumeData.phone ? `| ${resumeData.phone}` : ""}
         ${resumeData.location ? `| ${resumeData.location}` : ""}
       </div>
       <div class="contact-info">
-        ${resumeData.website ? `${resumeData.website}` : ""}
-        ${resumeData.linkedin ? `| ${resumeData.linkedin}` : ""}
-        ${resumeData.github ? `| ${resumeData.github}` : ""}
+        ${
+          resumeData.website
+            ? `<a href="${resumeData.website}" target="_blank" style="color: inherit; text-decoration: none;">${resumeData.website}</a>`
+            : ""
+        }
+        ${
+          resumeData.linkedin
+            ? `| <a href="${resumeData.linkedin}" target="_blank" style="color: inherit; text-decoration: none;">${resumeData.linkedin}</a>`
+            : ""
+        }
+        ${
+          resumeData.github
+            ? `| <a href="${resumeData.github}" target="_blank" style="color: inherit; text-decoration: none;">${resumeData.github}</a>`
+            : ""
+        }
       </div>
     </div>
     
@@ -315,7 +338,7 @@ export const resumeTemplate = (resumeData: ResumeData): string => `
         ${resumeData.skills
           .map(
             skill => `
-          <div class="skill-item">${skill.name}</div>
+          <span class="skill-item">${skill.name}</span>
         `
           )
           .join("")}
