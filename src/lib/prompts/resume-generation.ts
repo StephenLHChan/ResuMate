@@ -1,5 +1,6 @@
 import type { ProfileWithRelations } from "@/lib/types";
 import type { Job } from "@prisma/client";
+
 export const resumeGenerationPrompt = {
   system: `You are a professional resume writer with expertise in creating tailored resumes that highlight relevant skills and experiences. Your task is to create a resume that matches the job requirements while maintaining authenticity and professionalism.
 

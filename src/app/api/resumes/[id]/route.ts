@@ -99,7 +99,9 @@ export const PUT = async (
     const { id } = await params;
     const data = await request.json();
 
-    // Verify the resume belongs to the user
+    console.debug("data:", data);
+
+    console.debug("Finding resume...");
     const existingResume = await prisma.resume.findFirst({
       where: {
         id,
@@ -112,6 +114,7 @@ export const PUT = async (
     }
 
     // Update the resume
+    console.debug("Updating resume...");
     const updatedResume = await prisma.resume.update({
       where: {
         id,
@@ -130,7 +133,7 @@ export const PUT = async (
         summary: data.summary,
         workExperiences: {
           deleteMany: {},
-          create: data.experience.map(
+          create: data.workExperiences.map(
             (exp: {
               company: string;
               position: string;

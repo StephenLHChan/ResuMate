@@ -96,6 +96,8 @@ export const POST = async (req: Request): Promise<NextResponse> => {
         github: validatedData.github || "",
       };
 
+    console.debug("Getting user...");
+
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
     });
@@ -104,6 +106,7 @@ export const POST = async (req: Request): Promise<NextResponse> => {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
 
+    console.debug("Getting existing profile...");
     const existingProfile = await prisma.profile.findUnique({
       where: { userId: user.id },
     });
@@ -142,6 +145,7 @@ export const POST = async (req: Request): Promise<NextResponse> => {
       });
     } else {
       // Create new profile with skills
+      console.debug("Creating new profile...");
       const createData: Prisma.ProfileCreateInput = {
         ...baseProfileData,
         user: {

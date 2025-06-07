@@ -23,7 +23,6 @@ const ResumePage = (): React.ReactElement => {
             pageSize: 20,
           },
         });
-        // Ensure data is an array, if not, use empty array
         setResumes(data.items);
       } catch (error) {
         console.error("Error fetching resumes:", error);
