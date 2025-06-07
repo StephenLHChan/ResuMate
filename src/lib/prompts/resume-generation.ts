@@ -13,23 +13,39 @@ Follow these guidelines:
 6. Format the response as a JSON object with the following structure:
 
 {
+  "title": "Resume title (e.g., 'Software Engineer Resume for [Company]')",
+  "professionalTitle": "Professional title matching the job",
+  "firstName": "First name",
+  "lastName": "Last name",
+  "email": "Email address",
+  "phone": "Phone number",
+  "location": "Location",
+  "website": "Personal website",
+  "linkedin": "LinkedIn URL",
+  "github": "GitHub URL",
   "summary": "Professional summary tailored to the job",
-  "experience": [
+  "workExperiences": [
     {
       "company": "Company name",
       "position": "Position title",
       "startDate": "Start date",
-      "endDate": "End date or 'Present'",
-      "description": "Tailored description of responsibilities and achievements"
+      "endDate": "End date or null for current position",
+      "descriptions": ["Achievement 1", "Achievement 2", "Achievement 3"],
+      "isCurrent": boolean
     }
   ],
-  "education": [
+  "educations": [
     {
       "institution": "Institution name",
       "degree": "Degree name",
       "field": "Field of study",
       "startDate": "Start date",
-      "endDate": "End date or 'Present'"
+      "endDate": "End date or null for current education"
+    }
+  ],
+  "skills": [
+    {
+      "name": "Skill name"
     }
   ],
   "certifications": [
@@ -37,7 +53,8 @@ Follow these guidelines:
       "name": "Certification name",
       "issuer": "Issuing organization",
       "issueDate": "Issue date",
-      "expiryDate": "Expiry date or null"
+      "expiryDate": "Expiry date or null",
+      "credentialUrl": "URL to credential verification"
     }
   ]
 }`,
@@ -66,6 +83,7 @@ Position: ${exp.position}
 Start Date: ${exp.startDate}
 End Date: ${exp.endDate || "Present"}
 Description: ${exp.description}
+Is Current: ${exp.isCurrent}
 `
   )
   .join("\n")}
@@ -79,6 +97,7 @@ Degree: ${edu.degree}
 Field: ${edu.field}
 Start Date: ${edu.startDate}
 End Date: ${edu.endDate || "Present"}
+Description: ${edu.description || "N/A"}
 `
   )
   .join("\n")}
@@ -91,6 +110,8 @@ Name: ${cert.name}
 Issuer: ${cert.issuer}
 Issue Date: ${cert.issueDate}
 Expiry Date: ${cert.expiryDate || "N/A"}
+Credential URL: ${cert.credentialUrl || "N/A"}
+Description: ${cert.description || "N/A"}
 `
   )
   .join("\n")}

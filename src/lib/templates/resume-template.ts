@@ -185,12 +185,12 @@ export const resumeTemplate = (resumeData: ResumeData): string => `
     }
 
     ${
-      resumeData.education && resumeData.education.length > 0
+      resumeData.educations && resumeData.educations.length > 0
         ? `
     <div class="section">
       <div class="section-title">Education</div>
       <div class="education-list">
-        ${resumeData.education
+        ${resumeData.educations
           .map(
             edu => `
           <div class="education-item">

@@ -10,26 +10,16 @@ import { resumeGenerationPrompt } from "@/lib/prompts/resume-generation";
 import { SubscriptionService } from "@/lib/services/subscription-service";
 import { resumeTemplate } from "@/lib/templates/resume-template";
 
-import type { ResumeWithRelations, ProfileWithRelations } from "@/lib/types";
+import type {
+  ResumeWithRelations,
+  ProfileWithRelations,
+  ResumeData,
+} from "@/lib/types";
 import type { Job } from "@prisma/client";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
-
-// interface ResumeAnalysis {
-//   strengths: string[];
-//   weaknesses: string[];
-//   suggestions: string[];
-//   keywords: string[];
-//   score: number;
-//   improvements: {
-//     summary: string;
-//     experience: string[];
-//     skills: string[];
-//     education: string[];
-//   };
-// }
 
 export class ResumeService {
   static async generateResumeContent(
@@ -37,13 +27,13 @@ export class ResumeService {
     jobInfo: Job
   ): Promise<ResumeWithRelations> {
     // Check if user has premium subscription
-    const isPremium = await SubscriptionService.isPremiumUser(
-      userProfile.userId
-    );
+    // const isPremium = await SubscriptionService.isPremiumUser(
+    //   userProfile.userId
+    // );
 
-    if (!isPremium) {
-      throw new Error("Premium subscription required to generate resumes");
-    }
+    // if (!isPremium) {
+    //   throw new Error("Premium subscription required to generate resumes");
+    // }
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4-turbo-preview",
@@ -100,10 +90,7 @@ export class ResumeService {
     return resume;
   }
 
-  static async generatePDF(
-    userProfile: ProfileWithRelations,
-    resumeContent: ResumeWithRelations
-  ): Promise<Uint8Array> {
+  static async generatePDF(resumeContent: ResumeData): Promise<Uint8Array> {
     const browser = await puppeteer.launch({
       headless: true,
     });
