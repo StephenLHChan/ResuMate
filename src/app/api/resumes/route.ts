@@ -81,6 +81,8 @@ export const GET = async (
 
 export const POST = async (request: Request): Promise<NextResponse> => {
   try {
+    console.debug("Creating resume record...");
+
     const session = await auth();
     if (!session?.user?.id) {
       return new NextResponse("Unauthorized", { status: 401 });

@@ -9,6 +9,7 @@ import {
 import { resumeGenerationPrompt } from "@/lib/prompts/resume-generation";
 import { SubscriptionService } from "@/lib/services/subscription-service";
 import { resumeTemplate } from "@/lib/templates/resume-template";
+import axiosInstance from "@/lib/axios";
 
 import type {
   ResumeWithRelations,
@@ -21,11 +22,50 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+interface GeneratedResumeContent {
+  title: string;
+  professionalTitle: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  location: string;
+  website: string;
+  linkedin: string;
+  github: string;
+  summary: string;
+  workExperiences: {
+    company: string;
+    position: string;
+    startDate: string;
+    endDate: string | null;
+    descriptions: string[];
+    isCurrent: boolean;
+  }[];
+  educations: {
+    institution: string;
+    degree: string;
+    field: string;
+    startDate: string;
+    endDate: string | null;
+  }[];
+  skills: {
+    name: string;
+  }[];
+  certifications: {
+    name: string;
+    issuer: string;
+    issueDate: string;
+    expiryDate: string | null;
+    credentialUrl: string | null;
+  }[];
+}
+
 export class ResumeService {
   static async generateResumeContent(
     userProfile: ProfileWithRelations,
     jobInfo: Job
-  ): Promise<ResumeWithRelations> {
+  ): Promise<GeneratedResumeContent> {
     // Check if user has premium subscription
     // const isPremium = await SubscriptionService.isPremiumUser(
     //   userProfile.userId
@@ -54,21 +94,71 @@ export class ResumeService {
     if (!resumeContent) {
       throw new Error("Failed to generate resume content");
     }
-
+    console.debug("resumeContent", resumeContent);
     return JSON.parse(resumeContent);
   }
 
   static async createResumeRecord(
-    title: string,
-    content: string,
+    content: ResumeData,
+    userId?: string,
     applicationId?: string
   ): Promise<{ id: string }> {
-    const resumeResponse = await fetch("/api/resumes", {
-      method: "POST",
-      body: JSON.stringify({ title, content }),
-    });
+    console.debug("Creating resume record...");
+    console.debug("content", content);
 
-    const resume = await resumeResponse.json();
+    if (!userId) {
+      throw new Error("User ID is required to create a resume");
+    }
+
+    const resume = await prisma.resume.create({
+      data: {
+        title: content.title,
+        userId,
+        professionalTitle: content.professionalTitle || null,
+        firstName: content.firstName,
+        lastName: content.lastName,
+        email: content.email,
+        phone: content.phone || null,
+        location: content.location || null,
+        website: content.website || null,
+        linkedin: content.linkedin || null,
+        github: content.github || null,
+        summary: content.summary || null,
+        workExperiences: {
+          create: content.workExperiences.map(exp => ({
+            company: exp.company || "",
+            position: exp.position || "",
+            startDate: new Date(exp.startDate || new Date()),
+            endDate: exp.endDate ? new Date(exp.endDate) : null,
+            descriptions: exp.descriptions || [],
+            isCurrent: exp.isCurrent || false,
+          })),
+        },
+        educations: {
+          create: content.educations.map(edu => ({
+            institution: edu.institution || "",
+            degree: edu.degree || "",
+            field: edu.field || "",
+            startDate: new Date(edu.startDate || new Date()),
+            endDate: edu.endDate ? new Date(edu.endDate) : null,
+          })),
+        },
+        skills: {
+          create: content.skills.map(skill => ({
+            name: skill.name || "",
+          })),
+        },
+        certifications: {
+          create: content.certifications.map(cert => ({
+            name: cert.name || "",
+            issuer: cert.issuer || "",
+            issueDate: new Date(cert.issueDate || new Date()),
+            expiryDate: cert.expiryDate ? new Date(cert.expiryDate) : null,
+            credentialUrl: cert.credentialUrl || null,
+          })),
+        },
+      },
+    });
 
     if (applicationId) {
       await prisma.applicationResume.create({

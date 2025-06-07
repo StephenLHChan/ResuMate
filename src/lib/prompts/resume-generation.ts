@@ -67,7 +67,8 @@ Follow these guidelines:
 
 Name: ${userProfile.preferredFirstName} ${userProfile.preferredLastName}
 Title: ${userProfile.title}
-Contact: ${userProfile.phone || "N/A"}
+Email: ${userProfile.user.email}
+Phone: ${userProfile.phone || "N/A"}
 Location: ${userProfile.location || "N/A"}
 Website: ${userProfile.website || "N/A"}
 LinkedIn: ${userProfile.linkedin || "N/A"}
