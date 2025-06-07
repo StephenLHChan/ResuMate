@@ -3,10 +3,18 @@ import type { ResumeData } from "@/lib/types";
 // Helper function to format date to MMM yyyy
 const formatDate = (date: Date | string | null | undefined): string => {
   if (!date) return "";
-  if (date instanceof Date) {
-    return date.toISOString().split("T")[0];
-  }
-  return date;
+  const dateObj = date instanceof Date ? date : new Date(date);
+  return dateObj.toLocaleDateString("en-US", {
+    month: "short",
+    year: "numeric",
+  });
+};
+
+// Helper function to check if date is in the past
+const isDateInPast = (date: Date | string | null | undefined): boolean => {
+  if (!date) return false;
+  const dateObj = date instanceof Date ? date : new Date(date);
+  return dateObj < new Date();
 };
 
 export const resumeTemplate = (resumeData: ResumeData): string => `
@@ -118,6 +126,25 @@ export const resumeTemplate = (resumeData: ResumeData): string => `
         font-size: 9pt;
       }
 
+      .experience-description {
+        margin-top: 0.5em;
+        text-align: justify;
+        font-size: 8pt;
+      }
+
+      .experience-description p {
+        margin: 0.2em 0;
+        padding-left: 1em;
+        position: relative;
+      }
+
+      .experience-description p::before {
+        content: "•";
+        position: absolute;
+        left: 0;
+        color: #2c3e50;
+      }
+
       .skills-list {
         display: flex;
         flex-wrap: wrap;
@@ -127,6 +154,35 @@ export const resumeTemplate = (resumeData: ResumeData): string => `
       .skill-item {
         font-size: 9pt;
         color: #2c3e50;
+      }
+
+      .education-header, .certification-header, .experience-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.3em;
+      }
+
+      .education-info, .certification-info, .experience-info {
+        flex: 1;
+      }
+
+      .education-degree, .certification-name, .experience-position {
+        font-weight: 500;
+        color: #2c3e50;
+      }
+
+      .education-institution, .certification-issuer, .experience-company {
+        color: #7f8c8d;
+        font-size: 8.5pt;
+      }
+
+      .education-date, .certification-date, .experience-date {
+        color: #7f8c8d;
+        font-size: 8pt;
+        text-align: right;
+        white-space: nowrap;
+        margin-left: 1em;
       }
     </style>
   </head>
@@ -165,8 +221,10 @@ export const resumeTemplate = (resumeData: ResumeData): string => `
             exp => `
           <div class="experience-item">
             <div class="experience-header">
-              <div class="experience-title">${exp.position}</div>
-              <div class="experience-company">${exp.company}</div>
+              <div class="experience-info">
+                <div class="experience-position">${exp.position}</div>
+                <div class="experience-company">${exp.company}</div>
+              </div>
               <div class="experience-date">${formatDate(exp.startDate)} - ${
               exp.isCurrent ? "Present" : formatDate(exp.endDate)
             }</div>
@@ -195,11 +253,17 @@ export const resumeTemplate = (resumeData: ResumeData): string => `
             edu => `
           <div class="education-item">
             <div class="education-header">
-              <div class="education-degree">${edu.degree} in ${edu.field}</div>
-              <div class="education-institution">${edu.institution}</div>
-              <div class="education-date">${formatDate(
-                edu.startDate
-              )} - ${formatDate(edu.endDate)}</div>
+              <div class="education-info">
+                <div class="education-degree">${edu.degree} in ${
+              edu.field
+            }</div>
+                <div class="education-institution">${edu.institution}</div>
+              </div>
+              <div class="education-date">${
+                isDateInPast(edu.endDate)
+                  ? formatDate(edu.endDate)
+                  : `${formatDate(edu.startDate)} - ${formatDate(edu.endDate)}`
+              }</div>
             </div>
           </div>
         `
@@ -222,13 +286,13 @@ export const resumeTemplate = (resumeData: ResumeData): string => `
             cert => `
           <div class="certification-item">
             <div class="certification-header">
-              <div class="certification-name">${cert.name}</div>
-              <div class="certification-issuer">${cert.issuer}</div>
-              <div class="certification-date">Issued: ${formatDate(
-                cert.issueDate
-              )}${
-              cert.expiryDate
-                ? ` - Expires: ${formatDate(cert.expiryDate)}`
+              <div class="certification-info">
+                <div class="certification-name">${cert.name}</div>
+                <div class="certification-issuer">${cert.issuer}</div>
+              </div>
+              <div class="certification-date">${formatDate(cert.issueDate)}${
+              cert.expiryDate && !isDateInPast(cert.expiryDate)
+                ? ` - ${formatDate(cert.expiryDate)}`
                 : ""
             }</div>
             </div>
