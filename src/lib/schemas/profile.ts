@@ -37,7 +37,8 @@ export const profileSchema = z.object({
     .url({ message: "Please enter a valid URL" })
     .optional()
     .or(z.literal("")),
-  skills: z.union([z.array(z.string()), z.array(skillSchema)]).optional(),
+  skills: z.array(skillSchema).optional(),
+  // skills: z.union([z.array(z.string()), z.array(skillSchema)]).optional(),
 });
 
 // Type for use in forms and data handling

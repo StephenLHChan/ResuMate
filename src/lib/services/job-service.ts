@@ -13,6 +13,7 @@ export class JobService {
     content: string,
     type: "text" | "url" = "text"
   ): Promise<JobContent> {
+    console.debug("Analyzing job...");
     let jobContent = content;
 
     // If URL is provided, fetch the content
