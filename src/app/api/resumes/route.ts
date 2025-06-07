@@ -90,6 +90,7 @@ export const POST = async (request: Request): Promise<NextResponse> => {
       title,
       firstName,
       lastName,
+      professionalTitle,
       email,
       phone,
       location,
@@ -97,11 +98,10 @@ export const POST = async (request: Request): Promise<NextResponse> => {
       linkedin,
       github,
       summary,
-      experience,
-      education,
+      workExperiences,
+      educations,
       certifications,
       skills,
-      professionalTitle,
     } = await request.json();
 
     const resume = await prisma.resume.create({
@@ -122,9 +122,9 @@ export const POST = async (request: Request): Promise<NextResponse> => {
         linkedin,
         github,
         summary,
-        workExperiences: experience
+        workExperiences: workExperiences
           ? {
-              create: experience.map(
+              create: workExperiences.map(
                 (exp: {
                   company: string;
                   position: string;
@@ -143,9 +143,9 @@ export const POST = async (request: Request): Promise<NextResponse> => {
               ),
             }
           : undefined,
-        educationDetails: education
+        educations: educations
           ? {
-              create: education.map(
+              create: educations.map(
                 (edu: {
                   institution: string;
                   degree: string;
@@ -162,7 +162,7 @@ export const POST = async (request: Request): Promise<NextResponse> => {
               ),
             }
           : undefined,
-        certificationDetails: certifications
+        certifications: certifications
           ? {
               create: certifications.map(
                 (cert: {
@@ -181,7 +181,7 @@ export const POST = async (request: Request): Promise<NextResponse> => {
               ),
             }
           : undefined,
-        skillDetails: skills
+        skills: skills
           ? {
               create: skills.map((skill: { name: string }) => ({
                 name: skill.name,

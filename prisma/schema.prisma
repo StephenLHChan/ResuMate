@@ -184,7 +184,7 @@ model ResumeWork {
 model ResumeEducation {
   id          String    @id @default(cuid())
   resumeId    String
-  resume      Resume    @relation(fields: [resumeId], references: [id], onDelete: Cascade, name: "ResumeToEducationDetail")
+  resume      Resume    @relation(fields: [resumeId], references: [id], onDelete: Cascade, name: "ResumeToEducation")
   institution String
   degree      String
   field       String
@@ -197,7 +197,7 @@ model ResumeEducation {
 model ResumeSkill {
   id        String   @id @default(cuid())
   resumeId  String
-  resume    Resume   @relation(fields: [resumeId], references: [id], onDelete: Cascade, name: "ResumeToSkillDetail")
+  resume    Resume   @relation(fields: [resumeId], references: [id], onDelete: Cascade, name: "ResumeToSkill")
   name      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -206,7 +206,7 @@ model ResumeSkill {
 model ResumeCertification {
   id            String    @id @default(cuid())
   resumeId      String
-  resume        Resume    @relation(fields: [resumeId], references: [id], onDelete: Cascade, name: "ResumeToCertificationDetail")
+  resume        Resume    @relation(fields: [resumeId], references: [id], onDelete: Cascade, name: "ResumeToCertification")
   name          String
   issuer        String
   issueDate     DateTime
@@ -236,9 +236,9 @@ model Resume {
   summary String? @db.Text
   applications ApplicationResume[]
   workExperiences ResumeWork[] @relation("ResumeToWorkExperience")
-  educationDetails ResumeEducation[] @relation("ResumeToEducationDetail")
-  skillDetails ResumeSkill[] @relation("ResumeToSkillDetail")
-  certificationDetails ResumeCertification[] @relation("ResumeToCertificationDetail")
+  educations ResumeEducation[] @relation("ResumeToEducation")
+  skills ResumeSkill[] @relation("ResumeToSkill")
+  certifications ResumeCertification[] @relation("ResumeToCertification")
 }
 
 model Job {

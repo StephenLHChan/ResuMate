@@ -22,9 +22,9 @@ export const GET = async (
       },
       include: {
         workExperiences: true,
-        educationDetails: true,
-        certificationDetails: true,
-        skillDetails: true,
+        educations: true,
+        certifications: true,
+        skills: true,
       },
     });
 
@@ -46,7 +46,7 @@ export const GET = async (
       linkedin: resume.linkedin,
       github: resume.github,
       summary: resume.summary || "",
-      experience: resume.workExperiences.map(exp => ({
+      workExperiences: resume.workExperiences.map(exp => ({
         id: exp.id,
         company: exp.company,
         position: exp.position,
@@ -55,7 +55,7 @@ export const GET = async (
         descriptions: exp.descriptions,
         isCurrent: exp.isCurrent,
       })),
-      education: resume.educationDetails.map(edu => ({
+      educations: resume.educations.map(edu => ({
         id: edu.id,
         institution: edu.institution,
         degree: edu.degree,
@@ -63,14 +63,14 @@ export const GET = async (
         startDate: edu.startDate,
         endDate: edu.endDate,
       })),
-      certifications: resume.certificationDetails.map(cert => ({
+      certifications: resume.certifications.map(cert => ({
         id: cert.id,
         name: cert.name,
         issuer: cert.issuer,
         issueDate: cert.issueDate,
         expiryDate: cert.expiryDate,
       })),
-      skills: resume.skillDetails.map(skill => ({
+      skills: resume.skills.map(skill => ({
         id: skill.id,
         name: skill.name,
       })),
@@ -151,7 +151,7 @@ export const PUT = async (
             })
           ),
         },
-        educationDetails: {
+        educations: {
           deleteMany: {},
           create: data.education.map(
             (edu: {
@@ -169,7 +169,7 @@ export const PUT = async (
             })
           ),
         },
-        certificationDetails: {
+        certifications: {
           deleteMany: {},
           create: data.certifications.map(
             (cert: {
@@ -185,7 +185,7 @@ export const PUT = async (
             })
           ),
         },
-        skillDetails: {
+        skills: {
           deleteMany: {},
           create: data.skills.map((skill: { name: string }) => ({
             name: skill.name,

@@ -444,7 +444,7 @@ const ResumeForm = ({
               type="button"
               variant="outline"
               onClick={() =>
-                addItem("education", {
+                addItem("educations", {
                   institution: "",
                   degree: "",
                   field: "",
@@ -458,7 +458,7 @@ const ResumeForm = ({
             </Button>
           </CardHeader>
           <CardContent className="space-y-6">
-            {formData.education?.map((edu, index) => (
+            {formData.educations?.map((edu, index) => (
               <div key={edu.id} className="space-y-4 p-4 border rounded-lg">
                 <div className="flex justify-between items-start">
                   <div className="space-y-2 flex-1">
@@ -473,7 +473,7 @@ const ResumeForm = ({
                           onChange={e =>
                             handleInputChange(
                               e,
-                              "education",
+                              "educations",
                               index,
                               "institution"
                             )
@@ -486,7 +486,7 @@ const ResumeForm = ({
                           id={`degree-${edu.id}`}
                           value={edu.degree || ""}
                           onChange={e =>
-                            handleInputChange(e, "education", index, "degree")
+                            handleInputChange(e, "educations", index, "degree")
                           }
                         />
                       </div>
@@ -498,7 +498,7 @@ const ResumeForm = ({
                         id={`field-${edu.id}`}
                         value={edu.field || ""}
                         onChange={e =>
-                          handleInputChange(e, "education", index, "field")
+                          handleInputChange(e, "educations", index, "field")
                         }
                       />
                     </div>
@@ -515,7 +515,7 @@ const ResumeForm = ({
                           onChange={e =>
                             handleInputChange(
                               e,
-                              "education",
+                              "educations",
                               index,
                               "startDate"
                             )
@@ -529,7 +529,7 @@ const ResumeForm = ({
                           type="date"
                           value={formatDate(edu.endDate)}
                           onChange={e =>
-                            handleInputChange(e, "education", index, "endDate")
+                            handleInputChange(e, "educations", index, "endDate")
                           }
                         />
                       </div>
@@ -539,7 +539,7 @@ const ResumeForm = ({
                     type="button"
                     variant="ghost"
                     size="icon"
-                    onClick={() => removeItem("education", edu.id as string)}
+                    onClick={() => removeItem("educations", edu.id as string)}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>

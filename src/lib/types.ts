@@ -53,7 +53,7 @@ export type ResumeData = {
     descriptions: string[];
     isCurrent: boolean;
   }>[];
-  education: Partial<Education>[];
+  educations: Partial<Education>[];
   certifications: Partial<Certification>[];
   skills: Partial<Skill>[];
   firstName: string;
