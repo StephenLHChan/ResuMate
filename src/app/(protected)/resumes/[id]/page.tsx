@@ -17,7 +17,7 @@ const EditResumePage = (): React.ReactElement => {
   const [formData, setFormData] = useState<ResumeData>({
     summary: "",
     workExperiences: [],
-    education: [],
+    educations: [],
     skills: [],
     certifications: [],
     firstName: "",
@@ -40,7 +40,7 @@ const EditResumePage = (): React.ReactElement => {
         const { data } = await axiosInstance.get(`/resumes/${id}`);
         setFormData({
           ...data,
-          workExperiences: data.experience.map((exp: any) => ({
+          workExperiences: data.workExperiences.map((exp: any) => ({
             company: exp.company,
             position: exp.position,
             startDate: new Date(exp.startDate),
@@ -48,7 +48,7 @@ const EditResumePage = (): React.ReactElement => {
             descriptions: exp.descriptions,
             isCurrent: exp.isCurrent,
           })),
-          education: data.education.map((edu: any) => ({
+          educations: data.educations.map((edu: any) => ({
             institution: edu.institution,
             degree: edu.degree,
             field: edu.field,
@@ -84,10 +84,10 @@ const EditResumePage = (): React.ReactElement => {
     try {
       const transformedData = {
         ...data,
-        workExperiences: data.workExperiences.map(exp => ({ ...exp })),
-        education: data.education.map(edu => ({ ...edu })),
-        skills: data.skills.map(skill => ({ ...skill })),
-        certifications: data.certifications.map(cert => ({ ...cert })),
+        workExperiences: data.workExperiences.map(exp => ({
+          ...exp,
+          isCurrent: Boolean(exp.isCurrent),
+        })),
       };
 
       await axiosInstance.put(`/resumes/${id}`, transformedData);
