@@ -153,7 +153,7 @@ export const PUT = async (
         },
         educations: {
           deleteMany: {},
-          create: data.education.map(
+          create: data.educations.map(
             (edu: {
               institution: string;
               degree: string;

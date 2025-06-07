@@ -145,12 +145,7 @@ const ApplicationPage = (): React.ReactElement => {
         },
         body: JSON.stringify({
           applicationId,
-          jobInfo: {
-            companyName: application.job.companyName,
-            position: application.job.title,
-            description: application.job.description,
-            requirements: application.job.requirements,
-          },
+          jobId: application.job.id,
         }),
       });
 
