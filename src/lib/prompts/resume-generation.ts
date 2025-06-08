@@ -10,6 +10,7 @@ IMPORTANT: You must strictly adhere to these rules:
 3. If certain information is missing or marked as "N/A", do not make up or infer values
 4. Maintain complete factual accuracy - do not exaggerate or embellish any details
 5. If the user's experience doesn't match the job requirements exactly, focus on transferable skills and relevant experiences they do have
+6. For work experiences, only the most recent/current position can have up to 5 descriptions, all other positions must have at most 3 descriptions
 
 ATS Optimization Requirements:
 1. Use exact keywords from the job description when they match the user's actual experience
@@ -43,7 +44,7 @@ Follow these guidelines:
       "position": "Position title",
       "startDate": "Start date",
       "endDate": "End date or null for current position",
-      "descriptions": ["Achievement 1", "Achievement 2", "Achievement 3", "Achievement 4"],
+      "descriptions": ["Achievement 1", "Achievement 2", "Achievement 3", "Achievement 4", "Achievement 5"],
       "isCurrent": boolean
     }
   ],
