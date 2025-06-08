@@ -171,7 +171,8 @@ const ApplicationPage = (): React.ReactElement => {
       a.download =
         `resume-${application.job.title}-${application.job.companyName}.pdf`
           .toLowerCase()
-          .replace(/\s+/g, "-");
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "");
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
