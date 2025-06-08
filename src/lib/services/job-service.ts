@@ -56,16 +56,26 @@ export class JobService {
 
     try {
       const parsedResult = JSON.parse(result);
+      console.log(parsedResult);
       return {
         companyName: parsedResult.companyName,
         title: parsedResult.position,
         description: parsedResult.description,
+        duties: Array.isArray(parsedResult.duties) ? parsedResult.duties : [],
         requirements: Array.isArray(parsedResult.requirements)
           ? parsedResult.requirements
           : [],
         salaryMin: parsedResult.salaryMin || null,
         salaryMax: parsedResult.salaryMax || null,
         location: parsedResult.location || null,
+        postingDate: parsedResult.postingDate
+          ? new Date(parsedResult.postingDate)
+          : null,
+        applicationDeadline: parsedResult.applicationDeadline
+          ? new Date(parsedResult.applicationDeadline)
+          : null,
+        applicationInstructions: parsedResult.applicationInstructions || null,
+        applicationWebsite: parsedResult.applicationWebsite || null,
       };
     } catch (error) {
       console.error("Error parsing job analysis result:", error);
@@ -82,10 +92,15 @@ export class JobService {
         title: existingJob.title || "Unknown Position",
         companyName: existingJob.companyName || "Unknown Company",
         description: existingJob.description || "",
+        duties: existingJob.duties || [],
         requirements: existingJob.requirements || [],
         salaryMin: existingJob.salaryMin || null,
         salaryMax: existingJob.salaryMax || null,
         location: existingJob.location || null,
+        postingDate: existingJob.postingDate || null,
+        applicationDeadline: existingJob.applicationDeadline || null,
+        applicationInstructions: existingJob.applicationInstructions || null,
+        applicationWebsite: existingJob.applicationWebsite || null,
       };
     }
 

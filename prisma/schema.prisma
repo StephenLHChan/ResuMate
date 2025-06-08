@@ -246,6 +246,7 @@ model Job {
   title           String?
   companyName     String?
   description     String?    @db.Text
+  duties          String[]   @db.Text
   requirements    String[]
   url             String?    @unique
   salaryMin       Int?

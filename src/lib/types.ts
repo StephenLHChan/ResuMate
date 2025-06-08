@@ -72,10 +72,15 @@ export interface JobContent {
   title: string | null;
   companyName: string | null;
   description: string | null;
+  duties: string[];
   requirements: string[];
   salaryMin?: number | null;
   salaryMax?: number | null;
   location?: string | null;
+  postingDate?: Date | null;
+  applicationDeadline?: Date | null;
+  applicationInstructions?: string | null;
+  applicationWebsite?: string | null;
 }
 
 export interface APIResponse<T> {

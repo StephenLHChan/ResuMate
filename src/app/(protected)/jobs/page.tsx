@@ -27,10 +27,15 @@ const JobsPage = (): React.ReactElement => {
     title: "",
     company: "",
     description: "",
+    duties: "",
     requirements: "",
     salaryMin: "",
     salaryMax: "",
     location: "",
+    postingDate: "",
+    applicationDeadline: "",
+    applicationInstructions: "",
+    applicationWebsite: "",
   });
 
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
@@ -42,8 +47,9 @@ const JobsPage = (): React.ReactElement => {
       if (inputType === "manual") {
         jobInfo = {
           title: manualJob.title,
-          company: manualJob.company,
+          companyName: manualJob.company,
           description: manualJob.description,
+          duties: manualJob.duties.split("\n").filter(Boolean),
           requirements: manualJob.requirements.split("\n").filter(Boolean),
           salaryMin: manualJob.salaryMin
             ? parseInt(manualJob.salaryMin)
@@ -52,6 +58,15 @@ const JobsPage = (): React.ReactElement => {
             ? parseInt(manualJob.salaryMax)
             : undefined,
           location: manualJob.location || undefined,
+          postingDate: manualJob.postingDate
+            ? new Date(manualJob.postingDate)
+            : undefined,
+          applicationDeadline: manualJob.applicationDeadline
+            ? new Date(manualJob.applicationDeadline)
+            : undefined,
+          applicationInstructions:
+            manualJob.applicationInstructions || undefined,
+          applicationWebsite: manualJob.applicationWebsite || undefined,
         };
       } else {
         const { data: processedJob } = await axiosInstance.post(
@@ -66,10 +81,16 @@ const JobsPage = (): React.ReactElement => {
           title: processedJob.title,
           companyName: processedJob.companyName,
           description: processedJob.description,
+          duties: processedJob.duties,
           requirements: processedJob.requirements,
           salaryMin: processedJob.salaryMin || undefined,
           salaryMax: processedJob.salaryMax || undefined,
           location: processedJob.location || undefined,
+          postingDate: processedJob.postingDate || undefined,
+          applicationDeadline: processedJob.applicationDeadline || undefined,
+          applicationInstructions:
+            processedJob.applicationInstructions || undefined,
+          applicationWebsite: processedJob.applicationWebsite || undefined,
         };
       }
 
@@ -91,10 +112,15 @@ const JobsPage = (): React.ReactElement => {
         title: "",
         company: "",
         description: "",
+        duties: "",
         requirements: "",
         salaryMin: "",
         salaryMax: "",
         location: "",
+        postingDate: "",
+        applicationDeadline: "",
+        applicationInstructions: "",
+        applicationWebsite: "",
       });
       setInputType("url");
     } catch (error) {
@@ -209,6 +235,30 @@ const JobsPage = (): React.ReactElement => {
                         })
                       }
                     />
+                    <div className="grid grid-cols-2 gap-4">
+                      <Input
+                        type="date"
+                        placeholder="Posting Date"
+                        value={manualJob.postingDate}
+                        onChange={e =>
+                          setManualJob({
+                            ...manualJob,
+                            postingDate: e.target.value,
+                          })
+                        }
+                      />
+                      <Input
+                        type="date"
+                        placeholder="Application Deadline"
+                        value={manualJob.applicationDeadline}
+                        onChange={e =>
+                          setManualJob({
+                            ...manualJob,
+                            applicationDeadline: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
                     <Textarea
                       placeholder="Job Description"
                       value={manualJob.description}
@@ -218,6 +268,18 @@ const JobsPage = (): React.ReactElement => {
                           description: e.target.value,
                         })
                       }
+                      className="min-h-[100px]"
+                    />
+                    <Textarea
+                      placeholder="Job Duties (one per line)"
+                      value={manualJob.duties}
+                      onChange={e =>
+                        setManualJob({
+                          ...manualJob,
+                          duties: e.target.value,
+                        })
+                      }
+                      className="min-h-[100px]"
                     />
                     <Textarea
                       placeholder="Requirements (one per line)"
@@ -228,38 +290,42 @@ const JobsPage = (): React.ReactElement => {
                           requirements: e.target.value,
                         })
                       }
+                      className="min-h-[100px]"
+                    />
+                    <Textarea
+                      placeholder="Application Instructions"
+                      value={manualJob.applicationInstructions}
+                      onChange={e =>
+                        setManualJob({
+                          ...manualJob,
+                          applicationInstructions: e.target.value,
+                        })
+                      }
+                      className="min-h-[100px]"
+                    />
+                    <Input
+                      type="url"
+                      placeholder="Application Website URL"
+                      value={manualJob.applicationWebsite}
+                      onChange={e =>
+                        setManualJob({
+                          ...manualJob,
+                          applicationWebsite: e.target.value,
+                        })
+                      }
                     />
                   </div>
                 </TabsContent>
               </Tabs>
-
-              <Button type="submit" disabled={isLoading} className="w-full">
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Processing...
-                  </>
-                ) : (
-                  "Add Job"
-                )}
+              <Button type="submit" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isLoading ? "Processing..." : "Add Job"}
               </Button>
             </form>
           </CardContent>
         </Card>
-      </div>
 
-      <div className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Your Jobs</CardTitle>
-            <CardDescription>
-              View and manage your job applications
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <JobList />
-          </CardContent>
-        </Card>
+        <JobList />
       </div>
     </div>
   );
