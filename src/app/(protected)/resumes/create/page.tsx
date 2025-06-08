@@ -18,7 +18,7 @@ const CreateResumePage = (): React.ReactElement => {
   const [formData, setFormData] = useState<ResumeData>({
     summary: "",
     workExperiences: [],
-    education: [],
+    educations: [],
     certifications: [],
     skills: [],
     firstName: "",
