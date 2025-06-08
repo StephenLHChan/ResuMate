@@ -64,7 +64,7 @@ export const resumeTemplate = (resumeData: ResumeData): string => `
       .summary {
         text-align: justify;
         margin-bottom: 1.5em;
-        font-size: 9pt;
+        font-size: 10pt;
         line-height: 1.5;
       }
       
@@ -129,7 +129,7 @@ export const resumeTemplate = (resumeData: ResumeData): string => `
       .experience-description {
         margin-top: 0.5em;
         text-align: justify;
-        font-size: 8pt;
+        font-size: 9pt;
       }
 
       .experience-description p {
@@ -177,6 +177,8 @@ export const resumeTemplate = (resumeData: ResumeData): string => `
       .education-degree, .certification-name, .experience-position {
         font-weight: 500;
         color: #2c3e50;
+        font-size: 10pt;
+
       }
 
       .education-institution, .certification-issuer, .experience-company {
