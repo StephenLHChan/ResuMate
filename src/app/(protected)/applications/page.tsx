@@ -224,67 +224,6 @@ const ApplicationPage = (): React.ReactElement => {
     }
   };
 
-  const reprintResume = async (
-    applicationId: string,
-    resumeId: string
-  ): Promise<void> => {
-    setIsLoading(true);
-
-    try {
-      // Find the application to get resume content
-      const application = applications.find(app => app.id === applicationId);
-      if (!application) {
-        throw new Error("Application not found");
-      }
-
-      const resume = application.resumes.find(r => r.resume.id === resumeId);
-      if (!resume) {
-        throw new Error("Resume not found");
-      }
-
-      // Generate the PDF
-      const response = await fetch("/api/resumes/reprint", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          resumeContent: resume.resume.content,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to reprint resume");
-      }
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-
-      // Download the file
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `tailored-resume.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-
-      toast({
-        title: "Success",
-        description: "Resume reprinted successfully",
-      });
-    } catch (error) {
-      console.error("Error reprinting resume:", error);
-      toast({
-        title: "Error",
-        description: "Failed to reprint resume",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const updateApplicationStatus = async (
     applicationId: string,
     newStatus: string
@@ -483,36 +422,6 @@ const ApplicationPage = (): React.ReactElement => {
                               ).toLocaleDateString()}
                             </p>
                             <div className="flex gap-2 pt-4">
-                              {application.resumes &&
-                                application.resumes.length > 0 && (
-                                  <div className="flex gap-2">
-                                    {application.resumes.map(
-                                      ({ id, resume }) => (
-                                        <Button
-                                          key={id}
-                                          variant="outline"
-                                          size="sm"
-                                          onClick={() =>
-                                            reprintResume(
-                                              application.id,
-                                              resume.id
-                                            )
-                                          }
-                                          disabled={isLoading}
-                                        >
-                                          {isLoading ? (
-                                            <>
-                                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                              Reprinting...
-                                            </>
-                                          ) : (
-                                            `Reprint ${resume.title}`
-                                          )}
-                                        </Button>
-                                      )
-                                    )}
-                                  </div>
-                                )}
                               <Button
                                 variant="outline"
                                 size="sm"
