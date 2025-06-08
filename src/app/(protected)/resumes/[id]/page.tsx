@@ -1,6 +1,6 @@
 "use client";
 
-import { FileText } from "lucide-react";
+import { FileText, Printer, Loader2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import axiosInstance from "@/lib/axios";
 import { type ResumeData } from "@/lib/types";
+import { Button } from "@/components/ui/button";
 
 const EditResumePage = (): React.ReactElement => {
   const { id } = useParams();
@@ -32,6 +33,7 @@ const EditResumePage = (): React.ReactElement => {
     professionalTitle: "",
   });
   const [loading, setLoading] = useState(true);
+  const [isPrinting, setIsPrinting] = useState(false);
 
   useEffect(() => {
     const fetchResume = async (): Promise<void> => {
@@ -106,6 +108,44 @@ const EditResumePage = (): React.ReactElement => {
     }
   };
 
+  const handlePrint = async (): Promise<void> => {
+    try {
+      setIsPrinting(true);
+      const response = await axiosInstance.post(
+        `/resumes/print`,
+        {
+          resumeContent: JSON.stringify(formData),
+        },
+        {
+          responseType: "blob",
+        }
+      );
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${formData.title}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast({
+        title: "Success",
+        description: "Resume downloaded successfully",
+      });
+    } catch (error) {
+      console.error("Error printing resume:", error);
+      toast({
+        title: "Error",
+        description: "Failed to print resume",
+        variant: "destructive",
+      });
+    } finally {
+      setIsPrinting(false);
+    }
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -117,6 +157,19 @@ const EditResumePage = (): React.ReactElement => {
           <FileText className="h-7 w-7 text-primary" />
           <h1 className="text-3xl font-bold">Edit Resume</h1>
         </div>
+        <Button variant="outline" onClick={handlePrint} disabled={isPrinting}>
+          {isPrinting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Printing...
+            </>
+          ) : (
+            <>
+              <Printer className="mr-2 h-4 w-4" />
+              Print Resume
+            </>
+          )}
+        </Button>
       </div>
 
       <Card>
