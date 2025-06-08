@@ -41,7 +41,7 @@ export const resumeTemplate = (resumeData: ResumeData): string => `
       }
       
       .name {
-        font-size: 18pt;
+        font-size: 20pt;
         font-weight: 700;
         margin-bottom: 0;
         color: #2c3e50;

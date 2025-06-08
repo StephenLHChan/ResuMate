@@ -168,7 +168,10 @@ const ApplicationPage = (): React.ReactElement => {
       // Download the file
       const a = document.createElement("a");
       a.href = url;
-      a.download = `tailored-${type}.pdf`;
+      a.download =
+        `resume-${application.job.title}-${application.job.companyName}.pdf`
+          .toLowerCase()
+          .replace(/\s+/g, "-");
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);

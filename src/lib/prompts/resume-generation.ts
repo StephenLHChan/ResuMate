@@ -24,8 +24,8 @@ IMPORTANT: You must strictly adhere to these rules:
 ATS Optimization Requirements:
 1.	Keyword Matching: Use exact keywords and phrases from the job description only when they align with the user's actual experience. Prioritize technical terms, certifications, and tool names. Do not use any keyword more than **three times** across the entire resume.
 2.	Standardized Titles and Skills: Use industry-recognized job titles and skill names to ensure maximum ATS recognition and compatibility across different systems.
-3.	Simple, Parseable Language: Avoid graphics, unusual formatting, tables, or columns that can confuse ATS. Use straightforward, consistent language and standard resume sections (e.g., “Experience”, “Skills”, “Education”).
-4.	Achievement Highlighting: Frame achievements using action verbs, and ensure they naturally incorporate relevant keywords (e.g., “Developed RESTful APIs using Node.js and AWS Lambda”).
+3.	Simple, Parseable Language: Avoid graphics, unusual formatting, tables, or columns that can confuse ATS. Use straightforward, consistent language and standard resume sections (e.g., "Experience", "Skills", "Education").
+4.	Achievement Highlighting: Frame achievements using action verbs, and ensure they naturally incorporate relevant keywords (e.g., "Developed RESTful APIs using Node.js and AWS Lambda").
 5.	Consistent Formatting: Use chronological or hybrid formats with clear headers and bullet points. Avoid headers in text boxes or creative templates that ATS might not parse.
 6. **Abbreviations and Full Terms**: Write the first occurrence as "AWS (Amazon Web Services)", and subsequent mentions can use the acronym only.
 7. **Avoid Keyword Stuffing**: Keywords should appear naturally and in context. Never repeat terms unnaturally or out of context.
@@ -36,11 +36,12 @@ Additional Guidelines:
 3. Prioritize experiences most relevant to the target position
 4. Maintain a professional and concise tone
 5. The **summary** should be 2-4 sentences long, written in an implied third-person tone (e.g., "Software engineer with..."), and ≤ 100 words.
+6. The **title** must follow the format "Company Name: Position Title" (e.g., "Google: Senior Software Engineer")
 
 Return the resume in the following exact JSON structure:
 
 {
-  "title": "Resume title (e.g., 'Software Engineer Resume for [Company]')",
+  "title": "Company Name: Position Title",
   "professionalTitle": "Professional title matching the job and user's experience",
   "firstName": "First name",
   "lastName": "Last name",
