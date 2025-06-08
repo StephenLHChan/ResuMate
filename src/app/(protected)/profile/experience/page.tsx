@@ -223,10 +223,19 @@ const ExperiencePage = (): React.ReactElement => {
     experience: Experience;
   }): React.ReactElement => (
     <Card className="mb-4">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">
-          {experience.position}
-        </CardTitle>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+        <div>
+          <CardTitle className="text-xl font-bold">
+            {experience.position}
+          </CardTitle>
+          <div className="text-sm font-medium mt-1">{experience.company}</div>
+          <p className="text-xs text-muted-foreground mt-1">
+            {format(new Date(experience.startDate), "MMM yyyy")} -{" "}
+            {experience.endDate
+              ? format(new Date(experience.endDate), "MMM yyyy")
+              : "Present"}
+          </p>
+        </div>
         <div className="flex space-x-2">
           <Button
             variant="ghost"
@@ -245,14 +254,7 @@ const ExperiencePage = (): React.ReactElement => {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">{experience.company}</div>
-        <p className="text-xs text-muted-foreground">
-          {format(new Date(experience.startDate), "MMM yyyy")} -{" "}
-          {experience.endDate
-            ? format(new Date(experience.endDate), "MMM yyyy")
-            : "Present"}
-        </p>
-        <p className="mt-2 text-sm">{experience.description}</p>
+        <p className="text-sm whitespace-pre-line">{experience.description}</p>
       </CardContent>
     </Card>
   );
@@ -293,9 +295,6 @@ const ExperiencePage = (): React.ReactElement => {
         </Card>
       ) : experience.length > 0 ? (
         <Card>
-          <CardHeader>
-            <CardTitle>Your Experience</CardTitle>
-          </CardHeader>
           <CardContent>
             <div className="space-y-6">
               {sortedExperiences.map(exp => (
