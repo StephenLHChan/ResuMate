@@ -139,6 +139,7 @@ export const POST = async (req: Request): Promise<NextResponse> => {
         position,
         startDate: new Date(startDate),
         endDate: finalEndDate ? new Date(finalEndDate) : null,
+        isCurrent: currentlyWorking,
         description,
       },
     });

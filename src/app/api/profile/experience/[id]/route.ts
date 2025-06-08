@@ -127,6 +127,7 @@ export const PUT = async (
         position,
         startDate: new Date(startDate),
         endDate: finalEndDate ? new Date(finalEndDate) : null,
+        isCurrent: currentlyWorking,
         description,
       },
     });
