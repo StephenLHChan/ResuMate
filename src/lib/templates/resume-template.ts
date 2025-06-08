@@ -41,7 +41,7 @@ export const resumeTemplate = (resumeData: ResumeData): string => `
       }
       
       .name {
-        font-size: 20pt;
+        font-size: 22pt;
         font-weight: 700;
         margin-bottom: 0;
         color: #2c3e50;
@@ -58,6 +58,18 @@ export const resumeTemplate = (resumeData: ResumeData): string => `
       
       .contact-info {
         font-size: 8pt;
+        color: #7f8c8d;
+      }
+      
+      .contact-info a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .contact-info a:not(:last-child)::after,
+      .contact-info span:not(:last-child)::after {
+        content: " | ";
+        margin: 0 0.5em;
         color: #7f8c8d;
       }
       
@@ -202,28 +214,24 @@ export const resumeTemplate = (resumeData: ResumeData): string => `
       </div>
       <div class="title">${resumeData.professionalTitle}</div>
       <div class="contact-info">
-        <a href="mailto:${
-          resumeData.email
-        }" style="color: inherit; text-decoration: none;">${
-  resumeData.email
-}</a>
-        ${resumeData.phone ? `| ${resumeData.phone}` : ""}
-        ${resumeData.location ? `| ${resumeData.location}` : ""}
+        <a href="mailto:${resumeData.email}">${resumeData.email}</a>
+        ${resumeData.phone ? `<span>${resumeData.phone}</span>` : ""}
+        ${resumeData.location ? `<span>${resumeData.location}</span>` : ""}
       </div>
       <div class="contact-info">
         ${
           resumeData.website
-            ? `<a href="${resumeData.website}" target="_blank" style="color: inherit; text-decoration: none;">${resumeData.website}</a>`
+            ? `<a href="${resumeData.website}" target="_blank">${resumeData.website}</a>`
             : ""
         }
         ${
           resumeData.linkedin
-            ? `| <a href="${resumeData.linkedin}" target="_blank" style="color: inherit; text-decoration: none;">${resumeData.linkedin}</a>`
+            ? `<a href="${resumeData.linkedin}" target="_blank">${resumeData.linkedin}</a>`
             : ""
         }
         ${
           resumeData.github
-            ? `| <a href="${resumeData.github}" target="_blank" style="color: inherit; text-decoration: none;">${resumeData.github}</a>`
+            ? `<a href="${resumeData.github}" target="_blank">${resumeData.github}</a>`
             : ""
         }
       </div>
@@ -268,29 +276,15 @@ export const resumeTemplate = (resumeData: ResumeData): string => `
     }
 
     ${
-      resumeData.educations && resumeData.educations.length > 0
+      resumeData.skills && resumeData.skills.length > 0
         ? `
     <div class="section">
-      <div class="section-title">Education</div>
-      <div class="education-list">
-        ${resumeData.educations
+      <div class="section-title">Skills</div>
+      <div class="skills-list">
+        ${resumeData.skills
           .map(
-            edu => `
-          <div class="education-item">
-            <div class="education-header">
-              <div class="education-info">
-                <div class="education-degree">${edu.degree} in ${
-              edu.field
-            }</div>
-                <div class="education-institution">${edu.institution}</div>
-              </div>
-              <div class="education-date">${
-                isDateInPast(edu.endDate)
-                  ? formatDate(edu.endDate)
-                  : `${formatDate(edu.startDate)} - ${formatDate(edu.endDate)}`
-              }</div>
-            </div>
-          </div>
+            skill => `
+          <span class="skill-item">${skill.name}</span>
         `
           )
           .join("")}
@@ -332,15 +326,29 @@ export const resumeTemplate = (resumeData: ResumeData): string => `
     }
 
     ${
-      resumeData.skills && resumeData.skills.length > 0
+      resumeData.educations && resumeData.educations.length > 0
         ? `
     <div class="section">
-      <div class="section-title">Skills</div>
-      <div class="skills-list">
-        ${resumeData.skills
+      <div class="section-title">Education</div>
+      <div class="education-list">
+        ${resumeData.educations
           .map(
-            skill => `
-          <span class="skill-item">${skill.name}</span>
+            edu => `
+          <div class="education-item">
+            <div class="education-header">
+              <div class="education-info">
+                <div class="education-degree">${edu.degree} in ${
+              edu.field
+            }</div>
+                <div class="education-institution">${edu.institution}</div>
+              </div>
+              <div class="education-date">${
+                isDateInPast(edu.endDate)
+                  ? formatDate(edu.endDate)
+                  : `${formatDate(edu.startDate)} - ${formatDate(edu.endDate)}`
+              }</div>
+            </div>
+          </div>
         `
           )
           .join("")}
