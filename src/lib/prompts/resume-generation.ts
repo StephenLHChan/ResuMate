@@ -11,6 +11,8 @@ IMPORTANT: You must strictly adhere to these rules:
 4. Maintain complete factual accuracy - do not exaggerate or embellish any details
 5. If the user's experience doesn't match the job requirements exactly, focus on transferable skills and relevant experiences they do have
 6. For work experiences, only the most recent/current position can have up to 5 descriptions, all other positions must have at most 3 descriptions
+7. For all date fields, only include the date if it is valid and provided, otherwise use null
+8. Never return "Invalid Date" or any other invalid date format
 
 ATS Optimization Requirements:
 1. Use exact keywords from the job description when they match the user's actual experience
@@ -42,8 +44,8 @@ Follow these guidelines:
     {
       "company": "Company name",
       "position": "Position title",
-      "startDate": "Start date",
-      "endDate": "End date or null for current position",
+      "startDate": "Start date or null if not provided",
+      "endDate": "End date or null if not provided/current position",
       "descriptions": ["Achievement 1", "Achievement 2", "Achievement 3", "Achievement 4", "Achievement 5"],
       "isCurrent": boolean
     }
@@ -53,8 +55,8 @@ Follow these guidelines:
       "institution": "Institution name",
       "degree": "Degree name",
       "field": "Field of study",
-      "startDate": "Start date",
-      "endDate": "End date or null for current education"
+      "startDate": "Start date or null if not provided",
+      "endDate": "End date or null if not provided/current education"
     }
   ],
   "skills": [
@@ -66,8 +68,8 @@ Follow these guidelines:
     {
       "name": "Certification name",
       "issuer": "Issuing organization",
-      "issueDate": "Issue date",
-      "expiryDate": "Expiry date or null",
+      "issueDate": "Issue date or null if not provided",
+      "expiryDate": "Expiry date or null if not provided",
       "credentialUrl": "URL to credential verification"
     }
   ]
@@ -95,8 +97,8 @@ ${userProfile.experience
     exp => `
 Company: ${exp.company}
 Position: ${exp.position}
-Start Date: ${exp.startDate}
-End Date: ${exp.endDate || "Present"}
+Start Date: ${exp.startDate || "N/A"}
+End Date: ${exp.endDate || "N/A"}
 Description: ${exp.description}
 Is Current: ${exp.isCurrent}
 `
@@ -110,8 +112,8 @@ ${userProfile.education
 Institution: ${edu.institution}
 Degree: ${edu.degree}
 Field: ${edu.field}
-Start Date: ${edu.startDate}
-End Date: ${edu.endDate || "Present"}
+Start Date: ${edu.startDate || "N/A"}
+End Date: ${edu.endDate || "N/A"}
 Description: ${edu.description || "N/A"}
 `
   )
@@ -123,7 +125,7 @@ ${userProfile.certifications
     cert => `
 Name: ${cert.name}
 Issuer: ${cert.issuer}
-Issue Date: ${cert.issueDate}
+Issue Date: ${cert.issueDate || "N/A"}
 Expiry Date: ${cert.expiryDate || "N/A"}
 Credential URL: ${cert.credentialUrl || "N/A"}
 Description: ${cert.description || "N/A"}
