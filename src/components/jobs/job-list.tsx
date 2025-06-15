@@ -290,27 +290,69 @@ export const JobList = (): React.ReactElement => {
                     {job.salaryMax?.toLocaleString() ?? "N/A"}
                   </Badge>
                 )}
+                {job.postingDate && (
+                  <Badge variant="outline" className="text-xs">
+                    Posted: {new Date(job.postingDate).toLocaleDateString()}
+                  </Badge>
+                )}
+                {job.applicationDeadline && (
+                  <Badge variant="outline" className="text-xs">
+                    Deadline:{" "}
+                    {new Date(job.applicationDeadline).toLocaleDateString()}
+                  </Badge>
+                )}
               </div>
             </CardHeader>
             <CollapsibleContent>
-              <CardContent className="pt-0">
-                <div className="space-y-4">
+              <CardContent className="space-y-4">
+                {job.description && (
                   <div>
-                    <h3 className="font-semibold">Description</h3>
-                    <p className="whitespace-pre-wrap">{job.description}</p>
+                    <h3 className="text-sm font-medium mb-2">Description</h3>
+                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                      {job.description}
+                    </p>
                   </div>
+                )}
+                {job.duties && job.duties.length > 0 && (
                   <div>
-                    <h3 className="font-semibold">Requirements</h3>
-                    <ul className="list-disc pl-5">
+                    <h3 className="text-sm font-medium mb-2">Duties</h3>
+                    <ul className="list-disc list-inside text-sm text-muted-foreground">
+                      {job.duties.map((duty, index) => (
+                        <li key={index}>{duty}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {job.requirements && job.requirements.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-medium mb-2">Requirements</h3>
+                    <ul className="list-disc list-inside text-sm text-muted-foreground">
                       {job.requirements.map((req, index) => (
                         <li key={index}>{req}</li>
                       ))}
                     </ul>
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    Added on {new Date(job.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
+                )}
+                {job.applicationInstructions && (
+                  <div>
+                    <h3 className="text-sm font-medium mb-2">How to Apply</h3>
+                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                      {job.applicationInstructions}
+                    </p>
+                  </div>
+                )}
+                {job.applicationWebsite && (
+                  <div>
+                    <a
+                      href={job.applicationWebsite}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-primary hover:underline"
+                    >
+                      Apply on Company Website
+                    </a>
+                  </div>
+                )}
               </CardContent>
             </CollapsibleContent>
           </Card>
