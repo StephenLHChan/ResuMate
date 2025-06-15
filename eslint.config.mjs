@@ -145,6 +145,9 @@ const eslintConfig = [
         typescript: {},
       },
     },
+    linterOptions: {
+      reportUnusedDisableDirectives: true,
+    },
   },
 ];
 
