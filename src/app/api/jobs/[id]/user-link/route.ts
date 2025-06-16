@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 // Link a job to the current user
 export const POST = async (
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> => {
   try {
     const session = await auth();
@@ -58,7 +58,7 @@ export const POST = async (
 // Unlink a job from the current user
 export const DELETE = async (
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> => {
   try {
     const session = await auth();
@@ -66,7 +66,7 @@ export const DELETE = async (
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const jobId = params.id;
+    const jobId = (await params).id;
 
     // Check if job exists
     const job = await prisma.job.findUnique({
