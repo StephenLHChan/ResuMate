@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 
 export const GET = async (
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> => {
   try {
     const session = await auth();
@@ -88,7 +88,7 @@ export const GET = async (
 
 export const PUT = async (
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> => {
   try {
     const session = await auth();
