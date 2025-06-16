@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint . --config eslint.config.mjs"
+    "lint": "next lint",
+    "build:no-lint": "next build --no-lint"
   },
   "dependencies": {
     "@auth/prisma-adapter": "2.7.2",
