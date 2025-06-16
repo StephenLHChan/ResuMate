@@ -93,14 +93,7 @@ Return the resume in the following exact JSON structure:
     jobInfo.companyName
   }. Here's my profile information:
 
-Name: ${userProfile.preferredFirstName} ${userProfile.preferredLastName}
 Title: ${userProfile.title}
-Email: ${userProfile.user.email}
-Phone: ${userProfile.phone || "N/A"}
-Location: ${userProfile.location || "N/A"}
-Website: ${userProfile.website || "N/A"}
-LinkedIn: ${userProfile.linkedin || "N/A"}
-GitHub: ${userProfile.github || "N/A"}
 Skills: ${userProfile.skills.map(skill => skill.name).join(", ")}
 
 Experience:
