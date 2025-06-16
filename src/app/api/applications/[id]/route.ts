@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 import { auth } from "@/auth";
@@ -9,7 +9,7 @@ const updateApplicationSchema = z.object({
 });
 
 export const PATCH = async (
-  request: Request,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ): Promise<NextResponse> => {
   try {
@@ -50,7 +50,7 @@ export const PATCH = async (
 };
 
 export const DELETE = async (
-  request: Request,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ): Promise<NextResponse> => {
   try {
