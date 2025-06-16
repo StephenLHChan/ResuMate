@@ -10,20 +10,21 @@ const updateApplicationSchema = z.object({
 
 export const PATCH = async (
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> => {
   try {
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    const { id } = await params;
 
     const body = await request.json();
     const { status } = updateApplicationSchema.parse(body);
 
     const application = await prisma.application.update({
       where: {
-        id: params.id,
+        id,
         userId: session.user.id,
       },
       data: {
