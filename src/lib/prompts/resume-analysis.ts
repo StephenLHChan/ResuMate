@@ -1,4 +1,4 @@
-import type { ResumeContent } from "@/lib/types";
+import type { ResumeWithRelations } from "@/lib/types";
 import type { Job } from "@prisma/client";
 
 export const resumeAnalysisPrompt = {
@@ -27,7 +27,7 @@ export const resumeAnalysisPrompt = {
   }`,
 
   user: (
-    resumeContent: ResumeContent,
+    resumeContent: ResumeWithRelations,
     jobInfo?: Job
   ) => `Please analyze this resume:
   ${JSON.stringify(resumeContent)}
@@ -51,7 +51,7 @@ export const resumeSuggestionsPrompt = {
   5. Professional formatting`,
 
   user: (
-    resumeContent: ResumeContent,
+    resumeContent: ResumeWithRelations,
     jobInfo?: Job
   ) => `Please provide specific suggestions to improve this resume:
   ${JSON.stringify(resumeContent)}
