@@ -5,11 +5,11 @@ import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
 import ResumeForm from "@/components/resume/ResumeForm";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import axiosInstance from "@/lib/axios";
 import { type ResumeData } from "@/lib/types";
-import { Button } from "@/components/ui/button";
 
 const EditResumePage = (): React.ReactElement => {
   const { id } = useParams();

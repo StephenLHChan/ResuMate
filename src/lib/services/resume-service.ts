@@ -2,14 +2,9 @@ import OpenAI from "openai";
 import puppeteer from "puppeteer";
 
 import { prisma } from "@/lib/prisma";
-import {
-  // resumeAnalysisPrompt,
-  resumeSuggestionsPrompt,
-} from "@/lib/prompts/resume-analysis";
+import { resumeSuggestionsPrompt } from "@/lib/prompts/resume-analysis";
 import { resumeGenerationPrompt } from "@/lib/prompts/resume-generation";
-import { SubscriptionService } from "@/lib/services/subscription-service";
 import { resumeTemplate } from "@/lib/templates/resume-template";
-import axiosInstance from "@/lib/axios";
 
 import type {
   ResumeWithRelations,
