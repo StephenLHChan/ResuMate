@@ -81,7 +81,7 @@ export const GET = async (
 
 export const POST = async (request: Request): Promise<NextResponse> => {
   try {
-    console.debug("Creating resume record...");
+    // Creating resume record
 
     const session = await auth();
     if (!session?.user?.id) {

@@ -99,9 +99,8 @@ export const PUT = async (
     const { id } = await params;
     const data = await request.json();
 
-    console.debug("data:", data);
-
-    console.debug("Finding resume...");
+    // Processing resume update data
+    // Finding existing resume
     const existingResume = await prisma.resume.findFirst({
       where: {
         id,
@@ -114,7 +113,7 @@ export const PUT = async (
     }
 
     // Update the resume
-    console.debug("Updating resume...");
+    // Updating resume
     const updatedResume = await prisma.resume.update({
       where: {
         id,

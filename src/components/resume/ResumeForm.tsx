@@ -13,7 +13,7 @@ type ResumeSection = keyof Omit<ResumeData, "summary">;
 
 type ResumeItem = {
   id: string;
-  [key: string]: any;
+  [key: string]: string | number | boolean | string[] | Date | null | undefined;
 };
 
 interface ResumeFormProps {
@@ -38,15 +38,47 @@ const ResumeForm = ({
     section: keyof ResumeData,
     index?: number,
     field?: string,
-    value?: any
+    value?: string | number | boolean | string[] | Date | null
   ): void => {
     if (index !== undefined && field && section !== "summary") {
-      setFormData(prev => ({
-        ...prev,
-        [section]: (prev[section] as ResumeItem[]).map((item, i) =>
-          i === index ? { ...item, [field]: value || e.target.value } : item
-        ),
-      }));
+      // Validate field name to prevent object injection
+      const allowedFields = [
+        "company",
+        "position",
+        "startDate",
+        "endDate",
+        "descriptions",
+        "isCurrent",
+        "institution",
+        "degree",
+        "field",
+        "name",
+        "issuer",
+        "issueDate",
+        "expiryDate",
+        "credentialUrl",
+      ];
+      if (!allowedFields.includes(field)) {
+        console.warn(`Invalid field name: ${field}`);
+        return;
+      }
+
+      setFormData(prev => {
+        const sectionData = prev[section] as ResumeItem[];
+        const updatedSection = sectionData.map((item, i) => {
+          if (i === index) {
+            // Use Object.assign to safely update the field
+            return Object.assign({}, item, {
+              [field]: value || e.target.value,
+            });
+          }
+          return item;
+        });
+        return {
+          ...prev,
+          [section]: updatedSection,
+        };
+      });
     } else {
       setFormData(prev => ({
         ...prev,
@@ -59,22 +91,52 @@ const ResumeForm = ({
     section: T,
     template: Omit<ResumeData[T] extends Array<infer U> ? U : never, "id">
   ): void => {
-    setFormData(prev => ({
-      ...prev,
-      [section]: [
-        ...(prev[section] as Array<
-          ResumeData[T] extends Array<infer U> ? U : never
-        >),
-        { ...template, id: Date.now().toString() },
-      ],
-    }));
+    // Validate section name to prevent object injection
+    const allowedSections: ResumeSection[] = [
+      "workExperiences",
+      "educations",
+      "skills",
+      "certifications",
+    ];
+    if (!allowedSections.includes(section)) {
+      console.warn(`Invalid section name: ${section}`);
+      return;
+    }
+
+    setFormData(prev => {
+      const currentSection = prev[section] as Array<
+        ResumeData[T] extends Array<infer U> ? U : never
+      >;
+      return {
+        ...prev,
+        [section]: [
+          ...currentSection,
+          { ...template, id: Date.now().toString() },
+        ],
+      };
+    });
   };
 
   const removeItem = (section: ResumeSection, id: string): void => {
-    setFormData(prev => ({
-      ...prev,
-      [section]: (prev[section] as ResumeItem[]).filter(item => item.id !== id),
-    }));
+    // Validate section name to prevent object injection
+    const allowedSections: ResumeSection[] = [
+      "workExperiences",
+      "educations",
+      "skills",
+      "certifications",
+    ];
+    if (!allowedSections.includes(section)) {
+      console.warn(`Invalid section name: ${section}`);
+      return;
+    }
+
+    setFormData(prev => {
+      const currentSection = prev[section] as ResumeItem[];
+      return {
+        ...prev,
+        [section]: currentSection.filter(item => item.id !== id),
+      };
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
@@ -108,15 +170,30 @@ const ResumeForm = ({
     index: number,
     descIndex: number
   ): void => {
-    const newDescriptions = [...(exp.descriptions || [])].filter(
+    // Validate indices to prevent array injection
+    if (
+      index < 0 ||
+      descIndex < 0 ||
+      !Number.isInteger(index) ||
+      !Number.isInteger(descIndex)
+    ) {
+      console.warn("Invalid index provided");
+      return;
+    }
+
+    const currentDescriptions = [...(exp.descriptions || [])];
+    const newDescriptions = currentDescriptions.filter(
       (_, i) => i !== descIndex
     );
-    setFormData(prev => ({
-      ...prev,
-      workExperiences: prev.workExperiences?.map((item, i) =>
-        i === index ? { ...item, descriptions: newDescriptions } : item
-      ),
-    }));
+    setFormData(prev => {
+      const currentWorkExperiences = prev.workExperiences || [];
+      return {
+        ...prev,
+        workExperiences: currentWorkExperiences.map((item, i) =>
+          i === index ? { ...item, descriptions: newDescriptions } : item
+        ),
+      };
+    });
   };
 
   const handleDescriptionChange = (
@@ -125,14 +202,29 @@ const ResumeForm = ({
     descIndex: number,
     value: string
   ): void => {
-    const newDescriptions = [...(exp.descriptions || [])];
+    // Validate indices to prevent array injection
+    if (
+      index < 0 ||
+      descIndex < 0 ||
+      !Number.isInteger(index) ||
+      !Number.isInteger(descIndex)
+    ) {
+      console.warn("Invalid index provided");
+      return;
+    }
+
+    const currentDescriptions = [...(exp.descriptions || [])];
+    const newDescriptions = [...currentDescriptions];
     newDescriptions[descIndex] = value;
-    setFormData(prev => ({
-      ...prev,
-      workExperiences: prev.workExperiences?.map((item, i) =>
-        i === index ? { ...item, descriptions: newDescriptions } : item
-      ),
-    }));
+    setFormData(prev => {
+      const currentWorkExperiences = prev.workExperiences || [];
+      return {
+        ...prev,
+        workExperiences: currentWorkExperiences.map((item, i) =>
+          i === index ? { ...item, descriptions: newDescriptions } : item
+        ),
+      };
+    });
   };
 
   return (

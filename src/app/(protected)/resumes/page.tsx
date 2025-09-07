@@ -3,7 +3,7 @@
 import { type Resume } from "@prisma/client";
 import { Plus, FileText } from "lucide-react";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
@@ -14,31 +14,31 @@ const ResumePage = (): React.ReactElement => {
   const [resumes, setResumes] = useState<Resume[]>([]);
   const [_loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchResumes = async (): Promise<void> => {
-      try {
-        setLoading(true);
-        const { data } = await axiosInstance.get("/resumes", {
-          params: {
-            pageSize: 20,
-          },
-        });
-        setResumes(data.items);
-      } catch (error) {
-        console.error("Error fetching resumes:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load resumes",
-          variant: "destructive",
-        });
-        setResumes([]);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchResumes = useCallback(async (): Promise<void> => {
+    try {
+      setLoading(true);
+      const { data } = await axiosInstance.get("/resumes", {
+        params: {
+          pageSize: 20,
+        },
+      });
+      setResumes(data.items);
+    } catch (error) {
+      console.error("Error fetching resumes:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load resumes",
+        variant: "destructive",
+      });
+      setResumes([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [toast]);
 
-    fetchResumes();
-  }, []);
+  useEffect(() => {
+    void fetchResumes();
+  }, [fetchResumes]);
 
   return (
     <div className="container mx-auto py-10 space-y-6">

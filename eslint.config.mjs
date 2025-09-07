@@ -123,7 +123,7 @@ const eslintConfig = [
       // Security rules
       "no-eval": "error",
       "no-implied-eval": "error",
-      "security/detect-object-injection": "warn",
+      "security/detect-object-injection": "off", // Too strict for validated dynamic property access
       "security/detect-non-literal-regexp": "warn",
       "security/detect-unsafe-regex": "error",
       "security/detect-buffer-noassert": "error",

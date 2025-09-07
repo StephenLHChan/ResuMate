@@ -2,7 +2,7 @@
 
 import { ChevronDown, Trash2, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -50,11 +50,7 @@ export const JobList = (): React.ReactElement => {
   const { toast } = useToast();
   const [loadingJobId, setLoadingJobId] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchJobs();
-  }, []);
-
-  const fetchJobs = async (): Promise<void> => {
+  const fetchJobs = useCallback(async (): Promise<void> => {
     try {
       setIsLoading(true);
       setError(null);
@@ -90,7 +86,11 @@ export const JobList = (): React.ReactElement => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [pagination.pageSize, pagination.nextPageKey, toast]);
+
+  useEffect(() => {
+    void fetchJobs();
+  }, [fetchJobs]);
 
   const loadMore = (): void => {
     if (pagination.nextPageKey) {

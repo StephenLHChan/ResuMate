@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import axiosInstance from "@/lib/axios";
-import { type ResumeData } from "@/lib/types";
+import { type ResumeData, type ResumeApiResponse } from "@/lib/types";
 
 const EditResumePage = (): React.ReactElement => {
   const { id } = useParams();
@@ -39,10 +39,12 @@ const EditResumePage = (): React.ReactElement => {
     const fetchResume = async (): Promise<void> => {
       try {
         setLoading(true);
-        const { data } = await axiosInstance.get(`/resumes/${id}`);
+        const { data } = await axiosInstance.get<ResumeApiResponse>(
+          `/resumes/${id}`
+        );
         setFormData({
           ...data,
-          workExperiences: data.workExperiences.map((exp: any) => ({
+          workExperiences: data.workExperiences.map(exp => ({
             company: exp.company,
             position: exp.position,
             startDate: new Date(exp.startDate),
@@ -50,17 +52,17 @@ const EditResumePage = (): React.ReactElement => {
             descriptions: exp.descriptions,
             isCurrent: exp.isCurrent,
           })),
-          educations: data.educations.map((edu: any) => ({
+          educations: data.educations.map(edu => ({
             institution: edu.institution,
             degree: edu.degree,
             field: edu.field,
             startDate: new Date(edu.startDate),
             endDate: edu.endDate ? new Date(edu.endDate) : null,
           })),
-          skills: data.skills.map((skill: any) => ({
+          skills: data.skills.map(skill => ({
             name: skill.name,
           })),
-          certifications: data.certifications.map((cert: any) => ({
+          certifications: data.certifications.map(cert => ({
             name: cert.name,
             issuer: cert.issuer,
             issueDate: new Date(cert.issueDate),

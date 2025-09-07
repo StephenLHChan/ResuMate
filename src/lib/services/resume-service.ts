@@ -89,7 +89,7 @@ export class ResumeService {
     if (!resumeContent) {
       throw new Error("Failed to generate resume content");
     }
-    console.debug("resumeContent", resumeContent);
+    // Resume content generated successfully
     return JSON.parse(resumeContent);
   }
 
@@ -98,8 +98,7 @@ export class ResumeService {
     userId?: string,
     applicationId?: string
   ): Promise<{ id: string }> {
-    console.debug("Creating resume record...");
-    console.debug("content", content);
+    // Creating resume record...
 
     if (!userId) {
       throw new Error("User ID is required to create a resume");

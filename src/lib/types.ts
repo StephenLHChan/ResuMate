@@ -93,3 +93,56 @@ export interface APIResponse<T> {
 export interface APIError {
   error: string;
 }
+
+// API Response types for resume data
+export interface ResumeWorkExperienceResponse {
+  id: string;
+  company: string;
+  position: string;
+  startDate: string;
+  endDate: string | null;
+  descriptions: string[];
+  isCurrent: boolean;
+}
+
+export interface ResumeEducationResponse {
+  id: string;
+  institution: string;
+  degree: string;
+  field: string;
+  startDate: string;
+  endDate: string | null;
+}
+
+export interface ResumeSkillResponse {
+  id: string;
+  name: string;
+}
+
+export interface ResumeCertificationResponse {
+  id: string;
+  name: string;
+  issuer: string;
+  issueDate: string;
+  expiryDate: string | null;
+  credentialUrl: string | null;
+}
+
+export interface ResumeApiResponse {
+  id: string;
+  title: string;
+  professionalTitle: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  email: string | null;
+  phone: string | null;
+  location: string | null;
+  website: string | null;
+  linkedin: string | null;
+  github: string | null;
+  summary: string | null;
+  workExperiences: ResumeWorkExperienceResponse[];
+  educations: ResumeEducationResponse[];
+  skills: ResumeSkillResponse[];
+  certifications: ResumeCertificationResponse[];
+}
