@@ -114,12 +114,12 @@ export interface APIError {
 export interface DeleteResumeSuccessResponse {
   success: true;
   message: string;
+  applicationsAffected?: number;
 }
 
 export interface DeleteResumeErrorResponse {
   error: string;
   code?:
-    | "RESUME_IN_USE"
     | "RESUME_NOT_FOUND"
     | "UNAUTHORIZED"
     | "NETWORK_ERROR"
@@ -136,7 +136,7 @@ export interface DeleteResumeDialogProps {
   resumeId: string;
   resumeTitle: string;
   onDeleted: () => void;
-  disabled?: boolean;
+  isInUse?: boolean;
 }
 
 // Resume List Component Types

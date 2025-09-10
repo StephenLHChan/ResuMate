@@ -257,9 +257,6 @@ export const DELETE = async (
         case "RESUME_NOT_FOUND":
           statusCode = 404;
           break;
-        case "RESUME_IN_USE":
-          statusCode = 400;
-          break;
         case "VALIDATION_ERROR":
           statusCode = 400;
           break;

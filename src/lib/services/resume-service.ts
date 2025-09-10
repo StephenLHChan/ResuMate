@@ -309,17 +309,8 @@ export class ResumeService {
         throw error;
       }
 
-      // Check if resume is associated with any active applications
-      if (resume.applications.length > 0) {
-        const error: DeleteResumeErrorResponse = {
-          error:
-            "This resume is currently being used in job applications and cannot be deleted. Please remove it from all applications first.",
-          code: "RESUME_IN_USE",
-          retryable: false,
-          details: `Resume is associated with ${resume.applications.length} job application(s)`,
-        };
-        throw error;
-      }
+      // Note: Resume deletion will automatically remove it from all applications
+      // due to cascade delete relationships in the database schema
 
       // Delete the resume (cascade delete will handle related records)
       await prisma.resume.delete({
@@ -330,7 +321,11 @@ export class ResumeService {
 
       return {
         success: true,
-        message: "Resume deleted successfully",
+        message:
+          resume.applications.length > 0
+            ? `Resume deleted successfully. It has been removed from ${resume.applications.length} job application(s).`
+            : "Resume deleted successfully",
+        applicationsAffected: resume.applications.length,
       };
     } catch (error) {
       // Re-throw known errors

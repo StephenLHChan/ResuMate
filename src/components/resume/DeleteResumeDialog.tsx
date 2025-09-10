@@ -18,23 +18,18 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import axiosInstance from "@/lib/axios";
 import {
-  DeleteResumeDialogProps,
   isDeleteResumeErrorResponse,
   isRetryableError,
   isNonRetryableError,
-} from "@/lib/types";
-
-import type {
-  DeleteResumeErrorResponse,
-  isRetryableError,
-  isNonRetryableError,
+  type DeleteResumeDialogProps,
+  type DeleteResumeErrorResponse,
 } from "@/lib/types";
 
 export const DeleteResumeDialog = ({
   resumeId,
   resumeTitle,
   onDeleted,
-  disabled = false,
+  isInUse = false,
 }: DeleteResumeDialogProps): React.ReactElement => {
   const { toast } = useToast();
   const [isDeleting, setIsDeleting] = useState(false);
@@ -186,7 +181,6 @@ export const DeleteResumeDialog = ({
         <Button
           variant="ghost"
           size="sm"
-          disabled={disabled}
           className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
           aria-label={`Delete resume: ${resumeTitle}`}
         >
@@ -199,6 +193,13 @@ export const DeleteResumeDialog = ({
           <AlertDialogDescription>
             Are you sure you want to delete <strong>"{resumeTitle}"</strong>?
             This action cannot be undone.
+            {isInUse && (
+              <div className="mt-2 p-2 bg-amber-50 border border-amber-200 rounded text-sm text-amber-800">
+                <strong>Warning:</strong> This resume is currently being used in
+                job applications. Deleting it will remove it from all
+                applications.
+              </div>
+            )}
             {lastError && lastError.retryable && retryCount < MAX_RETRIES && (
               <div className="mt-2 p-2 bg-amber-50 border border-amber-200 rounded text-sm text-amber-800">
                 <strong>Previous attempt failed:</strong> {lastError.error}

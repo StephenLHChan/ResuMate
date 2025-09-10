@@ -132,7 +132,7 @@ const ResumePage = (): React.ReactElement => {
                       resumeId={resume.id}
                       resumeTitle={resume.title || "Untitled Resume"}
                       onDeleted={handleResumeDeleted}
-                      disabled={isInUse}
+                      isInUse={isInUse}
                     />
                   </div>
                 </div>
