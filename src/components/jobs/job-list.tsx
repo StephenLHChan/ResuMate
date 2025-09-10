@@ -50,43 +50,46 @@ export const JobList = (): React.ReactElement => {
   const { toast } = useToast();
   const [loadingJobId, setLoadingJobId] = useState<string | null>(null);
 
-  const fetchJobs = useCallback(async (): Promise<void> => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      const response = await fetch(
-        `/api/jobs?pageSize=${pagination.pageSize}${
-          pagination.nextPageKey ? `&nextPageKey=${pagination.nextPageKey}` : ""
-        }`
-      );
-      if (!response.ok) {
-        throw new Error("Failed to fetch jobs");
+  const fetchJobs = useCallback(
+    async (nextPageKey?: string): Promise<void> => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const response = await fetch(
+          `/api/jobs?pageSize=${pagination.pageSize}${
+            nextPageKey ? `&nextPageKey=${nextPageKey}` : ""
+          }`
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch jobs");
+        }
+        const data: APIResponse<JobWithApplications> = await response.json();
+
+        // If this is the initial load (no nextPageKey), replace the list
+        // Otherwise, append to the existing list
+        setJobs(prevJobs =>
+          nextPageKey ? [...prevJobs, ...data.items] : data.items
+        );
+
+        setPagination(prev => ({
+          ...prev,
+          nextPageKey: data.nextPageKey,
+          totalCount: data.totalCount,
+        }));
+      } catch (error) {
+        console.error("Error fetching jobs:", error);
+        setError("Failed to load jobs. Please try again.");
+        toast({
+          title: "Error",
+          description: "Failed to load jobs",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
       }
-      const data: APIResponse<JobWithApplications> = await response.json();
-
-      // If this is the initial load (no nextPageKey), replace the list
-      // Otherwise, append to the existing list
-      setJobs(prevJobs =>
-        pagination.nextPageKey ? [...prevJobs, ...data.items] : data.items
-      );
-
-      setPagination(prev => ({
-        ...prev,
-        nextPageKey: data.nextPageKey,
-        totalCount: data.totalCount,
-      }));
-    } catch (error) {
-      console.error("Error fetching jobs:", error);
-      setError("Failed to load jobs. Please try again.");
-      toast({
-        title: "Error",
-        description: "Failed to load jobs",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }, [pagination.pageSize, pagination.nextPageKey, toast]);
+    },
+    [pagination.pageSize, toast]
+  );
 
   useEffect(() => {
     void fetchJobs();
@@ -94,7 +97,7 @@ export const JobList = (): React.ReactElement => {
 
   const loadMore = (): void => {
     if (pagination.nextPageKey) {
-      fetchJobs();
+      fetchJobs(pagination.nextPageKey);
     }
   };
 
