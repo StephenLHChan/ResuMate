@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 
 import { auth } from "@/auth";
-import { prisma } from "@/lib/prisma";
+import { ResumeService } from "@/lib/services/resume-service";
+
+import type {
+  DeleteResumeSuccessResponse,
+  DeleteResumeErrorResponse,
+} from "@/lib/types";
 
 export const GET = async (
   request: Request,
@@ -200,5 +205,89 @@ export const PUT = async (
       { error: "Failed to update resume" },
       { status: 500 }
     );
+  }
+};
+
+export const DELETE = async (
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+): Promise<
+  NextResponse<DeleteResumeSuccessResponse | DeleteResumeErrorResponse>
+> => {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        {
+          error: "You must be logged in to delete a resume",
+          code: "UNAUTHORIZED",
+          retryable: false,
+          details: "Authentication required",
+        },
+        { status: 401 }
+      );
+    }
+
+    const { id } = await params;
+    if (!id) {
+      return NextResponse.json(
+        {
+          error: "Resume ID is required",
+          code: "VALIDATION_ERROR",
+          retryable: false,
+          details: "Missing resume ID parameter",
+        },
+        { status: 400 }
+      );
+    }
+
+    // Use ResumeService to handle the deletion logic
+    const result = await ResumeService.deleteResume(id, session.user.id);
+    return NextResponse.json(result);
+  } catch (error) {
+    console.error("Error deleting resume:", error);
+
+    // Handle specific error types from ResumeService
+    if (error && typeof error === "object" && "code" in error) {
+      const resumeError = error as DeleteResumeErrorResponse;
+
+      // Map error codes to appropriate HTTP status codes
+      let statusCode = 500;
+      switch (resumeError.code) {
+        case "RESUME_NOT_FOUND":
+          statusCode = 404;
+          break;
+        case "RESUME_IN_USE":
+          statusCode = 400;
+          break;
+        case "VALIDATION_ERROR":
+          statusCode = 400;
+          break;
+        case "UNAUTHORIZED":
+          statusCode = 401;
+          break;
+        case "NETWORK_ERROR":
+        case "TIMEOUT_ERROR":
+          statusCode = 503;
+          break;
+        case "SERVER_ERROR":
+          statusCode = 500;
+          break;
+        default:
+          statusCode = 500;
+      }
+
+      return NextResponse.json(resumeError, { status: statusCode });
+    }
+
+    // Handle generic errors
+    const genericError: DeleteResumeErrorResponse = {
+      error: "An unexpected error occurred while deleting the resume",
+      code: "SERVER_ERROR",
+      retryable: true,
+      details: error instanceof Error ? error.message : "Unknown server error",
+    };
+
+    return NextResponse.json(genericError, { status: 500 });
   }
 };

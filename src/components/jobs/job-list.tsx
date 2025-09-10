@@ -227,14 +227,19 @@ export const JobList = (): React.ReactElement => {
 
   return (
     <div className="space-y-4">
-      {jobs.map(job => (
-        <Collapsible key={job.id} className="space-y-1">
+      {jobs?.map(job => (
+        <Collapsible key={`job-${job.id}`} className="space-y-1">
           <Card>
             <CardHeader className="pb-1">
               <div className="flex justify-between items-start">
                 <div className="flex items-center gap-2">
                   <CollapsibleTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0"
+                      data-testid={`expand-job-${job.id}`}
+                    >
                       <ChevronDown className="h-3 w-3" />
                     </Button>
                   </CollapsibleTrigger>

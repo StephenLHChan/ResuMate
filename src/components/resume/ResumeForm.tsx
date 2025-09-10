@@ -107,12 +107,17 @@ const ResumeForm = ({
       const currentSection = prev[section] as Array<
         ResumeData[T] extends Array<infer U> ? U : never
       >;
+      // Generate a more robust unique ID using crypto.randomUUID if available, fallback to timestamp + random
+      const generateId = (): string => {
+        if (typeof crypto !== "undefined" && crypto.randomUUID) {
+          return crypto.randomUUID();
+        }
+        return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      };
+
       return {
         ...prev,
-        [section]: [
-          ...currentSection,
-          { ...template, id: Date.now().toString() },
-        ],
+        [section]: [...currentSection, { ...template, id: generateId() }],
       };
     });
   };
@@ -692,6 +697,7 @@ const ResumeForm = ({
                   issuer: "",
                   issueDate: new Date(),
                   expiryDate: null,
+                  credentialUrl: "",
                 })
               }
             >
@@ -774,6 +780,26 @@ const ResumeForm = ({
                           }
                         />
                       </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor={`credentialUrl-${cert.id}`}>
+                        Credential URL (Optional)
+                      </Label>
+                      <Input
+                        id={`credentialUrl-${cert.id}`}
+                        type="url"
+                        placeholder="https://example.com/certificate"
+                        value={cert.credentialUrl || ""}
+                        onChange={e =>
+                          handleInputChange(
+                            e,
+                            "certifications",
+                            index,
+                            "credentialUrl"
+                          )
+                        }
+                      />
                     </div>
                   </div>
                   <Button
