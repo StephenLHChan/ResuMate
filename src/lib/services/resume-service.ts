@@ -391,10 +391,14 @@ export class ResumeService {
           applications: {
             select: {
               id: true,
-              job: {
+              application: {
                 select: {
-                  title: true,
-                  company: true,
+                  job: {
+                    select: {
+                      title: true,
+                      companyName: true,
+                    },
+                  },
                 },
               },
             },
@@ -413,8 +417,8 @@ export class ResumeService {
 
       const applications = resume.applications.map(app => ({
         id: app.id,
-        jobTitle: app.job.title,
-        company: app.job.company,
+        jobTitle: app.application.job.title || "Untitled Job",
+        company: app.application.job.companyName || "Unknown Company",
       }));
 
       return {

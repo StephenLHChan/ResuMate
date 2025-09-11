@@ -1,15 +1,15 @@
-import type {
-  DeleteResumeErrorResponse,
-  DeleteResumeSuccessResponse,
-  DeleteResumeErrorCode,
-  DeleteResumeEvent,
-  ErrorContext,
-  ResumeValidationError,
-  DeleteResumeValidationResult,
+import {
   isRetryableError,
   isNonRetryableError,
   DELETE_RESUME_ERROR_CODES,
   DELETE_RESUME_EVENTS,
+  type DeleteResumeErrorResponse,
+  type DeleteResumeSuccessResponse,
+  type DeleteResumeErrorCode,
+  type DeleteResumeEvent,
+  type ErrorContext,
+  type ResumeValidationError,
+  type DeleteResumeValidationResult,
 } from "@/lib/types";
 
 /**

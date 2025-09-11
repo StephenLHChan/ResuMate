@@ -70,6 +70,15 @@ const EditResumePage = (): React.ReactElement => {
         );
         setFormData({
           ...data,
+          firstName: data.firstName || "",
+          lastName: data.lastName || "",
+          email: data.email || "",
+          phone: data.phone || "",
+          location: data.location || "",
+          website: data.website || "",
+          linkedin: data.linkedin || "",
+          github: data.github || "",
+          professionalTitle: data.professionalTitle || "",
           workExperiences: data.workExperiences.map(exp => ({
             id: exp.id,
             company: exp.company,
@@ -219,7 +228,7 @@ const EditResumePage = (): React.ReactElement => {
             resumeId={id as string}
             resumeTitle={formData.title || "Untitled Resume"}
             onDeleted={handleResumeDeleted}
-            disabled={isInUse}
+            isInUse={isInUse}
           />
         </div>
       </div>

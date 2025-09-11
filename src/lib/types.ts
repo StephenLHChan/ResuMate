@@ -120,6 +120,7 @@ export interface DeleteResumeSuccessResponse {
 export interface DeleteResumeErrorResponse {
   error: string;
   code?:
+    | "RESUME_IN_USE"
     | "RESUME_NOT_FOUND"
     | "UNAUTHORIZED"
     | "NETWORK_ERROR"

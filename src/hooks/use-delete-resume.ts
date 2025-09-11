@@ -1,15 +1,15 @@
-import { useState, useCallback } from "react";
+import { isAxiosError } from "axios";
+import { useReducer, useCallback, useState } from "react";
 
 import axiosInstance from "@/lib/axios";
-
-import type {
-  DeleteResumeErrorResponse,
-  DeleteResumeSuccessResponse,
-  UseDeleteResumeReturn,
-  DeleteResumeState,
-  DeleteResumeAction,
+import {
   isDeleteResumeErrorResponse,
-  DeleteResumeConfig,
+  type DeleteResumeErrorResponse,
+  type DeleteResumeSuccessResponse,
+  type UseDeleteResumeReturn,
+  type DeleteResumeState,
+  type DeleteResumeAction,
+  type DeleteResumeConfig,
 } from "@/lib/types";
 
 const DEFAULT_CONFIG: DeleteResumeConfig = {
@@ -21,7 +21,7 @@ const DEFAULT_CONFIG: DeleteResumeConfig = {
 };
 
 // Reducer for managing delete resume state
-const _deleteResumeReducer = (
+const deleteResumeReducer = (
   state: DeleteResumeState,
   action: DeleteResumeAction
 ): DeleteResumeState => {
@@ -72,13 +72,13 @@ export const useDeleteResume = (
 ): UseDeleteResumeReturn => {
   const finalConfig = { ...DEFAULT_CONFIG, ...config };
 
-  const [state, dispatch] = useState<DeleteResumeState>(() => ({
+  const [state, dispatch] = useReducer(deleteResumeReducer, {
     status: "idle",
     currentResumeId: null,
     error: null,
     retryCount: 0,
     maxRetries: finalConfig.maxRetries,
-  }));
+  });
 
   const clearError = useCallback(() => {
     dispatch({ type: "CLEAR_ERROR" });
@@ -112,7 +112,7 @@ export const useDeleteResume = (
 
         if (isDeleteResumeErrorResponse(error)) {
           errorResponse = error;
-        } else if (axiosInstance.isAxiosError(error)) {
+        } else if (isAxiosError(error)) {
           const axiosError = error as {
             response?: { data?: DeleteResumeErrorResponse };
           };
