@@ -20,7 +20,7 @@ export const POST = async (request: Request): Promise<NextResponse> => {
     const pdf = await ResumeService.generatePDF(parsedData);
 
     // Return the PDF
-    return new NextResponse(pdf, {
+    return new NextResponse(Buffer.from(pdf), {
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": 'attachment; filename="tailored-resume.pdf"',

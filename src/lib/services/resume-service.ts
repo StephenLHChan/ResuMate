@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import puppeteer from "puppeteer";
+import { launch } from "puppeteer";
 
 import { prisma } from "@/lib/prisma";
 import { resumeSuggestionsPrompt } from "@/lib/prompts/resume-analysis";
@@ -179,7 +179,7 @@ export class ResumeService {
   }
 
   static async generatePDF(resumeContent: ResumeData): Promise<Uint8Array> {
-    const browser = await puppeteer.launch({
+    const browser = await launch({
       headless: true,
     });
     const page = await browser.newPage();

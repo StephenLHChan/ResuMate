@@ -107,7 +107,7 @@ export const POST = async (request: Request): Promise<NextResponse> => {
     const pdf = await ResumeService.generatePDF(transformedContent);
 
     // Return PDF and resume ID
-    return new NextResponse(pdf, {
+    return new NextResponse(Buffer.from(pdf), {
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": `attachment; filename="${transformedContent.title}.pdf"`,
