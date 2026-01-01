@@ -2,7 +2,7 @@
 
 import { ChevronDown, Trash2, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -50,51 +50,54 @@ export const JobList = (): React.ReactElement => {
   const { toast } = useToast();
   const [loadingJobId, setLoadingJobId] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchJobs();
-  }, []);
+  const fetchJobs = useCallback(
+    async (nextPageKey?: string): Promise<void> => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const response = await fetch(
+          `/api/jobs?pageSize=${pagination.pageSize}${
+            nextPageKey ? `&nextPageKey=${nextPageKey}` : ""
+          }`
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch jobs");
+        }
+        const data: APIResponse<JobWithApplications> = await response.json();
 
-  const fetchJobs = async (): Promise<void> => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      const response = await fetch(
-        `/api/jobs?pageSize=${pagination.pageSize}${
-          pagination.nextPageKey ? `&nextPageKey=${pagination.nextPageKey}` : ""
-        }`
-      );
-      if (!response.ok) {
-        throw new Error("Failed to fetch jobs");
+        // If this is the initial load (no nextPageKey), replace the list
+        // Otherwise, append to the existing list
+        setJobs(prevJobs =>
+          nextPageKey ? [...prevJobs, ...data.items] : data.items
+        );
+
+        setPagination(prev => ({
+          ...prev,
+          nextPageKey: data.nextPageKey,
+          totalCount: data.totalCount,
+        }));
+      } catch (error) {
+        console.error("Error fetching jobs:", error);
+        setError("Failed to load jobs. Please try again.");
+        toast({
+          title: "Error",
+          description: "Failed to load jobs",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
       }
-      const data: APIResponse<JobWithApplications> = await response.json();
+    },
+    [pagination.pageSize, toast]
+  );
 
-      // If this is the initial load (no nextPageKey), replace the list
-      // Otherwise, append to the existing list
-      setJobs(prevJobs =>
-        pagination.nextPageKey ? [...prevJobs, ...data.items] : data.items
-      );
-
-      setPagination(prev => ({
-        ...prev,
-        nextPageKey: data.nextPageKey,
-        totalCount: data.totalCount,
-      }));
-    } catch (error) {
-      console.error("Error fetching jobs:", error);
-      setError("Failed to load jobs. Please try again.");
-      toast({
-        title: "Error",
-        description: "Failed to load jobs",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  useEffect(() => {
+    void fetchJobs();
+  }, [fetchJobs]);
 
   const loadMore = (): void => {
     if (pagination.nextPageKey) {
-      fetchJobs();
+      fetchJobs(pagination.nextPageKey);
     }
   };
 
@@ -227,14 +230,19 @@ export const JobList = (): React.ReactElement => {
 
   return (
     <div className="space-y-4">
-      {jobs.map(job => (
-        <Collapsible key={job.id} className="space-y-1">
+      {jobs?.map(job => (
+        <Collapsible key={`job-${job.id}`} className="space-y-1">
           <Card>
             <CardHeader className="pb-1">
               <div className="flex justify-between items-start">
                 <div className="flex items-center gap-2">
                   <CollapsibleTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0"
+                      data-testid={`expand-job-${job.id}`}
+                    >
                       <ChevronDown className="h-3 w-3" />
                     </Button>
                   </CollapsibleTrigger>

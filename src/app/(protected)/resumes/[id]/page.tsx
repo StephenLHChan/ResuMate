@@ -2,14 +2,15 @@
 
 import { FileText, Printer, Loader2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
+import { DeleteResumeDialog } from "@/components/resume/DeleteResumeDialog";
 import ResumeForm from "@/components/resume/ResumeForm";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import axiosInstance from "@/lib/axios";
-import { type ResumeData } from "@/lib/types";
+import { type ResumeData, type ResumeApiResponse } from "@/lib/types";
 
 const EditResumePage = (): React.ReactElement => {
   const { id } = useParams();
@@ -34,15 +35,52 @@ const EditResumePage = (): React.ReactElement => {
   });
   const [loading, setLoading] = useState(true);
   const [isPrinting, setIsPrinting] = useState(false);
+  const [isInUse, setIsInUse] = useState(false);
+
+  const checkResumeInUse = useCallback(async (): Promise<void> => {
+    try {
+      const { data } = await axiosInstance.get("/applications");
+      const inUseResumes = new Set<string>();
+
+      data.items.forEach(
+        (application: { resumes?: Array<{ resume: { id: string } }> }) => {
+          if (application.resumes) {
+            application.resumes.forEach(
+              (resumeLink: { resume: { id: string } }) => {
+                inUseResumes.add(resumeLink.resume.id);
+              }
+            );
+          }
+        }
+      );
+
+      setIsInUse(inUseResumes.has(id as string));
+    } catch (error) {
+      console.error("Error checking if resume is in use:", error);
+      // Don't show error toast for this as it's not critical
+    }
+  }, [id]);
 
   useEffect(() => {
     const fetchResume = async (): Promise<void> => {
       try {
         setLoading(true);
-        const { data } = await axiosInstance.get(`/resumes/${id}`);
+        const { data } = await axiosInstance.get<ResumeApiResponse>(
+          `/resumes/${id}`
+        );
         setFormData({
           ...data,
-          workExperiences: data.workExperiences.map((exp: any) => ({
+          firstName: data.firstName || "",
+          lastName: data.lastName || "",
+          email: data.email || "",
+          phone: data.phone || "",
+          location: data.location || "",
+          website: data.website || "",
+          linkedin: data.linkedin || "",
+          github: data.github || "",
+          professionalTitle: data.professionalTitle || "",
+          workExperiences: data.workExperiences.map(exp => ({
+            id: exp.id,
             company: exp.company,
             position: exp.position,
             startDate: new Date(exp.startDate),
@@ -50,21 +88,25 @@ const EditResumePage = (): React.ReactElement => {
             descriptions: exp.descriptions,
             isCurrent: exp.isCurrent,
           })),
-          educations: data.educations.map((edu: any) => ({
+          educations: data.educations.map(edu => ({
+            id: edu.id,
             institution: edu.institution,
             degree: edu.degree,
             field: edu.field,
             startDate: new Date(edu.startDate),
             endDate: edu.endDate ? new Date(edu.endDate) : null,
           })),
-          skills: data.skills.map((skill: any) => ({
+          skills: data.skills.map(skill => ({
+            id: skill.id,
             name: skill.name,
           })),
-          certifications: data.certifications.map((cert: any) => ({
+          certifications: data.certifications.map(cert => ({
+            id: cert.id,
             name: cert.name,
             issuer: cert.issuer,
             issueDate: new Date(cert.issueDate),
             expiryDate: cert.expiryDate ? new Date(cert.expiryDate) : null,
+            credentialUrl: cert.credentialUrl,
           })),
         });
       } catch (error) {
@@ -80,7 +122,8 @@ const EditResumePage = (): React.ReactElement => {
     };
 
     void fetchResume();
-  }, [id, toast]);
+    void checkResumeInUse();
+  }, [id, toast, checkResumeInUse]);
 
   const handleSubmit = async (data: ResumeData): Promise<void> => {
     try {
@@ -146,6 +189,11 @@ const EditResumePage = (): React.ReactElement => {
     }
   };
 
+  const handleResumeDeleted = (): void => {
+    // Redirect to resume list after successful deletion
+    router.push("/resumes");
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -156,20 +204,33 @@ const EditResumePage = (): React.ReactElement => {
         <div className="flex items-center gap-2">
           <FileText className="h-7 w-7 text-primary" />
           <h1 className="text-3xl font-bold">Edit Resume</h1>
-        </div>
-        <Button variant="outline" onClick={handlePrint} disabled={isPrinting}>
-          {isPrinting ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Printing...
-            </>
-          ) : (
-            <>
-              <Printer className="mr-2 h-4 w-4" />
-              Print Resume
-            </>
+          {isInUse && (
+            <span className="text-sm text-amber-600 bg-amber-50 px-2 py-1 rounded">
+              In use by applications
+            </span>
           )}
-        </Button>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={handlePrint} disabled={isPrinting}>
+            {isPrinting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Printing...
+              </>
+            ) : (
+              <>
+                <Printer className="mr-2 h-4 w-4" />
+                Print Resume
+              </>
+            )}
+          </Button>
+          <DeleteResumeDialog
+            resumeId={id as string}
+            resumeTitle={formData.title || "Untitled Resume"}
+            onDeleted={handleResumeDeleted}
+            isInUse={isInUse}
+          />
+        </div>
       </div>
 
       <Card>

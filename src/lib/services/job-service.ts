@@ -13,7 +13,7 @@ export class JobService {
     content: string,
     type: "text" | "url" = "text"
   ): Promise<JobContent> {
-    console.debug("Analyzing job...");
+    // Analyzing job...
     let jobContent = content;
 
     // If URL is provided, fetch the content
@@ -56,7 +56,7 @@ export class JobService {
 
     try {
       const parsedResult = JSON.parse(result);
-      console.log(parsedResult);
+      // Job analysis completed successfully
       return {
         companyName: parsedResult.companyName,
         title: parsedResult.position,

@@ -10,6 +10,10 @@ import type {
   ResumeWithRelations,
   ProfileWithRelations,
   ResumeData,
+  DeleteResumeSuccessResponse,
+  DeleteResumeErrorResponse,
+  DeleteResumeParams,
+  ResumeUsageCheck,
 } from "@/lib/types";
 import type { Job } from "@prisma/client";
 
@@ -89,7 +93,7 @@ export class ResumeService {
     if (!resumeContent) {
       throw new Error("Failed to generate resume content");
     }
-    console.debug("resumeContent", resumeContent);
+    // Resume content generated successfully
     return JSON.parse(resumeContent);
   }
 
@@ -98,8 +102,7 @@ export class ResumeService {
     userId?: string,
     applicationId?: string
   ): Promise<{ id: string }> {
-    console.debug("Creating resume record...");
-    console.debug("content", content);
+    // Creating resume record...
 
     if (!userId) {
       throw new Error("User ID is required to create a resume");
@@ -251,5 +254,207 @@ export class ResumeService {
     }
 
     return suggestions.split("\n").filter(Boolean);
+  }
+
+  static async deleteResume(
+    resumeId: string,
+    userId: string
+  ): Promise<DeleteResumeSuccessResponse> {
+    try {
+      // Validate input parameters
+      if (!resumeId || !userId) {
+        const error: DeleteResumeErrorResponse = {
+          error: "Resume ID and User ID are required",
+          code: "VALIDATION_ERROR",
+          retryable: false,
+          details: "Both resumeId and userId must be provided",
+        };
+        throw error;
+      }
+
+      // Validate resume ID format (CUID validation)
+      const cuidRegex = /^c[0-9a-z]{24}$/i;
+      if (!cuidRegex.test(resumeId)) {
+        const error: DeleteResumeErrorResponse = {
+          error: "Invalid resume ID format",
+          code: "VALIDATION_ERROR",
+          retryable: false,
+          details: "Resume ID must be a valid CUID",
+        };
+        throw error;
+      }
+
+      // Check if resume exists and belongs to the user
+      const resume = await prisma.resume.findFirst({
+        where: {
+          id: resumeId,
+          userId: userId,
+        },
+        include: {
+          applications: {
+            select: {
+              id: true,
+            },
+          },
+        },
+      });
+
+      if (!resume) {
+        const error: DeleteResumeErrorResponse = {
+          error: "Resume not found or you don't have permission to delete it",
+          code: "RESUME_NOT_FOUND",
+          retryable: false,
+          details: "The resume either doesn't exist or belongs to another user",
+        };
+        throw error;
+      }
+
+      // Note: Resume deletion will automatically remove it from all applications
+      // due to cascade delete relationships in the database schema
+
+      // Delete the resume (cascade delete will handle related records)
+      await prisma.resume.delete({
+        where: {
+          id: resumeId,
+        },
+      });
+
+      return {
+        success: true,
+        message:
+          resume.applications.length > 0
+            ? `Resume deleted successfully. It has been removed from ${resume.applications.length} job application(s).`
+            : "Resume deleted successfully",
+        applicationsAffected: resume.applications.length,
+      };
+    } catch (error) {
+      // Re-throw known errors
+      if (error && typeof error === "object" && "code" in error) {
+        throw error;
+      }
+
+      // Handle database connection errors
+      if (error instanceof Error) {
+        if (
+          error.message.includes("timeout") ||
+          error.message.includes("TIMEOUT")
+        ) {
+          const timeoutError: DeleteResumeErrorResponse = {
+            error: "Request timed out. Please try again.",
+            code: "TIMEOUT_ERROR",
+            retryable: true,
+            details: error.message,
+          };
+          throw timeoutError;
+        }
+
+        if (
+          error.message.includes("connection") ||
+          error.message.includes("network") ||
+          error.message.includes("Connection lost")
+        ) {
+          const networkError: DeleteResumeErrorResponse = {
+            error: "Network error. Please check your connection and try again.",
+            code: "NETWORK_ERROR",
+            retryable: true,
+            details: error.message,
+          };
+          throw networkError;
+        }
+      }
+
+      // Handle unknown errors
+      const unknownError: DeleteResumeErrorResponse = {
+        error: "An unexpected error occurred while deleting the resume",
+        code: "UNKNOWN_ERROR",
+        retryable: true,
+        details: error instanceof Error ? error.message : "Unknown error",
+      };
+      throw unknownError;
+    }
+  }
+
+  /**
+   * Check if a resume is currently being used in job applications
+   */
+  static async checkResumeUsage(
+    resumeId: string,
+    userId: string
+  ): Promise<ResumeUsageCheck> {
+    try {
+      const resume = await prisma.resume.findFirst({
+        where: {
+          id: resumeId,
+          userId: userId,
+        },
+        include: {
+          applications: {
+            select: {
+              id: true,
+              application: {
+                select: {
+                  job: {
+                    select: {
+                      title: true,
+                      companyName: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!resume) {
+        return {
+          resumeId,
+          isInUse: false,
+          applicationCount: 0,
+          applications: [],
+        };
+      }
+
+      const applications = resume.applications.map(app => ({
+        id: app.id,
+        jobTitle: app.application.job.title || "Untitled Job",
+        company: app.application.job.companyName || "Unknown Company",
+      }));
+
+      return {
+        resumeId,
+        isInUse: applications.length > 0,
+        applicationCount: applications.length,
+        applications,
+      };
+    } catch (error) {
+      console.error("Error checking resume usage:", error);
+      throw new Error("Failed to check resume usage");
+    }
+  }
+
+  /**
+   * Validate resume deletion parameters
+   */
+  static validateDeleteParams(params: DeleteResumeParams): {
+    isValid: boolean;
+    errors: string[];
+  } {
+    const errors: string[] = [];
+
+    if (!params.resumeId || typeof params.resumeId !== "string") {
+      errors.push("Resume ID is required");
+    } else if (!/^c[0-9a-z]{24}$/i.test(params.resumeId)) {
+      errors.push("Resume ID must be a valid CUID");
+    }
+
+    if (!params.userId || typeof params.userId !== "string") {
+      errors.push("User ID is required");
+    }
+
+    return {
+      isValid: errors.length === 0,
+      errors,
+    };
   }
 }

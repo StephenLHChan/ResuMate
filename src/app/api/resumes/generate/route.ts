@@ -15,7 +15,7 @@ export const POST = async (request: Request): Promise<NextResponse> => {
     }
 
     const { jobId, applicationId } = await request.json();
-    console.debug("jobId", jobId);
+    // Processing job ID for resume generation
 
     // Get user's profile data
     const profile = await prisma.profile.findUnique({
@@ -45,7 +45,7 @@ export const POST = async (request: Request): Promise<NextResponse> => {
       return new NextResponse("Job not found", { status: 404 });
     }
 
-    console.debug("jobInfo", jobInfo);
+    // Job information retrieved successfully
     // Generate resume content
     const resumeContent = await ResumeService.generateResumeContent(
       profile,
@@ -65,7 +65,8 @@ export const POST = async (request: Request): Promise<NextResponse> => {
       linkedin: profile.linkedin || undefined,
       github: profile.github || undefined,
       summary: resumeContent.summary,
-      workExperiences: resumeContent.workExperiences.map(exp => ({
+      workExperiences: resumeContent.workExperiences.map((exp, index) => ({
+        id: `temp-${index}`,
         company: exp.company,
         position: exp.position,
         startDate: new Date(exp.startDate),
@@ -73,17 +74,20 @@ export const POST = async (request: Request): Promise<NextResponse> => {
         descriptions: exp.descriptions,
         isCurrent: exp.isCurrent,
       })),
-      educations: resumeContent.educations.map(edu => ({
+      educations: resumeContent.educations.map((edu, index) => ({
+        id: `temp-${index}`,
         institution: edu.institution,
         degree: edu.degree,
         field: edu.field,
         startDate: new Date(edu.startDate),
         endDate: edu.endDate ? new Date(edu.endDate) : null,
       })),
-      skills: resumeContent.skills.map(skill => ({
+      skills: resumeContent.skills.map((skill, index) => ({
+        id: `temp-${index}`,
         name: skill.name,
       })),
-      certifications: resumeContent.certifications.map(cert => ({
+      certifications: resumeContent.certifications.map((cert, index) => ({
+        id: `temp-${index}`,
         name: cert.name,
         issuer: cert.issuer,
         issueDate: new Date(cert.issueDate),

@@ -8,7 +8,7 @@ import {
   Send,
   Trash2,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 import ApplicationForm from "@/components/application-form";
 import { Button } from "@/components/ui/button";
@@ -92,37 +92,40 @@ const ApplicationPage = (): React.ReactElement => {
     nextPageKey: null,
   });
 
-  const fetchApplications = async (nextPageKey?: string): Promise<void> => {
-    try {
-      const { data } = await axiosInstance.get<
-        APIResponse<ApplicationWithRelations>
-      >("/applications", {
-        params: nextPageKey ? { nextPageKey } : undefined,
-      });
+  const fetchApplications = useCallback(
+    async (nextPageKey?: string): Promise<void> => {
+      try {
+        const { data } = await axiosInstance.get<
+          APIResponse<ApplicationWithRelations>
+        >("/applications", {
+          params: nextPageKey ? { nextPageKey } : undefined,
+        });
 
-      setApplications(prev =>
-        nextPageKey ? [...prev, ...(data.items || [])] : data.items || []
-      );
-      setPagination({
-        total: data.totalCount || 0,
-        nextPageKey: data.nextPageKey || null,
-      });
-    } catch (error) {
-      console.error("Error fetching applications:", error);
-      setApplications([]); // Set empty array on error
-      toast({
-        title: "Error",
-        description: "Failed to fetch applications",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoadingApplications(false);
-    }
-  };
+        setApplications(prev =>
+          nextPageKey ? [...prev, ...(data.items || [])] : data.items || []
+        );
+        setPagination({
+          total: data.totalCount || 0,
+          nextPageKey: data.nextPageKey || null,
+        });
+      } catch (error) {
+        console.error("Error fetching applications:", error);
+        setApplications([]); // Set empty array on error
+        toast({
+          title: "Error",
+          description: "Failed to fetch applications",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoadingApplications(false);
+      }
+    },
+    [toast]
+  );
 
   useEffect(() => {
     void fetchApplications();
-  }, []);
+  }, [fetchApplications]);
 
   const generateDocument = async (
     applicationId: string,
